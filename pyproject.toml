@@ -1,0 +1,31 @@
+[project]
+name = "BevyFramework"
+version = "0.0.0"
+description = "Lightweight Python Web Micro Framework"
+readme = "README.md"
+license = {text = "GPL-3.0"}
+maintainers = [{name = "Çağan Mert İŞLEK", email = "islekcaganmert@gmail.com"}]
+classifiers = [
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GPL-3.0 License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Internet :: WWW/HTTP :: Application",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+requires-python = ">=3.8"
+dependencies = []
+
+[project.urls]
+Donate = "https://www.buymeacoffee.com/islekcaganmert"
+Documentation = "https://github.com/islekcaganmert/bevyframework/wiki"
+Changes = "https://github.com/islekcaganmert/bevyframework/commits/main"
+"Source Code" = "https://github.com/islekcaganmert/bevyframework"
+"Issue Tracker" = "https://github.com/islekcaganmert/bevyframework/issues"
+Chat = "https://hereus.pythonanywhere.com/communities/BevyFramework"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
