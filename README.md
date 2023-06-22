@@ -5,7 +5,7 @@ Lightweight Python Web Micro Framework
 ***Downstream Version, Do Not Use in Production***
 ## Installing
 ```
-$ git clone https://github.com/islekcaganmert/bevyframework.git
+$ git clone https://github.com/islekcaganmert/bevyframe.git
 ```
 ## Simple Example
 
@@ -30,6 +30,6 @@ if __name__ == '__main__':
 ## Links
 - Documentation: *Soon*
 - PyPI Releases: *Soon*
-- Source Code: https://github.com/islekcaganmert/bevyframework/
-- Issue Tracker: https://github.com/islekcaganmert/bevyframework/issues/
-- Community: https://hereus.pythonanywhere.com/communities/BevyFramework
+- Source Code: https://github.com/islekcaganmert/bevyframe/
+- Issue Tracker: https://github.com/islekcaganmert/bevyframe/issues/
+- Community: https://hereus.pythonanywhere.com/communities/BevyFrame

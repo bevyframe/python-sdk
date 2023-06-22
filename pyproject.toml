@@ -1,5 +1,5 @@
 [project]
-name = "BevyFramework"
+name = "BevyFrame"
 version = "0.0.0"
 description = "Lightweight Python Web Micro Framework"
 readme = "README.md"
@@ -20,11 +20,11 @@ dependencies = []
 
 [project.urls]
 Donate = "https://www.buymeacoffee.com/islekcaganmert"
-Documentation = "https://github.com/islekcaganmert/bevyframework/wiki"
-Changes = "https://github.com/islekcaganmert/bevyframework/commits/main"
-"Source Code" = "https://github.com/islekcaganmert/bevyframework"
-"Issue Tracker" = "https://github.com/islekcaganmert/bevyframework/issues"
-Chat = "https://hereus.pythonanywhere.com/communities/BevyFramework"
+Documentation = "https://github.com/islekcaganmert/bevyframe/wiki"
+Changes = "https://github.com/islekcaganmert/bevyframe/commits/main"
+"Source Code" = "https://github.com/islekcaganmert/bevyframe"
+"Issue Tracker" = "https://github.com/islekcaganmert/bevyframe/issues"
+Chat = "https://hereus.pythonanywhere.com/communities/BevyFrame"
 
 [build-system]
 requires = ["setuptools"]
