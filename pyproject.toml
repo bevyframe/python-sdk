@@ -1,6 +1,6 @@
 [project]
 name = "BevyFrame"
-version = "0.0.1"
+version = "0.0.2"
 description = "Lightweight Python Web Micro Framework"
 readme = "README.md"
 license = {text = "GPL-3.0"}

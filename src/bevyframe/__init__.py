@@ -38,9 +38,7 @@ class Frame:
             request.form = urllib.parse.parse_qs(form_data_str)
         if path.startswith('/static/') or path.startswith('/Files/'):
             try:
-                print(path.split('.')[-1])
                 response_data = 'HTTP/1.1 200 OK\r\nContent-Type: '.encode()+mimetypes.types_map.get('.'+path.split('.')[-1], "application/octet-stream").encode()+'\r\n\r\n'.encode()+open('./Files/'+path.removeprefix('/'+path.split('/')[1]+'/'), 'rb').read(); request.status_code = 200
-                print(response_data)
             except Exception as e:
                 try: response_data = '\r\n\r\n'+self.routes.__error_page__(500); request.status_code = 500; print(e)
                 except: response_data = '\r\n\r\n<h1>500 Internal Server Error</h1>'+str(e); request.status_code = 500; print(e)
