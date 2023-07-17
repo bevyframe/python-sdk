@@ -5,8 +5,8 @@ Lightweight Python Web Micro Framework
 ***Downstream Version, Do Not Use in Production***
 ## Installing
 ```
-$ wget https://github.com/islekcaganmert/bevyframe/releases/download/Preview/BevyFrame-0.0.0-py3-none-any.whl
-$ python3 -m pip install ./BevyFrame-0.0.0-py3-none-any.whl
+$ wget https://github.com/islekcaganmert/bevyframe/releases/download/Preview/BevyFrame-0.0.1-py3-none-any.whl
+$ python3 -m pip install ./BevyFrame-0.0.1-py3-none-any.whl
 ```
 ## Simple Example
 
