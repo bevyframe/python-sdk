@@ -1,4 +1,5 @@
 from datetime import datetime
+import mimetypes
 import socket
 import urllib
 import time
@@ -35,20 +36,33 @@ class Frame:
                     break
             form_data_str = request_data.split('\r\n\r\n', 1)[1][:content_length]
             request.form = urllib.parse.parse_qs(form_data_str)
-        if path in self.paths:
+        if path.startswith('/static/') or path.startswith('/Files/'):
             try:
-                response_data = self.paths[path][0](**self.paths[path][1]); request.status_code = 200
+                print(path.split('.')[-1])
+                response_data = 'HTTP/1.1 200 OK\r\nContent-Type: '.encode()+mimetypes.types_map.get('.'+path.split('.')[-1], "application/octet-stream").encode()+'\r\n\r\n'.encode()+open('./Files/'+path.removeprefix('/'+path.split('/')[1]+'/'), 'rb').read(); request.status_code = 200
+                print(response_data)
             except Exception as e:
-                try: response_data = self.routes.__error_page__(500); request.status_code = 500; print(e)
-                except: response_data = '<h1>500 Internal Server Error</h1>'+str(e); request.status_code = 500; print(e)
+                try: response_data = '\r\n\r\n'+self.routes.__error_page__(500); request.status_code = 500; print(e)
+                except: response_data = '\r\n\r\n<h1>500 Internal Server Error</h1>'+str(e); request.status_code = 500; print(e)
+                for cookie in request.cookies: response_data = cookie+'='+request.cookies[cookie]+'; '+response_data
+                response_data = 'HTTP/1.1 '+str(request.status_code)+' OK\r\nContent-Type: text/html\r\n'+response_data
+                response_data = response_data.encode()
         else:
-            try: response_data = self.routes.__error_page__(404); request.status_code = 404
-            except: response_data = '<h1>404 Not Found</h1>'; request.status_code = 404
-        response_data = '\r\n\r\n'+response_data
-        for cookie in request.cookies: response_data = cookie+'='+request.cookies[cookie]+'; '+response_data
-        response_data = 'HTTP/1.1 '+str(request.status_code)+' OK\r\nContent-Type: text/html\r\n'+response_data
-        client_socket.sendall(response_data.encode())
-        print(f'{str(datetime.utcnow()).split(".")[0]} [{client_address[0]}:{client_address[1]}] {response_data.split(" ")[1]} {request.method} {path}')
+            if path in self.paths:
+                try:
+                    response_data = self.paths[path][0](**self.paths[path][1]); request.status_code = 200
+                except Exception as e:
+                    try: response_data = self.routes.__error_page__(500); request.status_code = 500; print(e)
+                    except: response_data = '<h1>500 Internal Server Error</h1>'+str(e); request.status_code = 500; print(e)
+            else:
+                try: response_data = self.routes.__error_page__(404); request.status_code = 404
+                except: response_data = '<h1>404 Not Found</h1>'; request.status_code = 404
+            response_data = '\r\n\r\n'+response_data
+            for cookie in request.cookies: response_data = cookie+'='+request.cookies[cookie]+'; '+response_data
+            response_data = 'HTTP/1.1 '+str(request.status_code)+' OK\r\nContent-Type: text/html\r\n'+response_data
+            response_data = response_data.encode()
+        print(f'{str(datetime.utcnow()).split(".")[0]} [{client_address[0]}:{client_address[1]}] {request.status_code} {request.method} {path}')
+        client_socket.sendall(response_data)
         request.cookies = {}
         request.method = ''
         request.form = {}

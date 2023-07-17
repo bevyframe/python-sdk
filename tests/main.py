@@ -4,7 +4,7 @@ class routes:
     def index():
         usernames = {'1234567890': 'demo'}
         username = usernames[request.cookies['session']]
-        return renderpage('index.html', cuser=username)
+        return renderpage('index.html', cuser=username, cookies=request.cookies)
     def login():
         request.cookies['session'] = '1234567890'
         return redirect('/')
