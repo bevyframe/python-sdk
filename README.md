@@ -2,7 +2,7 @@
 # BevyFrame
 Lightweight Python Web Micro Framework
 
-***Downstream Version, Do Not Use in Production***
+***Upstream Version, Do Not Use in Production***
 ## Installing
 ```
 $ wget https://github.com/islekcaganmert/bevyframe/releases/download/Preview/BevyFrame-0.0.1-py3-none-any.whl
