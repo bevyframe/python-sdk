@@ -78,6 +78,8 @@ class Frame:
                 client_socket, client_address = server_socket.accept()
                 self.handle_request(client_socket, client_address)
         except KeyboardInterrupt: server_socket = None; print('\nServer Killed!')
+    def run(self):
+        self.start_server(host='0.0.0.0', port=8000, debug=False)
 
 def renderpage(html, **variables):
     template = open('./Pages/'+html, 'r', encoding='UTF-8').read()
@@ -86,3 +88,5 @@ def renderpage(html, **variables):
     return template
 
 def redirect(url): return '<meta http-equiv="Refresh" content="0; url='+"'"+url+"'"+'" />'
+
+from .widgets import Widget

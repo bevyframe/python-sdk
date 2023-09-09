@@ -2,9 +2,9 @@
 
 all:
 	@echo "Possible Commands"
-	@echo "   build: Builds BevyFrame"
-	@echo "   install: Installs via pip, needs to be built before installing"
-	@echo "   test: Starts test server, needs BevyFrame to installed via pip"
+	@echo "\tbuild: Builds BevyFrame"
+	@echo "\tinstall: Installs via pip, needs to be built before installing"
+	@echo "\ttest: Starts test server, needs BevyFrame to installed via pip"
 
 build:
 	@python3 -m build
