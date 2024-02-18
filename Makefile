@@ -14,7 +14,7 @@ install:
 	@cd dist; python3 -m pip install *.whl
 
 test:
-	@cd tests; python3 main.py
+	@cd tests; python3 -m bevyframe config.json
 
 clean:
 	@rm -rfv dist

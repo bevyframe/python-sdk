@@ -1,6 +1,6 @@
 [project]
 name = "BevyFrame"
-version = "0.1.0"
+version = "0.2.0"
 description = "Lightweight Python Web Micro Framework"
 readme = "README.md"
 license = {text = "GPL-3.0"}
@@ -24,7 +24,7 @@ Documentation = "https://github.com/islekcaganmert/bevyframe/wiki"
 Changes = "https://github.com/islekcaganmert/bevyframe/commits/main"
 "Source Code" = "https://github.com/islekcaganmert/bevyframe"
 "Issue Tracker" = "https://github.com/islekcaganmert/bevyframe/issues"
-Chat = "https://hereus.pythonanywhere.com/communities/BevyFrame"
+Chat = "https://www.hereus.net/communities/bevyframe.islekcaganmert.dev"
 
 [build-system]
 requires = ["setuptools","wheel"]

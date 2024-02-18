@@ -1,59 +1,54 @@
-###### *Alpha Preview 0.1.0*
-# BevyFrame
-Lightweight Python Web Micro Framework
+# BevyFrame 0.2 ɑ
+
+Lightweight Python Web Framework
 
 ***Upstream Version, Do Not Use in Production***
+
 ## Installing
+
+LuOS
+```zsh
+% luman package install bevyframe
+```
+
+Other
 ```bash
-$ wget https://github.com/islekcaganmert/bevyframe/releases/download/Preview/BevyFrame-0.1.0-py3-none-any.whl
-$ python3 -m pip install ./BevyFrame-0.1.0-py3-none-any.whl
+$ wget https://github.com/islekcaganmert/bevyframe/releases/download/Preview/BevyFrame-0.2.0-py3-none-any.whl
+$ python3 -m pip install ./BevyFrame-0.2.0-py3-none-any.whl
 ```
-## Simple Example
+## Features
 
-```python
-from bevyframe import Frame, renderpage, request, redirect, Widget
+- High performance, built directly on sockets
+- Serving Python scripts as a webpage, just like an HTML
+- Rich request and response objects for easy development
+- Built-in decentralized authentication with [TheProtocols](https://git.hereus.net/islekcaganmert/TheProtocols)
+- Widget based templating engine
+- Routing engine for dynamic paths
+- Decentralized user querying with [TheProtocols](https://git.hereus.net/islekcaganmert/TheProtocols)
+- JSON based CSS-like styling, importable from path, URL, dictionary
+- User-friendly terminal output
+- Built-in error handling replaceable with a single file creation (ex. `404.py`)
+- Easy command line interface, `% python3 -m bevyframe config.json`
 
-class routes:
-    def index():
-        usernames = {'1234567890': 'demo'}
-        username = usernames[request.cookies['session']]
-        return Widget('html',
-            lang='en',
-            childs=[
-                Widget('head',
-                    childs=[
-                        Widget('meta', charset='UTF-8'),
-                        Widget('meta', name='viewport', content='width=device-width, initial-scale=1.0'),
-                        Widget('link', rel='stylesheet', href='/static/index.css'),
-                        Widget('title', innertext='Web App'),
-                    ]
-                ),
-                Widget('body',
-                    childs=[
-                        Widget('h1', innertext=f'Hello, {username}!'),
-                        Widget('p', innertext=request.cookies)
-                    ]
-                )
-            ]
-        )
-        #return renderpage('index.html', cuser=username, cookies=request.cookies)
-    def login():
-        request.cookies['session'] = '1234567890'
-        return redirect('/')
-    def __error_page__(error):
-        return Widget('h1',
-            childs=[
-                f'Error Code: {error}'
-            ]
-        )
+## Planned Features
 
-if __name__ == '__main__':
-    paths = {'/': [routes.index, {}], '/login': [routes.login, {}]}
-    Frame(routes, paths).start_server(host='0.0.0.0', port=8000)
-```
+- Decentralized cloud synced user data with [TheProtocols](https://git.hereus.net/islekcaganmert/TheProtocols)
+- Decentralized database with [TheProtocols](https://git.hereus.net/islekcaganmert/TheProtocols)
+- Page Authorization (Blacklist / Whitelist)
+- Easier Socket Integration
+- Easier REST API Development
+- Rate Limiting
+- Permanent Logging
+- Multiple Workers
+- Admin Panel
+- Built-in Mailing List with [TheProtocols](https://git.hereus.net/islekcaganmert/TheProtocols)
+- Built-in Webhook, compatible with HereUS and Discord
+- Built-in RSS
+- Built-in [AAS](https://git.hereus.net/islekcaganmert/AAS) Record Serving
+
 ## Links
 - Documentation: *Soon*
 - PyPI Releases: *Soon*
-- Source Code: https://github.com/islekcaganmert/bevyframe/
-- Issue Tracker: https://github.com/islekcaganmert/bevyframe/issues/
-- Community: https://hereus.pythonanywhere.com/communities/BevyFrame
+- Source Code: https://git.hereus.net/islekcaganmert/bevyframe
+- Issue Tracker: https://git.hereus.net/islekcaganmert/bevyframe/issues
+- Community: https://www.hereus.net/communities/bevyframe.islekcaganmert.dev
