@@ -3,7 +3,7 @@ name = "BevyFrame"
 version = "0.2.0"
 description = "Lightweight Python Web Micro Framework"
 readme = "README.md"
-license = {text = "GPL-3.0"}
+license = {text = "LGPL-3.0"}
 maintainers = [{name = "Çağan Mert İŞLEK", email = "islekcaganmert@gmail.com"}]
 classifiers = [
     "Environment :: Web Environment",

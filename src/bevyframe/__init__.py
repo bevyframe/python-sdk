@@ -31,6 +31,7 @@ mime_types = {
     'pdf': 'application/pdf',
     'ico': 'image/x-icon',
     'css': 'text/css',
+    'json': 'application/json'
 }
 
 
@@ -79,7 +80,10 @@ class Request:
 
 class Response:
     def __init__(self, body: (Page, str, dict, list), **kwargs) -> None:
-        self.body = body
+        try:
+            self.body = body.decode()
+        except:
+            self.body = body
         self.credentials = {}
         kwargs_info = {
             'status_code': [int, 200],

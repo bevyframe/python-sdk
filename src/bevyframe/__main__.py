@@ -1,6 +1,7 @@
 import sys
 import json
 from bevyframe import *
+import secrets
 
 config = {
     'host': '127.0.0.1',
@@ -22,6 +23,7 @@ Frame(
     config['package'],
     config['developer'],
     config['administrator'],
+    secrets.token_hex(secrets.randbits(4)),
     config['style'],
     '/favicon.ico',
     config['keywords']
