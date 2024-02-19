@@ -80,10 +80,7 @@ class Request:
 
 class Response:
     def __init__(self, body: (Page, str, dict, list), **kwargs) -> None:
-        try:
-            self.body = body.decode()
-        except:
-            self.body = body
+        self.body = body
         self.credentials = {}
         kwargs_info = {
             'status_code': [int, 200],
@@ -297,14 +294,17 @@ class Frame:
                                     resp = self.error_handler(Request(recv, self), 404, '')
                             else:
                                 with open(page_script_path, 'rb') as f:
-                                    resp = Response(f.read(), headers={
-                                        'Content-Type': mime_types.get(
-                                            page_script_path.split('.')[-1],
-                                            'application/octet-stream'
-                                        ),
-                                        'Content-Length': len(f.read()),
-                                        'Connection': 'keep-alive'
-                                    })
+                                    resp = Response(
+                                        (f.read().decode() if page_script_path.endswith('.html') else f.read()),
+                                        headers={
+                                            'Content-Type': mime_types.get(
+                                                page_script_path.split('.')[-1],
+                                                'application/octet-stream'
+                                            ),
+                                            'Content-Length': len(f.read()),
+                                            'Connection': 'keep-alive'
+                                        }
+                                    )
                 except Exception as e:
                     resp = self.error_handler(Request(recv, self), 500, traceback.format_exc())
                 if isinstance(resp, Page):
