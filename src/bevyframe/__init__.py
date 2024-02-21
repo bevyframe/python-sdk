@@ -126,13 +126,14 @@ class Frame:
                     self.style = r.json()
         self.icon = icon
         self.keywords = keywords
-        admins.update({self.package: protocol.get_admin(
-            administrator,
-            getpass.getpass(f'Password for {administrator}: '))
-        })
-        print()
-        admin = get_admin(package)
-        print(f"Welcome {admin['name']} {admin['surname']}!")
+        if not administrator:
+            admins.update({self.package: protocol.get_admin(
+                administrator,
+                getpass.getpass(f'Password for {administrator}: '))
+            })
+            print()
+            admin = get_admin(package)
+            print(f"Welcome {admin['name']} {admin['surname']}!")
         print()
 
     def route(self, path) -> Any:
