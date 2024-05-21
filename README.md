@@ -21,10 +21,10 @@ $ python3 -m pip install ./BevyFrame-0.2.0-py3-none-any.whl
 - High performance, built directly on sockets
 - Serving Python scripts as a webpage, just like an HTML
 - Rich request and response objects for easy development
-- Built-in decentralized authentication with [TheProtocols](https://git.hereus.net/islekcaganmert/TheProtocols)
+- Built-in decentralized authentication with [TheProtocols](https://github.com/islekcaganmert/TheProtocols)
 - Widget based templating engine
 - Routing engine for dynamic paths
-- Decentralized user querying with [TheProtocols](https://git.hereus.net/islekcaganmert/TheProtocols)
+- Decentralized user querying with [TheProtocols](https://github.com/islekcaganmert/TheProtocols)
 - JSON based CSS-like styling, importable from path, URL, dictionary
 - User-friendly terminal output
 - Built-in error handling replaceable with a single file creation (ex. `404.py`)
@@ -32,8 +32,8 @@ $ python3 -m pip install ./BevyFrame-0.2.0-py3-none-any.whl
 
 ## Planned Features
 
-- Decentralized cloud synced user data with [TheProtocols](https://git.hereus.net/islekcaganmert/TheProtocols)
-- Decentralized database with [TheProtocols](https://git.hereus.net/islekcaganmert/TheProtocols)
+- Decentralized cloud synced user data with [TheProtocols](https://github.com/islekcaganmert/TheProtocols)
+- Decentralized database with [TheProtocols](https://github.com/islekcaganmert/TheProtocols)
 - Page Authorization (Blacklist / Whitelist)
 - Easier Socket Integration
 - Easier REST API Development
@@ -41,14 +41,12 @@ $ python3 -m pip install ./BevyFrame-0.2.0-py3-none-any.whl
 - Permanent Logging
 - Multiple Workers
 - Admin Panel
-- Built-in Mailing List with [TheProtocols](https://git.hereus.net/islekcaganmert/TheProtocols)
-- Built-in Webhook, compatible with HereUS and Discord
+- Built-in Mailing List
 - Built-in RSS
-- Built-in [AAS](https://git.hereus.net/islekcaganmert/AAS) Record Serving
 
 ## Links
 - Documentation: *Soon*
 - PyPI Releases: *Soon*
-- Source Code: https://git.hereus.net/islekcaganmert/bevyframe
-- Issue Tracker: https://git.hereus.net/islekcaganmert/bevyframe/issues
+- Source Code: https://github.com/islekcaganmert/bevyframe
+- Issue Tracker: https://github.com/islekcaganmert/bevyframe/issues
 - Community: https://www.hereus.net/communities/bevyframe.islekcaganmert.dev

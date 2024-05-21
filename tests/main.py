@@ -6,7 +6,7 @@ app = Frame(
     developer='islekcaganmert@hereus.net',
     administrator='islekcaganmert@hereus.net',
     secret='5d9547e68c469b5e4b97b273e760',  # secrets.token_hex(secrets.randbits(4))
-    style=requests.get('https://git.hereus.net/HereUS/HereUS-UI-3.1/raw/master/HereUS-UI-3.1.json').json(),
+    style=requests.get('https://github.com/hereus-pbc/HereUS-UI-3.1/raw/master/HereUS-UI-3.1.json').json(),
     icon='/favicon.png',
     keywords=['Test']
 )

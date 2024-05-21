@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="Python 3.10.12 WSL (Ubuntu): (/home/islek/.virtualenvs/bevyframe/bin/python)" />
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.12 (Bevy2Flask)" project-jdk-type="Python SDK" />
 </project>

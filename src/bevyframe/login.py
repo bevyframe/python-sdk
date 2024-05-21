@@ -1,4 +1,4 @@
-from .protocol import get_aas, Obj
+from .protocol import Obj
 import requests
 import jwt
 
@@ -12,7 +12,7 @@ def get_session_token(secret, email, password) -> str:
 
 def current_user(request) -> Obj:
     r = requests.post(
-        f"https://{get_aas(request.email.split('@')[1])}/protocols/current_user_info",
+        f"https://{request.email.split('@')[1]}/protocols/current_user_info",
         data={
             'current_user_username': request.email.split('@')[0],
             'current_user_password': request.password

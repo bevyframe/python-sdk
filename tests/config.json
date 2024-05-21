@@ -5,6 +5,6 @@
   "debug": true,
   "administrator": "islekcaganmert@hereus.net",
   "developer": "islekcaganmert@hereus.net",
-  "style": "https://git.hereus.net/HereUS/HereUS-UI-3.1/raw/master/HereUS-UI-3.1.json",
+  "style": "https://github.com/hereus-pbc/HereUS-UI-3.1/raw/master/HereUS-UI-3.1.json",
   "keywords": ["Test"]
 }
