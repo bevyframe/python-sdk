@@ -1,26 +1,49 @@
 import urllib.parse
 from datetime import datetime
-from random import randint
 from typing import Any
 import importlib.util
 import importlib
 import traceback
 import getpass
 import socket
-import json
-import sys
 import os
 import re
 from .widgets import *
-from . import protocol
 from .login import *
+import requests
+import TheProtocols
+
 
 https_codes = {
-    404: 'Not Found',
-    500: 'Internal Server Error',
     200: 'OK',
+    201: 'Created',
+    202: 'Accepted',
+    203: 'Non-Authoritative Information',
+    204: 'No Content',
+    205: 'Reset Content',
     301: 'Moved Permanently',
-    303: 'See Other'
+    302: 'Found',
+    303: 'See Other',
+    307: 'Temporary Redirect',
+    308: 'Permanent Redirect',
+    400: 'Bad Request',
+    401: 'Unauthorized',
+    402: 'Payment Required',
+    403: 'Forbidden',
+    405: 'Method Not Allowed',
+    404: 'Not Found',
+    410: 'Gone',
+    415: 'Unsupported Media Type',
+    418: 'I\'m a teapot',
+    429: 'Too Many Requests',
+    451: 'Unavailable For Legal Reasons',
+    500: 'Internal Server Error',
+    501: 'Not Implemented',
+    502: 'Bad Gateway',
+    503: 'Service Unavailable',
+    504: 'Gateway Timeout',
+    506: 'Variant Also Negotiates',
+    511: 'Network Authentication Required'
 }
 admins = {}
 mime_types = {
@@ -64,6 +87,7 @@ class Request:
         try:
             self.email = data['credentials']['email']
             self.password = data['credentials']['password']
+            self.user = TheProtocols.ID(self.email, self.password)
         except TypeError:
             pass
         self.app = app
@@ -82,17 +106,12 @@ class Response:
     def __init__(self, body: (Page, str, dict, list), **kwargs) -> None:
         self.body = body
         self.credentials = {}
-        kwargs_info = {
-            'status_code': [int, 200],
-            'headers': [dict, {
-                'Content-Type': 'text/html; charset=utf-8'
-            }]
-        }
+        kwargs_info = ['status_code', 'headers']
+        self.headers = {'Content-Type': 'text/html; charset=utf-8'}
+        self.status_code = 200
         for kwarg in kwargs_info:
             if kwarg in kwargs:
                 setattr(self, kwarg, kwargs_info[kwarg][0](kwargs[kwarg]))
-            else:
-                setattr(self, kwarg, kwargs_info[kwarg][1])
 
     def login(self, email, password) -> None:
         self.credentials = {'email': email, 'password': password}
@@ -117,30 +136,33 @@ class Frame:
         self.routes = {}
         if isinstance(style, dict):
             self.style = style
-        else:
+        elif isinstance(style, str):
             if os.path.isfile(style):
                 self.style = json.load(open(style, 'rb'))
-            elif style.startswith('https://') or style.startswith('http://'):
-                r = protocol.requests.get(style)
+            elif style.startswith('https://'):
+                r = requests.get(style)
                 if r.status_code == 200:
                     self.style = r.json()
+                else:
+                    self.style = {}
+            else:
+                self.style = {}
+        else:
+            self.style = {}
         self.icon = icon
         self.keywords = keywords
-        if not administrator:
-            admins.update({self.package: protocol.get_admin(
-                administrator,
-                getpass.getpass(f'Password for {administrator}: '))
-            })
+        if administrator:
+            self.admin = TheProtocols.ID(administrator, getpass.getpass(f'Password for {administrator}: '))
             print()
-            admin = get_admin(package)
-            print(f"Welcome {admin['name']} {admin['surname']}!")
+            print(f"Welcome {self.admin.id}!")
         print()
 
-    def route(self, path) -> Any:
+    def route(self, path, whitelist: list = None, blacklist: list = None) -> Any:
         def decorator(func) -> Any:
             self.routes.update({path: func})
-            def wrapper(*args, **kwargs) -> Any:
-                return func(*args, **kwargs)
+
+            def wrapper(r: Request, **kwargs) -> Any:
+                return func(r, **kwargs)
             return wrapper
         return decorator
 
@@ -205,7 +227,7 @@ class Frame:
                     title=https_codes[status_code],
                     style=self.style,
                     childs=e_boxes,
-                    selector=f'body_{current_user(request).settings.theme_color}'
+                    selector=f'body_{request.user.id.settings.theme_color}'
                 ),
                 status_code=status_code
             )
@@ -279,8 +301,6 @@ class Frame:
                             page_script_path = page_script_path.replace('//', '/')
                         if not os.path.isfile(page_script_path):
                             page_script_path += '/__init__.py'
-                            if not os.path.isfile(page_script_path):
-                                resp = self.error_handler(Request(recv, self), 404, '')
                         if os.path.isfile(page_script_path):
                             if page_script_path.endswith('.py'):
                                 page_script_spec = importlib.util.spec_from_file_location(
@@ -290,7 +310,10 @@ class Frame:
                                 page_script = importlib.util.module_from_spec(page_script_spec)
                                 try:
                                     page_script_spec.loader.exec_module(page_script)
-                                    resp = getattr(page_script, recv['method'].lower())(Request(recv, self))
+                                    if recv['method'].lower() in page_script.__dict__:
+                                        resp = getattr(page_script, recv['method'].lower())(Request(recv, self))
+                                    else:
+                                        resp = self.error_handler(Request(recv, self), 405, '')
                                 except FileNotFoundError:
                                     resp = self.error_handler(Request(recv, self), 404, '')
                             else:
@@ -306,7 +329,9 @@ class Frame:
                                             'Connection': 'keep-alive'
                                         }
                                     )
-                except Exception as e:
+                        else:
+                            resp = self.error_handler(Request(recv, self), 404, '')
+                except Exception:
                     resp = self.error_handler(Request(recv, self), 500, traceback.format_exc())
                 if isinstance(resp, Page):
                     resp.data['lang'] = ''

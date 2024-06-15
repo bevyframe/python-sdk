@@ -1,14 +1,14 @@
 [project]
 name = "BevyFrame"
-version = "0.2.0"
-description = "Lightweight Python Web Micro Framework"
+version = "0.3.0"
+description = "Python Web Framework"
 readme = "README.md"
-license = {text = "LGPL-3.0"}
+license = {text = "LGPL-2.1"}
 maintainers = [{name = "Çağan Mert İŞLEK", email = "islekcaganmert@gmail.com"}]
 classifiers = [
     "Environment :: Web Environment",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: GPL-3.0 License",
+    "License :: OSI Approved :: LGPL-2.1 License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
@@ -16,15 +16,15 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Application Frameworks",
 ]
 requires-python = ">=3.9"
-dependencies = []
+dependencies = ["requests==2.32.3", "PyJWT==2.8.0", "TheProtocols==3.0.1"]
 
 [project.urls]
 Donate = "https://www.buymeacoffee.com/islekcaganmert"
 Documentation = "https://github.com/islekcaganmert/bevyframe/wiki"
-Changes = "https://github.com/islekcaganmert/bevyframe/commits/main"
+Changes = "https://github.com/islekcaganmert/bevyframe/commits/master"
 "Source Code" = "https://github.com/islekcaganmert/bevyframe"
 "Issue Tracker" = "https://github.com/islekcaganmert/bevyframe/issues"
-Chat = "https://www.hereus.net/communities/bevyframe.islekcaganmert.dev"
+Chat = "https://lemmy.today/c/bevyframe"
 
 [build-system]
 requires = ["setuptools","wheel"]

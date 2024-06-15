@@ -1,7 +1,6 @@
-import sys
-import json
 from bevyframe import *
 import secrets
+import sys
 
 config = {
     'host': '127.0.0.1',

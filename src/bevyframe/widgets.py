@@ -1,10 +1,12 @@
 import json
+
+
 def RenderCSS(style):
+    if isinstance(style, str):
+        return style
     css = ''
     for prop in style:
-        if type(style[prop]) == str:
-            css += f'{prop}:{style[prop]};'
-        elif prop.startswith('@'):
+        if prop.startswith('@'):
             if prop == '@imports':
                 for i in style[prop]:
                     css += f"@import url('{i}'); "
@@ -20,14 +22,22 @@ def RenderCSS(style):
                     except:
                         pass
                 css += f'{prop} {f} '
-                css += ('{ '+RenderCSS(style[prop])+'}')
-        elif type(style[prop]) == list:
+                css += ('{ ' + RenderCSS(style[prop]) + '}')
+        elif isinstance(style[prop], list):
+            css += f'{prop}:{", ".join(style[prop])};'
+        elif isinstance(style[prop], str):
+            css += f'{prop}:{style[prop]};'
+        elif isinstance(style[prop], int):
+            css += f'{prop}:{style[prop]};'
+        elif isinstance(style[prop], list):
             css += f'{prop}:{", ".join(style[prop])};'
         else:
             css += f'{prop} '
-            css += ('{ '+RenderCSS(style[prop])+'}')
+            css += ('{ ' + RenderCSS(style[prop]) + '}')
         css += ' '
     return css
+
+
 class Widget:
     def __init__(self, item, **kwargs):
         self.data = {}
@@ -41,7 +51,8 @@ class Widget:
             elif arg == 'style':
                 self.style = kwargs['style']
             else:
-                self.data.update({arg:kwargs[arg]})
+                self.data.update({arg: kwargs[arg]})
+
     def render(self):
         gen = f'<{self.element}'
         if not self.style == {}:
@@ -84,6 +95,20 @@ class Widget:
                     gen += str(i)
             gen += f'</{self.element}>'
         return gen
+
+
+Title = lambda innertext, **kwargs: Widget('h1', innertext=innertext, **kwargs)
+Box = lambda **kwargs: Widget('div', selector='the_box', **kwargs)
+Line = lambda childs, **kwargs: Widget('p', childs=childs if isinstance(childs, list) else [childs], **kwargs)
+Label = lambda innertext, **kwargs: Line(childs=innertext, **kwargs)
+Textbox = lambda name, selector = '', **kwargs: Widget('input', name=name, id=name, selector=f'textbox {selector}', **kwargs)
+Button = lambda selector = '', **kwargs: Widget('button', selector=f'button {selector}', **kwargs)
+Form = lambda method, childs: Widget('form', method=method, childs=childs)
+Bold = lambda innertext: Widget('b', innertext=innertext)
+Italic = lambda innertext: Widget('i', innertext=innertext)
+Link = lambda innertext, url, external=False: Widget('a', innertext=innertext, href=url, selector='link', **({'target': '_blank'} if external else {}))
+
+
 class Page:
     def __init__(self, **kwargs):
         self.content = []
@@ -120,10 +145,13 @@ class Page:
                 self.style = kwargs['style']
             else:
                 self.data.update({arg: kwargs[arg]})
+
     def __getattr__(self, item):
         return self.data[item]
+
     def __repr__(self):
         return self.render()
+
     def render(self):
         og = []
         for i in self.OpenGraph:
@@ -131,17 +159,18 @@ class Page:
         html = '<!DOCTYPE html>'
         html += Widget('html', lang=self.lang, childs=[
             Widget('head', childs=[
-                Widget('meta', charset=self.charset),
-                Widget('meta', name='viewport', content=f'width={self.viewport["width"]}, initial-scale={self.viewport["initial-scale"]}'),
-                Widget('meta', name='description', content=self.description),
-                Widget('meta', name='keywords', content=', '.join(self.keywords)),
-                Widget('meta', name='author', content=self.author),
-                Widget('link', rel='icon', href=self.icon['href'], type=self.icon['type']),
-                Widget('title', innertext=self.title)
-            ]+og+[
-                Widget('script', innertext=f'const bf_db = {json.dumps(self.db)}'),
-                Widget('style', innertext=RenderCSS(self.style))
-            ]),
+                                      Widget('meta', charset=self.charset),
+                                      Widget('meta', name='viewport',
+                                             content=f'width={self.viewport["width"]}, initial-scale={self.viewport["initial-scale"]}'),
+                                      Widget('meta', name='description', content=self.description),
+                                      Widget('meta', name='keywords', content=', '.join(self.keywords)),
+                                      Widget('meta', name='author', content=self.author),
+                                      Widget('link', rel='icon', href=self.icon['href'], type=self.icon['type']),
+                                      Widget('title', innertext=self.title)
+                                  ] + og + [
+                                      Widget('script', innertext=f'const bf_db = {json.dumps(self.db)}'),
+                                      Widget('style', innertext=RenderCSS(self.style))
+                                  ]),
             Widget('body', selector=self.selector, childs=self.content)
         ]).render()
         return html
