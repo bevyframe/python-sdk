@@ -1,12 +1,12 @@
-from bevyframe import Frame, Page, Widget, protocol, Request, Response
-import requests
+from bevyframe import *
+from TheProtocols import User
 
 app = Frame(
     package='dev.islekcaganmert.bevyframe.stdin',
     developer='islekcaganmert@hereus.net',
-    administrator='islekcaganmert@hereus.net',
+    administrator=None,
     secret='5d9547e68c469b5e4b97b273e760',  # secrets.token_hex(secrets.randbits(4))
-    style=requests.get('https://github.com/hereus-pbc/HereUS-UI-3.1/raw/master/HereUS-UI-3.1.json').json(),
+    style='https://github.com/hereus-pbc/HereUS-UI-3.1/raw/master/HereUS-UI-3.1.json',
     icon='/favicon.png',
     keywords=['Test']
 )
@@ -14,13 +14,13 @@ app = Frame(
 
 @app.route('/user/<email>')
 def index(request: Request, email) -> Page:
-    u = protocol.find_user(email)
+    u = User(email)
     return Page(
         title='',
         description='',
-        selector='body_blue',
+        selector=f'body_{request.user.id.settings.theme_color}',
         childs=[
-            Widget('h1', innertext=f"{u['name']} {u['surname']}")
+            Title(f"{u.name} {u.surname}")
         ]
     )
 

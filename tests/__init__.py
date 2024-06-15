@@ -1,33 +1,23 @@
-from bevyframe import Page, Widget, Request, get_admin, redirect, Response, current_user
-import json
+from bevyframe import *
 
 
 def get(request: Request) -> (Page, Response):
     if request.email.split('@')[0] == 'Guest':
         return redirect('/login.py')
-    cuser = current_user(request)
     return Page(
         title='BevyFrame Test App',
         description='BevyFrame Test App',
-        selector='body_blue',
+        selector=f'body_{request.user.id.settings.theme_color}',
         childs=[
-            Widget('h1', innertext=f'Hello, {cuser.name} {cuser.surname}!'),
-            Widget('div', selector='the_box', style={
+            Title(f'Hello, {request.user.id.name} {request.user.id.surname} from {request.user.network}!'),
+            Box(style={
                 "width": "max-content",
                 "text-align": "center"
             }, childs=[
-                Widget('p', childs=[
-                    Widget('input', type="text", selector='textbox', placeholder='textbox')
-                ]),
-                Widget('p', childs=[
-                    Widget('button', selector='button', innertext='Button')
-                ]),
-                Widget('p', childs=[
-                    Widget('button', selector='button small', innertext='Button')
-                ]),
-                Widget('p', childs=[
-                    Widget('button', selector='button mini', innertext='Button')
-                ])
+                Line([Textbox('', type="text", placeholder='textbox')]),
+                Line([Button(innertext='Button')]),
+                Line([Button(selector='small', innertext='Button')]),
+                Line([Button(selector='mini', innertext='Button')])
             ])
         ]
     )

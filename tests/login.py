@@ -1,4 +1,4 @@
-from bevyframe import Request, Response, Page, Widget, redirect
+from bevyframe import *
 
 
 def get(request: Request) -> Page:
@@ -7,35 +7,17 @@ def get(request: Request) -> Page:
         description='BevyFrame Test App',
         selector='body_blue',
         childs=[
-            Widget(
-                'form',
-                method='POST',
+            Form(
+                'POST',
                 childs=[
-                    Widget(
-                        'p',
-                        childs=[z]
-                    )
+                    Line(z)
                     for z in [
-                        Widget(
-                            'input',
-                            selector='textbox grey',
-                            name=y[0],
-                            type=y[1],
-                            placeholder=y[2],
-                            value=y[3]
-                        )
+                        Textbox(y[0], selector='grey', type=y[1], placeholder=y[2])
                         for y in [
-                            ['email', 'text', 'Email Address', ''],
-                            ['password', 'password', 'Password', '']
+                            ['email', 'text', 'Email Address'],
+                            ['password', 'password', 'Password']
                         ]
-                    ] + [
-                        Widget(
-                            'input',
-                            selector='button',
-                            type='submit',
-                            value='Login'
-                        )
-                    ]
+                    ] + [Button(innertext='Login')]
                 ]
             )
         ]
