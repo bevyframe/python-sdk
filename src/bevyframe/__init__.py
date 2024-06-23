@@ -106,12 +106,10 @@ class Response:
     def __init__(self, body: (Page, str, dict, list), **kwargs) -> None:
         self.body = body
         self.credentials = {}
-        kwargs_info = ['status_code', 'headers']
         self.headers = {'Content-Type': 'text/html; charset=utf-8'}
         self.status_code = 200
-        for kwarg in kwargs_info:
-            if kwarg in kwargs:
-                setattr(self, kwarg, kwargs_info[kwarg][0](kwargs[kwarg]))
+        for kwarg in kwargs:
+            setattr(self, kwarg, kwargs[kwarg])
 
     def login(self, email, password) -> None:
         self.credentials = {'email': email, 'password': password}
