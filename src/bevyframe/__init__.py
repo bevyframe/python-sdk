@@ -215,7 +215,7 @@ class Frame:
                                 style={'margin-bottom': '10px', 'padding-top': '10px', 'font-family': 'monospace'},
                                 innertext=(
                                     'Path ' +
-                                    e.split('"')[1].removeprefix('.').removesuffix('/__init__.py') +
+                                    e.split('"')[1].removeprefix('.').removesuffix('/__init__.py').removeprefix(os.getcwd()) +
                                     e.removeprefix(e.split('"')[0] + '"' + e.split('"')[1] + '"')
                                 )
                             )
