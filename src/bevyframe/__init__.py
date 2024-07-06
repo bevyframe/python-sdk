@@ -78,7 +78,7 @@ class Request:
         self.method = data['method']
         self.path = data['path']
         self.headers = data['headers']
-        self.body = urllib.parse.unquote(data['body'])
+        self.body = urllib.parse.unquote(data['body'].replace('+', ' '))
         self.form = {}
         for b in self.body.split('\r\n'):
             for i in b.split('&'):
