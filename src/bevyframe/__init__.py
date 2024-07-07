@@ -78,6 +78,7 @@ class Request:
         self.method = data['method']
         self.path = data['path']
         self.headers = data['headers']
+        self.query = data['query']
         self.body = urllib.parse.unquote(data['body'].replace('+', ' '))
         self.form = {}
         for b in self.body.split('\r\n'):
@@ -254,7 +255,8 @@ class Frame:
                     'protocol': '',
                     'headers': {},
                     'body': '',
-                    'credentials': None
+                    'credentials': None,
+                    'query': {}
                 }
                 for crl in range(len(raw.split('\r'))):
                     for lfl in range(len(raw.split('\r')[crl].split('\n'))):
@@ -282,6 +284,9 @@ class Frame:
                     print(f"\r(   ) {recv['credentials']['email']} [{datetime.now().strftime('%Y-%M-%d %H:%m:%S')}]",
                           end=' ')
                 print(f"{recv['method']} {recv['path']} {recv['protocol']}", end='', flush=True)
+                for i in recv['path'].split('?')[1].split('&'):
+                    recv['query'].update({i.split('=')[0]: i.split('=')[1]})
+                recv['path'] = recv['path'].split('?')[0]
                 try:
                     not_in_routes = True
                     if recv['path'] in self.routes:
