@@ -14,9 +14,20 @@ from bevyframe.Frame.Run.Sender import sender
 
 
 class Frame:
-    def __init__(self, package, developer, administrator, secret, style, icon='/favicon.ico', keywords=None) -> None:
+    def __init__(
+            self,
+            package,
+            developer,
+            administrator,
+            secret,
+            style,
+            icon='/favicon.ico',
+            keywords=None,
+            default_network='hereus.net'
+    ) -> None:
         if keywords is None:
             keywords = []
+        self.default_network = default_network
         self.secret = secret
         self.package = package
         self.debug = False

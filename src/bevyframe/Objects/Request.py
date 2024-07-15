@@ -1,5 +1,6 @@
 import urllib.parse
 import TheProtocols
+from TheProtocols.Data import DataRoot
 from typing import Any
 import json
 
@@ -19,7 +20,11 @@ class Request:
         try:
             self.email = data['credentials']['email']
             self.password = data['credentials']['password']
-            self.user = TheProtocols.ID(self.email, self.password)
+            try:
+                self.user = TheProtocols.ID(self.email, self.password)
+            except TheProtocols.CredentialsDidntWorked:
+                self.user = TheProtocols.ID(f'Guest@{app.default_network}', '')
+            self.data = DataRoot(self.user, app.package)()
         except TypeError:
             pass
         self.app = app
