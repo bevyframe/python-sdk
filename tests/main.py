@@ -25,4 +25,4 @@ def index(request: Request, email) -> Page:
     )
 
 
-app.run('0.0.0.0', 80, False)
+app.run('0.0.0.0', 80, True)
