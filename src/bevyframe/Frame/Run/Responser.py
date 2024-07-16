@@ -13,9 +13,8 @@ from bevyframe.Objects.Response import Response
 from bevyframe.Widgets.Page import Page
 
 
-def responser(self, recv):
+def responser(self, recv, req_time, r):
     resp = None
-    r = Request(recv, self)
     # noinspection PyBroadException
     try:
         in_routes = False
@@ -44,6 +43,22 @@ def responser(self, recv):
                             try:
                                 page_script_spec.loader.exec_module(page_script)
                                 if recv['method'].lower() in page_script.__dict__:
+                                    if 'log' in page_script.__dict__:
+                                        formatted_log = page_script.log(r, req_time)
+                                        if formatted_log is not None:
+                                            print(f'\r(   ) ', end='', flush=True)
+                                            print(
+                                                '                   ' if r.email.split('@')[0] == 'Guest' else
+                                                ''.join([' ' for i in range(len(r.email))])
+                                            , end='', flush=True)
+                                            print('                       ', end='', flush=True)
+                                            print(''.join([' ' for i in range(len(r.method))]), end='', flush=True)
+                                            print(''.join([' ' for i in range(len(r.path))]), end='', flush=True)
+                                            print('        ', end='', flush=True)
+                                            print(f'\r(   ) ', end='', flush=True)
+                                            print(
+                                                formatted_log.replace('\n', '').replace('\r', '')
+                                                , end='', flush=True)
                                     resp = getattr(page_script, recv['method'].lower())(r)
                                 else:
                                     resp = self.error_handler(r, 405, '')

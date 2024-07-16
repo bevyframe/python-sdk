@@ -1,4 +1,12 @@
 from bevyframe import *
+from TheProtocols import ID, CredentialsDidntWorked
+
+
+def log(r: Request, time: str) -> str:
+    if r.method == 'POST':
+        return f'{r.form['email']} is trying to login at {time.split(' ')[0]} on {time.split(' ')[1]}'
+    else:
+        return None
 
 
 def get(request: Request) -> Page:
@@ -26,5 +34,10 @@ def get(request: Request) -> Page:
 
 def post(request: Request) -> Response:
     resp = redirect('/')
-    resp.login(request.form['email'], request.form['password'])
+    try:
+        ID(request.form['email'], request.form['password'])
+        resp.login(request.form['email'], request.form['password'])
+        print(', success', end='', flush=True)
+    except CredentialsDidntWorked:
+        print(', failed', end='', flush=True)
     return resp

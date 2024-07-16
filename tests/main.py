@@ -12,6 +12,11 @@ app = Frame(
 )
 
 
+@app.default_logging
+def log(r: Request, time: str) -> str:
+    return f'{r.email} {'sent form to' if r.method == 'POST' else 'landed on'} {r.path} at {time.split(' ')[0]} on {time.split(' ')[1]}'
+
+
 @app.route('/user/<email>')
 def index(request: Request, email) -> Page:
     u = User(email)

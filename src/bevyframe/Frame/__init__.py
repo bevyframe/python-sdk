@@ -7,6 +7,7 @@ import TheProtocols
 import json
 from bevyframe.Frame.error_handler import error_handler
 from bevyframe.Frame.route import route
+from bevyframe.Frame.default_logging import default_logging
 from bevyframe.Frame.Run.Booting import booting
 from bevyframe.Frame.Run.Receiver import receiver
 from bevyframe.Frame.Run.Responser import responser
@@ -50,6 +51,7 @@ class Frame:
             self.style = {}
         self.icon = icon
         self.keywords = keywords
+        self.default_logging_str = None
         if administrator:
             self.admin = TheProtocols.ID(administrator, getpass.getpass(f'Password for {administrator}: '))
             print()
@@ -62,12 +64,15 @@ class Frame:
     def route(self, path, whitelist: list = None, blacklist: list = None) -> Any:
         return route(self, path, whitelist, blacklist)
 
+    def default_logging(self, func):
+        return default_logging(self, func)
+
     def run(self, host: str = '127.0.0.1', port: int = 5000, debug: bool = True):
         server_socket = booting(self, host, port, debug)
         try:
             while True:
-                recv, client_socket = receiver(self, server_socket)
-                resp = responser(self, recv)
+                recv, client_socket, req_time, r = receiver(self, server_socket)
+                resp = responser(self, recv, req_time, r)
                 sender(self, recv, resp, client_socket)
         except KeyboardInterrupt:
             server_socket.close()

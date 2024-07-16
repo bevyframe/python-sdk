@@ -7,7 +7,7 @@ from bevyframe.Objects.Request import Request
 
 def receiver(self, server_socket: socket.socket):
     client_socket, client_address = server_socket.accept()
-    print(f"(   ) {client_address[0]} [{datetime.now().strftime('%Y-%M-%d %H:%m:%S')}]", end=' ')
+    req_time = datetime.now().strftime('%Y-%M-%d %H:%m:%S')
     raw = client_socket.recv(1024).decode()
     recv = {
         'method': '',
@@ -41,13 +41,19 @@ def receiver(self, server_socket: socket.socket):
             'email': 'Guest@hereus.net',
             'password': ''
         }
-    if recv['credentials']['email'].split('@')[0] != 'Guest':
-        print(f"\r(   ) {recv['credentials']['email']} [{datetime.now().strftime('%Y-%M-%d %H:%m:%S')}]",
-              end=' ')
-    print(f"{recv['method']} {recv['path']} {recv['protocol']}", end='', flush=True)
+    r = Request(recv, self)
+    if self.default_logging_str is None:
+        if recv['credentials']['email'].split('@')[0] == 'Guest':
+            print(f"(   ) {client_address[0]} [{req_time}]", end=' ')
+        else:
+            print(f"\r(   ) {recv['credentials']['email']} [{req_time}]",
+                  end=' ')
+        print(f"{recv['method']} {recv['path']} {recv['protocol']}", end='', flush=True)
+    else:
+        print('(   ) ' + self.default_logging_str(r, req_time).replace('\n', '').replace('\r', ''), end='', flush=True)
     if '?' in recv['path']:
         for i in recv['path'].split('?')[1].split('&'):
             recv['query'].update({i.split('=')[0]: i.split('=')[1]})
         # noinspection PyUnresolvedReferences
         recv['path'] = recv['path'].split('?')[0]
-    return recv, client_socket
+    return recv, client_socket, req_time, r

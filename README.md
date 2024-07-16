@@ -18,6 +18,7 @@ $ python3 -m pip install ./BevyFrame-0.3.0-py3-none-any.whl
 ```
 ## Features
 
+- Secure, no known vulnerabilities
 - High performance, built directly on sockets
 - Serving Python scripts as a webpage, just like an HTML
 - Rich request and response objects for easy development
@@ -29,19 +30,17 @@ $ python3 -m pip install ./BevyFrame-0.3.0-py3-none-any.whl
 - JSON based CSS-like styling, importable from any path, URL, in-code
 - User-friendly terminal output
 - Built-in error handling replaceable with a single file creation (ex. `404.py`)
+- Built-in web debugger
 - Easy command line interface, `% python3 -m bevyframe config.json`
 
 ## Planned Features
 
-- Built-in SQL Support
 - Page Authorization (Blacklist / Whitelist)
 - Easier Socket Integration
-- Easier REST API Development
 - Rate Limiting
 - Permanent Logging
 - Multiple Workers
 - Admin Panel
-- Built-in Mailing List
 - Built-in RSS
 
 ## Links
