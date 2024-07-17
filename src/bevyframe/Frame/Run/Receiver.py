@@ -32,7 +32,7 @@ def receiver(self, server_socket: socket.socket):
     try:
         recv['credentials'] = get_session(
             self.secret,
-            Request(recv, self).cookies['s']
+            recv['headers']['Cookie'].split('s=')[1].split(';')[0]
         )
     except KeyError:
         pass
