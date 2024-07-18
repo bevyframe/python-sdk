@@ -25,7 +25,7 @@ def error_handler(self, request, status_code, exception) -> Response:
                 innertext=f'{https_codes[status_code]}'
             )
         ]
-        if self.debug:
+        if self.debug and status_code == 500:
             for e in t:
                 if e.startswith('Traceback'):
                     e_boxes.append(
@@ -71,6 +71,6 @@ def error_handler(self, request, status_code, exception) -> Response:
                 style=self.style,
                 childs=e_boxes,
                 selector=f'body_{request.user.id.settings.theme_color}'
-            ),
+            ).render(),
             status_code=status_code
         )

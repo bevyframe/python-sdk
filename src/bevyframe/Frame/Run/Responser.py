@@ -42,6 +42,12 @@ def responser(self, recv, req_time, r):
                             page_script = importlib.util.module_from_spec(page_script_spec)
                             try:
                                 page_script_spec.loader.exec_module(page_script)
+                                if 'whitelist' in page_script.__dict__:
+                                    if r.email not in page_script.whitelist():
+                                        return self.error_handler(r, 401, '')
+                                elif 'blacklist' in page_script.__dict__:
+                                    if r.email in page_script.blacklist():
+                                        return self.error_handler(r, 401, '')
                                 if recv['method'].lower() in page_script.__dict__:
                                     if 'log' in page_script.__dict__:
                                         formatted_log = page_script.log(r, req_time)

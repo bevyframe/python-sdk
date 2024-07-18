@@ -1,5 +1,7 @@
 from bevyframe import *
 
+blacklist = lambda: ["demo@hereus.net"]
+
 
 def get(request: Request) -> (Page, Response):
     if request.email.split('@')[0] == 'Guest':
