@@ -20,11 +20,11 @@ Italic = lambda innertext: Widget(
     innertext=innertext
 )
 
-Link = lambda innertext, url, external=False, **kwargs: Widget(
+Link = lambda innertext, url, external=False, selector=None, **kwargs: Widget(
     'a',
     innertext=innertext,
     href=url,
-    selector=f'link {kwargs['selector'] if 'selector' in kwargs else ""}',
+    selector=f'link {selector if selector else ""}',
     **({'target': '_blank'} if external else {}),
     **kwargs
 )
