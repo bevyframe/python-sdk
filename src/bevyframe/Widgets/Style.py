@@ -1,9 +1,41 @@
+inherit = 'inherit'
+
+
 class Align:
     center = 'center'
     left = 'left'
     right = 'right'
     baseline = 'baseline'
     sub = 'sub'
+
+
+class Cursor:
+    pointer = 'pointer'
+    default = 'default'
+    help = 'help'
+    wait = 'wait'
+    text = 'text'
+    move = 'move'
+    not_allowed = 'not-allowed'
+    grab = 'grab'
+    grabbing = 'grabbing'
+    zoom_in = 'zoom-in'
+    zoom_out = 'zoom-out'
+    crosshair = 'crosshair'
+    e_resize = 'e-resize'
+    n_resize = 'n-resize'
+    ne_resize = 'ne-resize'
+    nw_resize = 'nw-resize'
+    s_resize = 's-resize'
+    se_resize = 'se-resize'
+    sw_resize = 'sw-resize'
+    w_resize = 'w-resize'
+    ew_resize = 'ew-resize'
+    ns_resize = 'ns-resize'
+    nesw_resize = 'nesw-resize'
+    nwse_resize = 'nwse-resize'
+    col_resize = 'col-resize'
+    row_resize = 'row-resize'
 
 
 class Color:

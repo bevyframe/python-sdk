@@ -23,6 +23,8 @@ class Widget:
             border_radius: str = None,
             font_size: str = None,
             vertical_align: str = None,
+            cursor: str = None,
+            text_decoration: str = None,
             **kwargs,
     ):
         self.data = {}
@@ -53,7 +55,9 @@ class Widget:
             for i in k:
                 if i not in ['self', 'item', 'style', 'css', 'data', 'element', 'content', 'margin', 'padding', 'position', 'kwargs']:
                     if locals().get(i, None) is not None:
-                        self.style.update({i.replace('_', '-'): locals()[i]})
+                        self.style.update({
+                            i.replace('_', '-'): f"{'none' if locals()[i] is None else locals()[i]} !important"
+                        })
         for arg in kwargs:
             if arg == 'innertext':
                 self.content = [kwargs['innertext']]
