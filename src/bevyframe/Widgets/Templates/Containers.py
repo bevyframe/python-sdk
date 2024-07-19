@@ -6,25 +6,27 @@ Container = lambda childs, **kwargs: Widget(
     **kwargs
 )
 
-Root = lambda childs, style = None, onclick = None: Container(
+Root = lambda childs, style = None, **kwargs: Container(
     selector='root',
     childs=childs if isinstance(childs, list) else [childs],
     style=style if style else {},
-    onclick=onclick if onclick else ''
+    **kwargs
 )
 
-Box = lambda childs, style = None, onclick = None: Container(
+Box = lambda childs, style = None, onclick = None, **kwargs: Container(
     selector='the_box',
     childs=childs if isinstance(childs, list) else [childs],
     style=style if style else {},
-    onclick=onclick if onclick else ''
+    onclick=onclick if onclick else '',
+    **kwargs
 )
 
-Post = lambda childs, style = None, onclick = None: Container(
+Post = lambda childs, style = None, onclick = None, **kwargs: Container(
     selector='post',
     childs=childs if isinstance(childs, list) else [childs],
     style=style if style else {},
-    onclick=onclick if onclick else ''
+    onclick=onclick if onclick else '',
+    **kwargs
 )
 
 Line = lambda childs, style = None, onclick = None, **kwargs: Widget(

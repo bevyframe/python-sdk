@@ -1,5 +1,6 @@
 from bevyframe.Widgets.Page import Page
 from bevyframe.Widgets.Widget import Widget
+from bevyframe.Widgets.Style import *
 from bevyframe.Helpers.RenderCSS import RenderCSS
 from bevyframe.Widgets.Templates import *
 from bevyframe.Objects.Request import Request
