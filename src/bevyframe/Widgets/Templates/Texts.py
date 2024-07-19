@@ -24,7 +24,7 @@ Link = lambda innertext, url, external=False, **kwargs: Widget(
     'a',
     innertext=innertext,
     href=url,
-    selector='link',
+    selector=f'link {kwargs['selector'] if 'selector' in kwargs else ""}',
     **({'target': '_blank'} if external else {}),
     **kwargs
 )
