@@ -1,37 +1,33 @@
 from bevyframe.Widgets.Widget import Widget
+from bevyframe.Widgets.Style import *
 
-Navbar = lambda childs: Widget(
-    'nav',
-    selector='Navbar',
-    id='navbar',
-    childs=childs
-)
 
-NavIcon = lambda src: Widget(
-    'a',
-    selector='titleicon',
-    childs=[
-        Widget(
-            'img',
-            src=src,
-            height='36px',
-            style={'padding-bottom': '10px'}
-        )
-    ]
-)
+class Navbar(Widget):
+    def __init__(self, childs):
+        super().__init__('nav', selector='Navbar', id='navbar', childs=childs)
 
-NavItem = lambda icon, link, alt, active = False: Widget(
-    'a',
-    selector=('active' if active else 'inactive'),
-    href=link,
-    childs=[
-        Widget('button', childs=[
+
+class NavIcon(Widget):
+    def __init__(self, src):
+        super().__init__('a', selector='titleicon', childs=[
             Widget(
-                'span',
-                selector=f'material-symbols-rounded',
-                innertext=icon,
-                alt=alt
+                'img',
+                src=src,
+                height=Size.pixel(36),
+                padding=Padding(bottom=Size.pixel(10)),
             )
         ])
-    ]
-)
+
+
+class NavItem(Widget):
+    def __init__(self, icon, link, alt, active=False):
+        super().__init__('a', selector=('active' if active else 'inactive'), href=link, childs=[
+            Widget('button', childs=[
+                Widget(
+                    'span',
+                    selector='material-symbols-rounded',
+                    innertext=icon,
+                    alt=alt
+                )
+            ])
+        ])

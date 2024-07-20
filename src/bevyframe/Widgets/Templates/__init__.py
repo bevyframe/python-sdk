@@ -4,4 +4,7 @@ from bevyframe.Widgets.Templates.Texts import *
 from bevyframe.Widgets.Templates.Navbar import *
 from bevyframe.Widgets.Templates.Media import *
 
-Icon = lambda i, **k: Widget('span', selector='material-symbols-rounded', innertext=i, **k)
+
+class Icon(Widget):
+    def __init__(self, i: str, **k):
+        super().__init__('span', selector='material-symbols-rounded', innertext=i, **k)

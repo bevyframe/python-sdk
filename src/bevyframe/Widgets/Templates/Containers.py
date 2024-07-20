@@ -1,38 +1,45 @@
 from bevyframe.Widgets.Widget import Widget
 
-Container = lambda childs, **kwargs: Widget(
-    'div',
-    childs=childs,
-    **kwargs
-)
 
-Root = lambda childs, style = None, **kwargs: Container(
-    selector='root',
-    childs=childs if isinstance(childs, list) else [childs],
-    style=style if style else {},
-    **kwargs
-)
+class Container(Widget):
+    def __init__(self, childs, **kwargs,):
+        super().__init__('div', childs=childs, **kwargs)
 
-Box = lambda childs, style = None, onclick = None, **kwargs: Container(
-    selector='the_box',
-    childs=childs if isinstance(childs, list) else [childs],
-    style=style if style else {},
-    onclick=onclick if onclick else '',
-    **kwargs
-)
 
-Post = lambda childs, style = None, onclick = None, **kwargs: Container(
-    selector='post',
-    childs=childs if isinstance(childs, list) else [childs],
-    style=style if style else {},
-    onclick=onclick if onclick else '',
-    **kwargs
-)
+class Root(Container):
+    def __init__(self, childs, **kwargs):
+        super().__init__(
+            selector='root',
+            childs=childs if isinstance(childs, list) else [childs],
+            **kwargs
+        )
 
-Line = lambda childs, style = None, onclick = None, **kwargs: Widget(
-    'p',
-    childs=childs if isinstance(childs, list) else [childs],
-    style=style if style else {},
-    onclick=onclick if onclick else '',
-    **kwargs
-)
+
+class Box(Container):
+    def __init__(self, childs, onclick=None, **kwargs):
+        super().__init__(
+            selector='the_box',
+            childs=childs if isinstance(childs, list) else [childs],
+            onclick=onclick if onclick else '',
+            **kwargs
+        )
+
+
+class Post(Container):
+    def __init__(self, childs, onclick=None, **kwargs):
+        super().__init__(
+            selector='post',
+            childs=childs if isinstance(childs, list) else [childs],
+            onclick=onclick if onclick else '',
+            **kwargs
+        )
+
+
+class Line(Widget):
+    def __init__(self, childs, onclick=None, **kwargs):
+        super().__init__(
+            'p',
+            childs=childs if isinstance(childs, list) else [childs],
+            onclick=onclick if onclick else '',
+            **kwargs
+        )
