@@ -7,6 +7,7 @@ class Align:
     right = 'right'
     baseline = 'baseline'
     sub = 'sub'
+    text_top = 'text-top'
 
 
 class Cursor:
