@@ -33,7 +33,7 @@ def receiver(self, server_socket: socket.socket):
         recv['credentials'] = get_session(
             self.secret,
             recv['headers']['Cookie'].split('s=')[1].split(';')[0]
-        )
+        ) if 's=' in recv['headers']['Cookie'] else None
     except KeyError:
         pass
     if recv['credentials'] is None:
