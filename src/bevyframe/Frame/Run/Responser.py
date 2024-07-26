@@ -20,7 +20,7 @@ def responser(self, recv, req_time, r):
         in_routes = False
         if recv['path'] in self.routes:
             in_routes = True
-            resp = self.routes[recv['path']]()
+            resp = self.routes[recv['path']](r)
         for rt in self.routes:
             if not in_routes:
                 match, variables = match_routing(rt, recv['path'])
