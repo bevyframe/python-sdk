@@ -1,4 +1,4 @@
-# BevyFrame 0.3 ɑ
+# BevyFrame 0.4 ɑ
 
 Python Web Framework
 
@@ -13,8 +13,8 @@ LuOS
 
 Other
 ```bash
-$ wget https://github.com/islekcaganmert/bevyframe/releases/download/Preview/BevyFrame-0.3.0-py3-none-any.whl
-$ python3 -m pip install ./BevyFrame-0.3.0-py3-none-any.whl
+$ wget https://github.com/islekcaganmert/bevyframe/releases/download/Preview/BevyFrame-0.4.0-py3-none-any.whl
+$ python3 -m pip install ./BevyFrame-0.4.0-py3-none-any.whl
 ```
 ## Features
 
