@@ -127,5 +127,8 @@ def responser(self, recv, req_time, r, default_network):
         )) + '; '
     except TypeError:
         resp.headers['Set-Cookie'] = 's=' + get_session_token(self.secret, email=f'Guest@{default_network}', password='') + '; '
-    DataRoot(r.user, self.package)(r.data)
+    DataRoot(
+        r.user,
+        f"{self.package}{recv['path'].split('/')[1]}" if self.package.endswith('.') else self.package
+    )(r.data)
     return resp

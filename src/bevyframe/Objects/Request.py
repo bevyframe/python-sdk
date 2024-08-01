@@ -24,7 +24,10 @@ class Request:
                 self.user = TheProtocols.ID(self.email, self.password)
             except TheProtocols.CredentialsDidntWorked:
                 self.user = TheProtocols.ID(f'Guest@{app.default_network}', '')
-            self.data = DataRoot(self.user, app.package)()
+            self.data = DataRoot(
+                self.user,
+                f"{app.package}{self.path.split('/')[1]}" if app.package.endswith('.') else app.package
+            )()
         except TypeError:
             pass
         self.app = app
