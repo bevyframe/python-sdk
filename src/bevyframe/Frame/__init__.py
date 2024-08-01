@@ -72,7 +72,7 @@ class Frame:
         try:
             while True:
                 recv, client_socket, req_time, r = receiver(self, server_socket, self.default_network)
-                resp = responser(self, recv, req_time, r)
+                resp = responser(self, recv, req_time, r, self.default_network)
                 sender(self, recv, resp, client_socket)
         except KeyboardInterrupt:
             server_socket.close()

@@ -13,7 +13,7 @@ from bevyframe.Objects.Response import Response
 from bevyframe.Widgets.Page import Page
 
 
-def responser(self, recv, req_time, r):
+def responser(self, recv, req_time, r, default_network):
     resp = None
     # noinspection PyBroadException
     try:
@@ -121,8 +121,11 @@ def responser(self, recv, req_time, r):
     elif isinstance(resp.body, list):
         resp.body = json.dumps(resp.body)
     resp.headers['Content-Length'] = len(resp.body.encode() if isinstance(resp.body, str) else resp.body)
-    resp.headers['Set-Cookie'] = 's=' + get_session_token(self.secret, **(
-        resp.credentials if resp.credentials != {} else recv['credentials']
-    )) + '; '
+    try:
+        resp.headers['Set-Cookie'] = 's=' + get_session_token(self.secret, **(
+            resp.credentials if resp.credentials != {} else recv['credentials']
+        )) + '; '
+    except TypeError:
+        resp.headers['Set-Cookie'] = 's=' + get_session_token(self.secret, email=f'Guest@{default_network}', password='') + '; '
     DataRoot(r.user, self.package)(r.data)
     return resp
