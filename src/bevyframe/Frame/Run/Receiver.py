@@ -56,9 +56,4 @@ def receiver(self, server_socket: socket.socket, default_network: str):
         print(f"{recv['method']} {recv['path']} {recv['protocol']}", end='', flush=True)
     else:
         print('(   ) ' + self.default_logging_str(r, req_time).replace('\n', '').replace('\r', ''), end='', flush=True)
-    if '?' in recv['path']:
-        for i in recv['path'].split('?')[1].split('&'):
-            recv['query'].update({i.split('=')[0]: i.split('=')[1]})
-        # noinspection PyUnresolvedReferences
-        recv['path'] = recv['path'].split('?')[0]
     return recv, client_socket, req_time, r
