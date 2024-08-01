@@ -71,7 +71,7 @@ class Frame:
         server_socket = booting(self, host, port, debug)
         try:
             while True:
-                recv, client_socket, req_time, r = receiver(self, server_socket)
+                recv, client_socket, req_time, r = receiver(self, server_socket, self.default_network)
                 resp = responser(self, recv, req_time, r)
                 sender(self, recv, resp, client_socket)
         except KeyboardInterrupt:

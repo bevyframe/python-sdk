@@ -5,7 +5,7 @@ from bevyframe.Features.Login import get_session
 from bevyframe.Objects.Request import Request
 
 
-def receiver(self, server_socket: socket.socket):
+def receiver(self, server_socket: socket.socket, default_network: str):
     client_socket, client_address = server_socket.accept()
     req_time = datetime.now().strftime('%Y-%M-%d %H:%m:%S')
     raw = client_socket.recv(1024).decode()
@@ -34,6 +34,11 @@ def receiver(self, server_socket: socket.socket):
             self.secret,
             recv['headers']['Cookie'].split('s=')[1].split(';')[0]
         ) if 's=' in recv['headers']['Cookie'] else None
+        if recv['credentials'] is None:
+            recv['credentials'] = {
+                'email': f"Guest@{default_network}",
+                'password': ''
+            }
     except KeyError:
         pass
     if recv['credentials'] is None:

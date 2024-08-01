@@ -11,9 +11,5 @@ def get_session_token(secret, email, password) -> str:
 def get_session(secret, token) -> dict:
     try:
         return jwt.decode(token, secret, algorithms=['HS256'])
-    except jwt.exceptions.InvalidSignatureError:
-        pass
-    except jwt.exceptions.InvalidTokenError:
-        pass
-    except jwt.exceptions.InvalidKeyError:
-        pass
+    except:
+        return None
