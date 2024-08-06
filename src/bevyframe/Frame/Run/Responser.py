@@ -18,18 +18,18 @@ def responser(self, recv, req_time, r: Request, default_network):
     # noinspection PyBroadException
     try:
         in_routes = False
-        if recv['path'] in self.routes:
+        if recv['path'].split('?')[0] in self.routes:
             in_routes = True
-            resp = self.routes[recv['path']](Request(recv, self) if r is None else r)
+            resp = self.routes[recv['path'].split('?')[0]](Request(recv, self) if r is None else r)
         else:
             for rt in self.routes:
                 if not in_routes:
-                    match, variables = match_routing(rt, recv['path'])
+                    match, variables = match_routing(rt, recv['path'].split('?')[0])
                     in_routes = match
                     if in_routes:
                         resp = self.routes[rt](Request(recv, self) if r is None else r, **variables)
             if resp is None:
-                page_script_path = f"./{recv['path']}"
+                page_script_path = f"./{recv['path'].split('?')[0]}"
                 for i in range(0, 3):
                     page_script_path = page_script_path.replace('//', '/')
                 if not os.path.isfile(page_script_path):
