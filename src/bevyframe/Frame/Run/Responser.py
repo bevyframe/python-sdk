@@ -127,7 +127,7 @@ def responser(self, recv, req_time, r: Request, default_network):
             resp.credentials if resp.credentials != {} else recv['credentials']
         )) + '; '
     except TypeError:
-        resp.headers['Set-Cookie'] = 's=' + get_session_token(self.secret, email=f'Guest@{default_network}', password='') + '; '
+        resp.headers['Set-Cookie'] = ''
     if r and r.is_data_assigned:
         DataRoot(
             r.user,
