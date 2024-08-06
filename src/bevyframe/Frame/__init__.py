@@ -24,10 +24,14 @@ class Frame:
             style,
             icon='/favicon.ico',
             keywords=None,
-            default_network='hereus.net'
+            default_network='hereus.net',
+            loginview='Login.py',
+            environment=None
     ) -> None:
         if keywords is None:
             keywords = []
+        self.environment = environment if environment else {}
+        self.loginview = loginview
         self.default_network = default_network
         self.secret = secret
         self.package = package

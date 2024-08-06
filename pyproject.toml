@@ -26,6 +26,9 @@ Changes = "https://github.com/islekcaganmert/bevyframe/commits/master"
 "Issue Tracker" = "https://github.com/islekcaganmert/bevyframe/issues"
 Chat = "https://lemmy.today/c/bevyframe"
 
+[project.scripts]
+bevyframe = "bevyframe:cmdline"
+
 [build-system]
 requires = ["setuptools","wheel"]
 build-backend = "setuptools.build_meta"

@@ -1,4 +1,5 @@
 from bevyframe.Widgets.Page import Page
+from TheProtocols import ID, CredentialsDidntWorked
 
 
 class Response:
@@ -11,7 +12,12 @@ class Response:
             setattr(self, kwarg, others[kwarg])
 
     def login(self, email, password) -> None:
-        self.credentials = {'email': email, 'password': password}
+        try:
+            ID(email, password)
+            self.credentials = {'email': email, 'password': password}
+            return True
+        except CredentialsDidntWorked:
+            return False
 
 
 def redirect(to_url) -> Response:

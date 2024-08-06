@@ -46,8 +46,9 @@ def receiver(self, server_socket: socket.socket, default_network: str):
             'email': 'Guest@hereus.net',
             'password': ''
         }
-    r = Request(recv, self)
+
     if self.default_logging_str is None:
+        r = None
         if recv['credentials']['email'].split('@')[0] == 'Guest':
             print(f"(   ) {client_address[0]} [{req_time}]", end=' ')
         else:
@@ -55,5 +56,6 @@ def receiver(self, server_socket: socket.socket, default_network: str):
                   end=' ')
         print(f"{recv['method']} {recv['path']} {recv['protocol']}", end='', flush=True)
     else:
+        r = Request(recv, self)
         print('(   ) ' + self.default_logging_str(r, req_time).replace('\n', '').replace('\r', ''), end='', flush=True)
     return recv, client_socket, req_time, r

@@ -11,6 +11,9 @@ class Request:
         self.path = data['path'].split('?')[0]
         self.headers = data['headers']
         self.query = {}
+        self.env = app.environment() if callable(app.environment) else app.environment
+        if not isinstance(self.env, dict):
+            self.env = {}
         while data['body'].endswith('\r\n'):
             data['body'] = data['body'].removesuffix('\r\n')
         while data['body'].startswith('\r\n'):
@@ -36,14 +39,8 @@ class Request:
         try:
             self.email = data['credentials']['email']
             self.password = data['credentials']['password']
-            try:
-                self.user = TheProtocols.ID(self.email, self.password)
-            except TheProtocols.CredentialsDidntWorked:
-                self.user = TheProtocols.ID(f'Guest@{app.default_network}', '')
-            self.data = DataRoot(
-                self.user,
-                f"{app.package}{self.path.split('/')[1]}" if app.package.endswith('.') else app.package
-            )()
+            self._user = None
+            self._data = None
         except TypeError:
             pass
         self.app = app
@@ -53,6 +50,27 @@ class Request:
                 if '=' in cookie:
                     self.cookies.update({cookie.split('=')[0]: cookie.split('=')[1]})
 
-    def __getattr__(self, item) -> Any:
-        if item == 'json':
-            return json.loads(self.body)
+    @property
+    def user(self):
+        if self._user is None:
+            try:
+                self._user = TheProtocols.ID(self.email, self.password)
+            except TheProtocols.CredentialsDidntWorked:
+                self._user = TheProtocols.ID(f'Guest@{app.default_network}', '')
+        return self._user
+
+    @property
+    def data(self) -> dict:
+        if self._data is None:
+            self._data = DataRoot(
+                self.user,
+                f"{self.app.package}{self.path.split('/')[1]}" if self.app.package.endswith('.') else self.app.package
+            )()
+        return self._data
+
+    def is_data_assigned(self) -> bool:
+        return self._data is not None
+
+    @property
+    def json(self) -> Any:
+        return json.loads(self.body)

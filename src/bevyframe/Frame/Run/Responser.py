@@ -13,21 +13,21 @@ from bevyframe.Objects.Response import Response
 from bevyframe.Widgets.Page import Page
 
 
-def responser(self, recv, req_time, r, default_network):
+def responser(self, recv, req_time, r: Request, default_network):
     resp = None
     # noinspection PyBroadException
     try:
         in_routes = False
         if recv['path'] in self.routes:
             in_routes = True
-            resp = self.routes[recv['path']](r)
+            resp = self.routes[recv['path']](Request(recv, self) if r is None else r)
         else:
             for rt in self.routes:
                 if not in_routes:
                     match, variables = match_routing(rt, recv['path'])
                     in_routes = match
                     if in_routes:
-                        resp = self.routes[rt](r, **variables)
+                        resp = self.routes[rt](Request(recv, self) if r is None else r, **variables)
             if resp is None:
                 page_script_path = f"./{recv['path']}"
                 for i in range(0, 3):
@@ -36,6 +36,7 @@ def responser(self, recv, req_time, r, default_network):
                     page_script_path += '/__init__.py'
                 if os.path.isfile(page_script_path):
                     if page_script_path.endswith('.py'):
+                        r = (Request(recv, self) if r is None else r)
                         page_script_spec = importlib.util.spec_from_file_location(
                             os.path.splitext(os.path.basename(page_script_path))[0],
                             page_script_path
@@ -85,11 +86,11 @@ def responser(self, recv, req_time, r, default_network):
                                 }
                             )
                 else:
-                    resp = self.error_handler(r, 404, '')
+                    resp = self.error_handler(Request(recv, self) if r is None else r, 404, '')
     except Exception:
-        resp = self.error_handler(r, 500, traceback.format_exc())
+        resp = self.error_handler(Request(recv, self) if r is None else r, 500, traceback.format_exc())
     if resp is None:
-        resp = self.error_handler(r, 404, '')
+        resp = self.error_handler(Request(recv, self) if r is None else r, 404, '')
     if isinstance(resp, Page):
         resp.data['lang'] = ''
         resp.data['charset'] = 'utf-8'
@@ -127,8 +128,9 @@ def responser(self, recv, req_time, r, default_network):
         )) + '; '
     except TypeError:
         resp.headers['Set-Cookie'] = 's=' + get_session_token(self.secret, email=f'Guest@{default_network}', password='') + '; '
-    DataRoot(
-        r.user,
-        f"{self.package}{recv['path'].split('/')[1]}" if self.package.endswith('.') else self.package
-    )(r.data)
+    if r and r.is_data_assigned:
+        DataRoot(
+            r.user,
+            f"{self.package}{recv['path'].split('/')[1]}" if self.package.endswith('.') else self.package
+        )(r.data)
     return resp
