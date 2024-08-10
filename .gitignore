@@ -2,3 +2,4 @@ dist
 src/BevyFrame.egg-info
 build
 .venv
+.idea

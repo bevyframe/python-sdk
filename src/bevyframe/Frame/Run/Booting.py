@@ -2,7 +2,7 @@ import socket
 
 
 def booting(self, host: str, port: int, debug: bool):
-    print('BevyFrame 0.4 ⍺')
+    print('BevyFrame 0.5 ⍺')
     print('Upstream Version, Do Not Use in Production')
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
