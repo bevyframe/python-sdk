@@ -1,11 +1,33 @@
 from bevyframe.Helpers.RenderCSS import RenderCSS
 from bevyframe.Widgets.Style import Margin, Padding, Position
+from bevyframe.Helpers.Exceptions import *
+from bevyframe.Features.Style import compile_style
+
+
+no_content_elements = [
+    "area",
+    "base",
+    "br",
+    "col",
+    "embed",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "param",
+    "source",
+    "track",
+    "wbr"
+]
 
 
 class Widget:
     def __init__(
             self,
             item,
+            innertext: str = None,
+            childs: list = None,
             style: dict = None,
             css: dict = None,
             color: str = None,
@@ -19,52 +41,26 @@ class Widget:
             text_align: str = None,
             margin: (str, Margin) = None,
             padding: (str, Padding) = None,
-            position: Position = None,
+            position: (Position.fixed, Position.sticky, Position.absolute, Position.relative) = None,
             border_radius: str = None,
             font_size: str = None,
             vertical_align: str = None,
             cursor: str = None,
             text_decoration: str = None,
-            **kwargs,
+            **kwargs
     ):
-        self.data = {}
+        self.data = kwargs
         self.element = item
         self.style = {} if style is None else style
-        self.content = ''
+        self.content = []
         if style is None:
-            if css is not None:
-                self.style = css
-            if isinstance(margin, str):
-                self.style.update({'margin': margin})
-            elif isinstance(margin, Margin):
-                for i in ['top', 'right', 'bottom', 'left']:
-                    if getattr(margin, i) is not None:
-                        self.style.update({f'margin-{i}': getattr(margin, i)})
-            if isinstance(padding, str):
-                self.style.update({'padding': padding})
-            elif isinstance(padding, Padding):
-                for i in ['top', 'right', 'bottom', 'left']:
-                    if getattr(padding, i) is not None:
-                        self.style.update({f'padding-{i}': getattr(padding, i)})
-            if position is not None:
-                self.style.update({'position': position.item})
-                for i in ['top', 'right', 'bottom', 'left']:
-                    if getattr(position, i) is not None:
-                        self.style.update({i: getattr(position, i)})
-            k = [i for i in locals().keys()]
-            for i in k:
-                if i not in ['self', 'item', 'style', 'css', 'data', 'element', 'content', 'margin', 'padding', 'position', 'kwargs']:
-                    if locals().get(i, None) is not None:
-                        self.style.update({
-                            i.replace('_', '-'): f"{'none' if locals()[i] is None else locals()[i]} !important"
-                        })
-        for arg in kwargs:
-            if arg == 'innertext':
-                self.content = [kwargs['innertext']]
-            elif arg == 'childs':
-                self.content = kwargs['childs']
-            else:
-                self.data.update({arg: kwargs[arg]})
+            self.style = compile_style(**locals())
+        if innertext is not None:
+            self.content = [innertext]
+        elif childs is not None:
+            self.content = childs
+        elif item not in no_content_elements:
+            raise WidgetContentEmptyError('Widget content is empty')
 
     def render(self):
         gen = f'<{self.element}'
@@ -82,22 +78,7 @@ class Widget:
                     gen += f' {i}'
             else:
                 gen += f' {i}="{self.data[i]}"'
-        if self.element in [
-            "area",
-            "base",
-            "br",
-            "col",
-            "embed",
-            "hr",
-            "img",
-            "input",
-            "link",
-            "meta",
-            "param",
-            "source",
-            "track",
-            "wbr"
-        ]:
+        if self.element in no_content_elements:
             gen += '/>'
         else:
             gen += '>'

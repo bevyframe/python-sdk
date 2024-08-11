@@ -12,6 +12,7 @@ from bevyframe.Frame.Run.Booting import booting
 from bevyframe.Frame.Run.Receiver import receiver
 from bevyframe.Frame.Run.Responser import responser
 from bevyframe.Frame.Run.Sender import sender
+from bevyframe.Features.Style import compile_object as compile_style
 
 
 class Frame:
@@ -38,21 +39,23 @@ class Frame:
         self.debug = False
         self.developer = developer
         self.routes = {}
-        if isinstance(style, dict):
-            self.style = style
-        elif isinstance(style, str):
+        if isinstance(style, str):
             if os.path.isfile(style):
                 self.style = json.load(open(style, 'rb'))
             elif style.startswith('https://'):
                 r = requests.get(style)
                 if r.status_code == 200:
-                    self.style = r.json()
+                    if r.headers['Content-Type'] == 'application/json':
+                        self.style = r.json()
+                    else:
+                        self.style = r.content.decode()
                 else:
                     self.style = {}
             else:
-                self.style = {}
+                self.style = style
         else:
-            self.style = {}
+            self.style = style
+        self.style = compile_style(self.style)
         self.icon = icon
         self.keywords = keywords
         self.default_logging_str = None

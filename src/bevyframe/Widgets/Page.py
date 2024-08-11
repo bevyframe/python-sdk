@@ -1,5 +1,5 @@
 import json
-from bevyframe.Helpers.RenderCSS import RenderCSS
+import bevyframe.Features.Style as Style
 from bevyframe.Widgets.Widget import Widget
 
 
@@ -37,6 +37,10 @@ class Page:
                 self.content = kwargs['childs']
             elif arg == 'style':
                 self.style = kwargs['style']
+            elif arg == 'db':
+                self.db = kwargs['db']
+            elif arg == 'color':
+                self.data.update({'selector': f"body_{kwargs['color']}"})
             else:
                 self.data.update({arg: kwargs[arg]})
 
@@ -52,19 +56,21 @@ class Page:
             og.append(Widget('meta', name=f'og:{i}', content=self.OpenGraph[i]))
         html = '<!DOCTYPE html>'
         html += Widget('html', lang=self.lang, childs=[
-            Widget('head', childs=[
-                                      Widget('meta', charset=self.charset),
-                                      Widget('meta', name='viewport',
-                                             content=f'width={self.viewport["width"]}, initial-scale={self.viewport["initial-scale"]}'),
-                                      Widget('meta', name='description', content=self.description),
-                                      Widget('meta', name='keywords', content=', '.join(self.keywords)),
-                                      Widget('meta', name='author', content=self.author),
-                                      Widget('link', rel='icon', href=self.icon['href'], type=self.icon['type']),
-                                      Widget('title', innertext=self.title)
-                                  ] + og + [
-                                      Widget('script', innertext=f'const bf_db = {json.dumps(self.db)}'),
-                                      Widget('style', innertext=RenderCSS(self.style))
-                                  ]),
+            Widget(
+                'head',
+                childs=[
+                    Widget('meta', charset=self.charset),
+                    Widget('meta', name='viewport', content=f'width={self.viewport["width"]}, initial-scale={self.viewport["initial-scale"]}'),
+                    Widget('meta', name='description', content=self.description),
+                    Widget('meta', name='keywords', content=', '.join(self.keywords)),
+                    Widget('meta', name='author', content=self.author),
+                    Widget('link', rel='icon', href=self.icon['href'], type=self.icon['type']),
+                    Widget('title', innertext=self.title)
+                ] + og + [
+                    Widget('script', innertext=f'const bf_db = {json.dumps(self.db)}'),
+                    Widget('style', innertext=Style.compile_object(self.style))
+                ]
+            ),
             Widget('body', selector=self.selector, childs=self.content)
         ]).render()
         return html

@@ -13,12 +13,12 @@ def get(request: Request) -> Page:
     return Page(
         title='Login - BevyFrame Test App',
         description='BevyFrame Test App',
-        selector='body_blue',
+        color=ColorTheme.blue,
         childs=[
             Form(
                 'POST',
                 childs=[
-                    Line(z)
+                    Line([z])
                     for z in [
                         Textbox(y[0], selector='grey', type=y[1], placeholder=y[2])
                         for y in [

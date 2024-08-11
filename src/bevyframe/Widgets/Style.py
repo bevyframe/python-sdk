@@ -1,4 +1,62 @@
 inherit = 'inherit'
+NoStyle = 'none'
+
+
+class Float:
+    left = 'left'
+    right = 'right'
+    none = 'none'
+
+
+class ColorTheme:
+    blank = "blank"
+    red = "red"
+    orange = "orange"
+    yellow = "yellow"
+    green = "green"
+    blue = "blue"
+    pink = "pink"
+
+
+class Effect:
+    blur = lambda x: f'blur({x}px)'
+    brightness = lambda x: f'brightness({x})'
+    contrast = lambda x: f'contrast({x})'
+    drop_shadow = lambda x, y, blur, color: f'drop-shadow({x}px {y}px {blur}px {color})'
+    grayscale = lambda x: f'grayscale({x})'
+    hue_rotate = lambda x: f'hue-rotate({x}deg)'
+    invert = lambda x: f'invert({x})'
+    opacity = lambda x: f'opacity({x})'
+    saturate = lambda x: f'saturate({x})'
+    sepia = lambda x: f'sepia({x})'
+
+
+class BorderLine:
+    solid = 'solid'
+    dashed = 'dashed'
+    dotted = 'dotted'
+    double = 'double'
+    groove = 'groove'
+    ridge = 'ridge'
+    inset = 'inset'
+    outset = 'outset'
+    hidden = 'hidden'
+
+
+def Border(width, style, color):
+    return f"{width} {style} {color}"
+
+
+class Scroll:
+    smooth = 'smooth'
+    auto = 'auto'
+    hidden = 'hidden'
+
+
+class Visibility:
+    visible = 'visible'
+    hidden = 'hidden'
+    collapse = 'collapse'
 
 
 class Align:
@@ -74,6 +132,16 @@ class FourSided:
         self.left = left
 
 
+class Coordinate:
+    def __init__(self, x=None, y=None):
+        self.x = x
+        self.y = y
+
+
+class Overflow(Coordinate):
+    pass
+
+
 class Margin(FourSided):
     pass
 
@@ -83,6 +151,7 @@ class Padding(FourSided):
 
 
 class Position:
+
     class absolute(FourSided):
         def __init__(self, top=None, right=None, bottom=None, left=None):
             self.item = 'absolute'
