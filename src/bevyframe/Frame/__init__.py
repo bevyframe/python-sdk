@@ -27,10 +27,12 @@ class Frame:
             keywords=None,
             default_network='hereus.net',
             loginview='Login.py',
-            environment=None
+            environment=None,
+            cors=False
     ) -> None:
         if keywords is None:
             keywords = []
+        self.cors = cors
         self.environment = environment if environment else {}
         self.loginview = loginview
         self.default_network = default_network
