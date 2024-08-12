@@ -10,6 +10,7 @@ class Request:
         self.method = data['method']
         self.path = data['path'].split('?')[0]
         self.headers = data['headers']
+        self.ip = data.get('ip', '127.0.0.1')
         self.query = {}
         self.env = app.environment() if callable(app.environment) else app.environment
         if not isinstance(self.env, dict):

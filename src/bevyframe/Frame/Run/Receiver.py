@@ -16,7 +16,8 @@ def receiver(self, server_socket: socket.socket, default_network: str):
         'headers': {},
         'body': '',
         'credentials': None,
-        'query': {}
+        'query': {},
+        'ip': client_address[0]
     }
     for crl in range(len(raw.split('\r'))):
         for lfl in range(len(raw.split('\r')[crl].split('\n'))):
