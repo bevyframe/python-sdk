@@ -17,14 +17,14 @@ class Page:
             'keywords': [],
             'author': '',
             'icon': {
-                'href': '/Static/favicon.ico',
+                'href': '/favicon.ico',
                 'type': 'image/x-icon'
             },
             'title': 'WebApp',
             'OpenGraph': {
                 'title': 'WebApp',
                 'description': 'BevyFrame App',
-                'image': '/Static/Banner.png',
+                'image': '/Banner.png',
                 'url': '',
                 'type': 'website'
             },

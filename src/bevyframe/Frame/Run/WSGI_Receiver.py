@@ -1,34 +1,24 @@
-import socket
 from datetime import datetime
 from bevyframe.Features.Login import get_session
 from bevyframe.Objects.Request import Request
 
 
-def receiver(self, server_socket: socket.socket):
-    client_socket, client_address = server_socket.accept()
+def wsgi_receiver(self, environ):
     req_time = datetime.now().strftime('%Y-%M-%d %H:%m:%S')
-    raw = client_socket.recv(1024).decode()
     recv = {
-        'method': '',
-        'path': '',
-        'protocol': '',
+        'method': environ['REQUEST_METHOD'],
+        'path': environ['PATH_INFO'],
+        'protocol': environ['SERVER_PROTOCOL'],
         'headers': {},
-        'body': '',
+        'body': environ['wsgi.input'].read().decode(),
         'credentials': None,
         'query': {},
-        'ip': client_address[0]
+        'ip': environ['REMOTE_ADDR']
     }
-    for crl in range(len(raw.split('\r'))):
-        for lfl in range(len(raw.split('\r')[crl].split('\n'))):
-            line = raw.split('\r')[crl].split('\n')[lfl]
-            if crl == lfl == 0:
-                recv['method'], recv['path'], recv['protocol'] = line.split(' ')
-            else:
-                if ': ' in line:
-                    recv['headers'].update({line.split(': ')[0]: line.split(': ')[1]})
-                else:
-                    recv['body'] += (line + '\r\n')
-    recv['path'] = '/'.join([('' if i == '..' else i) for i in recv['path'].split('/')])
+    for header in environ:
+        if header.startswith('HTTP_'):
+            key = header[5:].removeprefix('HTTP_').replace('_', '-').title()
+            recv['headers'].update({key: environ[header]})
     try:
         recv['credentials'] = get_session(
             self.secret,
@@ -50,12 +40,13 @@ def receiver(self, server_socket: socket.socket):
     if self.default_logging_str is None:
         r = None
         if recv['credentials']['email'].split('@')[0] == 'Guest':
-            print(f"(   ) {client_address[0]} [{req_time}]", end=' ')
+            print(f"(   ) {recv['ip']} [{req_time}]", end=' ')
         else:
             print(f"\r(   ) {recv['credentials']['email']} [{req_time}]",
                   end=' ')
         print(f"{recv['method']} {recv['path']} {recv['protocol']}", end='', flush=True)
     else:
         r = Request(recv, self)
-        print('(   ) ' + self.default_logging_str(r, req_time).replace('\n', '').replace('\r', ''), end='', flush=True)
-    return recv, client_socket, req_time, r
+        print('WSGI: ' + self.default_logging_str(r, req_time).replace('\n', '').replace('\r', ''), end='', flush=True)
+
+    return recv, req_time, None

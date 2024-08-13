@@ -13,6 +13,7 @@ from bevyframe.Helpers.MatchRouting import match_routing
 from bevyframe.Objects.Request import Request
 from bevyframe.Objects.Response import Response
 from bevyframe.Widgets.Page import Page
+from bevyframe.Features.Style import compile_object as compile_to_css
 
 
 def responser(self, recv, req_time, r: Request, default_network):
@@ -97,26 +98,16 @@ def responser(self, recv, req_time, r: Request, default_network):
     if resp is None:
         resp = self.error_handler(Request(recv, self) if r is None else r, 404, '')
     if isinstance(resp, Page):
-        resp.data['lang'] = '' if 'lang' not in resp.data else resp.data['lang']
-        resp.data['charset'] = 'utf-8' if 'charset' not in resp.data else resp.data['charset']
-        resp.data['viewport'] = {
-            'width': 'device-width',
-            'initial-scale': '1.0'
-        } if 'viewport' not in resp.data else resp.data['viewport']
-        resp.data['keywords'] = self.keywords if 'keywords' not in resp.data else resp.data['keywords']
-        resp.data['author'] = self.developer if 'author' not in resp.data else resp.data['author']
+        resp.data['keywords'] = self.keywords if resp.data['keywords'] == [] else resp.data['keywords']
+        resp.data['author'] = self.developer if resp.data['author'] == '' else resp.data['author']
         resp.data['icon'] = {
             'href': self.icon,
             'type': mime_types[self.icon.split('.')[-1]]
-        } if 'icon' not in resp.data else resp.data['icon']
-        resp.data['OpenGraph'] = {
-            'title': 'WebApp',
-            'description': 'BevyFrame App',
-            'image': '/Static/Banner.png',
-            'url': '',
-            'type': 'website'
-        } if 'OpenGraph' not in resp.data else resp.data['OpenGraph']
-        resp.style = self.style if resp.style in [None, {}] else resp.style
+        } if resp.data['icon'] == {
+            'href': '/favicon.ico',
+            'type': 'image/x-icon'
+        } else resp.data['icon']
+        resp.style = self.style + compile_to_css(self.style)
     if not isinstance(resp, Response):
         resp = Response(resp)
     if isinstance(resp.body, Page):

@@ -13,7 +13,7 @@ def get(request: Request) -> Page:
     return Page(
         title='Login - BevyFrame Test App',
         description='BevyFrame Test App',
-        color=ColorTheme.blue,
+        color=Theme.blue,
         childs=[
             Form(
                 'POST',

@@ -8,7 +8,7 @@ class Float:
     none = 'none'
 
 
-class ColorTheme:
+class Theme:
     blank = "blank"
     red = "red"
     orange = "orange"

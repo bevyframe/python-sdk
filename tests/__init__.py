@@ -9,7 +9,7 @@ def get(request: Request) -> (Page, Response):
     return Page(
         title='BevyFrame Test App',
         description='BevyFrame Test App',
-        selector=f'body_{request.user.id.settings.theme_color}',
+        color=request.user.id.settings.theme_color,
         childs=[
             Title(f'Hello, {request.user.id.name} {request.user.id.surname} from {request.user.network}!'),
             Box(

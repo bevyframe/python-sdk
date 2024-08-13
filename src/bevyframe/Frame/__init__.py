@@ -12,7 +12,9 @@ from bevyframe.Frame.Run.Booting import booting
 from bevyframe.Frame.Run.Receiver import receiver
 from bevyframe.Frame.Run.Responser import responser
 from bevyframe.Frame.Run.Sender import sender
+from bevyframe.Frame.Run.WSGI_Receiver import wsgi_receiver
 from bevyframe.Features.Style import compile_object as compile_style
+from bevyframe.Helpers.Identifiers import https_codes
 
 
 class Frame:
@@ -80,9 +82,16 @@ class Frame:
         server_socket = booting(self, host, port, debug)
         try:
             while True:
-                recv, client_socket, req_time, r = receiver(self, server_socket, self.default_network)
+                recv, client_socket, req_time, r = receiver(self, server_socket)
                 resp = responser(self, recv, req_time, r, self.default_network)
                 sender(self, recv, resp, client_socket)
         except KeyboardInterrupt:
             server_socket.close()
             print('\r  \nServer was been terminated!\n')
+
+    def __call__(self, environ, start_response):
+        recv, req_time, r = wsgi_receiver(self, environ)
+        resp = responser(self, recv, req_time, r, self.default_network)
+        start_response(f"{resp.status_code} {https_codes[resp.status_code].upper()}", [(str(i), str(resp.headers[i])) for i in resp.headers])
+        print(f'\r({resp.status_code})')
+        return [resp.body.encode()]

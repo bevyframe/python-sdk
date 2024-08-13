@@ -27,7 +27,7 @@ def index(request: Request, email) -> Page:
     return Page(
         title='',
         description='',
-        selector=f'body_{request.user.id.settings.theme_color}',
+        color=request.user.id.settings.theme_color,
         childs=[
             Title(f"{u.name} {u.surname}")
         ]
