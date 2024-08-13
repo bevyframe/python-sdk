@@ -9,7 +9,9 @@ app = Frame(
     secret='5d9547e68c469b5e4b97b273e760',  # secrets.token_hex(secrets.randbits(4))
     style=hereus_ui_3_2,
     icon='/favicon.png',
-    keywords=['Test']
+    keywords=['Test'],
+    loginview='login.py',
+    did='did:plc:demo'
 )
 
 

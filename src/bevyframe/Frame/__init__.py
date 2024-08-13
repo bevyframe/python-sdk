@@ -30,7 +30,8 @@ class Frame:
             default_network='hereus.net',
             loginview='Login.py',
             environment=None,
-            cors=False
+            cors=False,
+            did=None
     ) -> None:
         if keywords is None:
             keywords = []
@@ -63,6 +64,8 @@ class Frame:
         self.icon = icon
         self.keywords = keywords
         self.default_logging_str = None
+        if did:
+            self.route('/.well-known/atproto-did')(lambda request: Response(body=did, content_type='plain/text'))
         if administrator:
             self.admin = TheProtocols.ID(administrator, getpass.getpass(f'Password for {administrator}: '))
             print()
