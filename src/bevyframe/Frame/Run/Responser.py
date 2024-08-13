@@ -4,6 +4,7 @@ import os
 import traceback
 import importlib.metadata
 from datetime import datetime, UTC
+import jinja2
 
 from TheProtocols.Data import DataRoot
 
@@ -16,7 +17,7 @@ from bevyframe.Widgets.Page import Page
 from bevyframe.Features.Style import compile_object as compile_to_css
 
 
-def responser(self, recv, req_time, r: Request, default_network):
+def responser(self, recv, req_time, r: Request):
     resp = None
     if recv['method'].lower() == 'options':
         resp = Response('', status_code=204)
@@ -42,7 +43,6 @@ def responser(self, recv, req_time, r: Request, default_network):
                         page_script_path += '/__init__.py'
                     if os.path.isfile(page_script_path):
                         if page_script_path.endswith('.py'):
-                            r = (r)
                             page_script_spec = importlib.util.spec_from_file_location(
                                 os.path.splitext(os.path.basename(page_script_path))[0],
                                 page_script_path
@@ -80,17 +80,28 @@ def responser(self, recv, req_time, r: Request, default_network):
                                 resp = self.error_handler(r, 404, '')
                         else:
                             with open(page_script_path, 'rb') as f:
-                                resp = Response(
-                                    (f.read().decode() if page_script_path.endswith('.html') else f.read()),
-                                    headers={
-                                        'Content-Type': mime_types.get(
-                                            page_script_path.split('.')[-1],
-                                            'application/octet-stream'
-                                        ),
-                                        'Content-Length': len(f.read()),
-                                        'Connection': 'keep-alive'
-                                    }
-                                )
+                                if page_script_path.endswith('.html'):
+                                    body = jinja2.Template(f.read().decode()).render(request=r, style=f"<style>{self.style}</style>")
+                                    resp = Response(
+                                        body,
+                                        headers={
+                                            'Content-Type': 'text/html',
+                                            'Content-Length': len(body),
+                                            'Connection': 'keep-alive'
+                                        }
+                                    )
+                                else:
+                                    resp = Response(
+                                        f.read(),
+                                        headers={
+                                            'Content-Type': mime_types.get(
+                                                page_script_path.split('.')[-1],
+                                                'application/octet-stream'
+                                            ),
+                                            'Content-Length': len(f.read()),
+                                            'Connection': 'keep-alive'
+                                        }
+                                    )
                     else:
                         resp = self.error_handler(r, 404, '')
         except Exception:

@@ -9,15 +9,4 @@ def post(r: Request) -> Page:
 def get(r: Request) -> Page:
     if 'value' not in r.data.keys():
         r.data = {'value': 'Hello, World!'}
-    return Page(
-        title='Data',
-        color=r.user.id.settings.theme_color,
-        childs=[
-            Form(
-                method='POST',
-                childs=[
-                    Textbox('entry', value=r.data.get('value')),
-                ]
-            )
-        ]
-    )
+    return r.render_template('data.html', value=r.data['value'])

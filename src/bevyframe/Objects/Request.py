@@ -3,6 +3,7 @@ import TheProtocols
 from TheProtocols.Data import DataRoot
 from typing import Any
 import json
+import jinja2
 
 
 class Request:
@@ -71,6 +72,10 @@ class Request:
         self._data = data
 
     data = property(get_data, set_data)
+
+    def render_template(self, template: str, **kwargs) -> str:
+        with open(template.removeprefix('/')) as f:
+            return jinja2.Template(f.read()).render(request=self, style=f"<style>{self.app.style}</style>", **kwargs)
 
     @property
     def json(self) -> Any:

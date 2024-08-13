@@ -86,7 +86,7 @@ class Frame:
         try:
             while True:
                 recv, client_socket, req_time, r = receiver(self, server_socket)
-                resp = responser(self, recv, req_time, r, self.default_network)
+                resp = responser(self, recv, req_time, r)
                 sender(self, recv, resp, client_socket)
         except KeyboardInterrupt:
             server_socket.close()
@@ -96,7 +96,7 @@ class Frame:
         debug_ = self.debug
         self.debug = False
         recv, req_time, r = wsgi_receiver(self, environ)
-        resp = responser(self, recv, req_time, r, self.default_network)
+        resp = responser(self, recv, req_time, r)
         start_response(f"{resp.status_code} {https_codes[resp.status_code].upper()}", [(str(i), str(resp.headers[i])) for i in resp.headers])
         print(f'\r({resp.status_code})')
         self.debug = debug_
