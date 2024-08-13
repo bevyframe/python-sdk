@@ -7,10 +7,11 @@ def post(r: Request) -> Page:
 
 
 def get(r: Request) -> Page:
-    if 'value' not in r.data:
+    if 'value' not in r.data.keys():
         r.data = {'value': 'Hello, World!'}
     return Page(
         title='Data',
+        color=r.user.id.settings.theme_color,
         childs=[
             Form(
                 method='POST',

@@ -41,6 +41,7 @@ class Request:
         self.password = data['credentials']['password']
         self._user = None
         self._data = None
+        self.is_data_assigned = False
         self.app = app
         self.cookies = {}
         if 'Cookie' in self.headers:
@@ -57,8 +58,7 @@ class Request:
                 self._user = TheProtocols.ID(f'Guest@{self.app.default_network}', '')
         return self._user
 
-    @property
-    def data(self) -> dict:
+    def get_data(self) -> dict:
         if self._data is None:
             self._data = DataRoot(
                 self.user,
@@ -67,10 +67,10 @@ class Request:
         return self._data
 
     def set_data(self, data: dict) -> None:
+        self.is_data_assigned = True
         self._data = data
 
-    def is_data_assigned(self) -> bool:
-        return self._data is not None
+    data = property(get_data, set_data)
 
     @property
     def json(self) -> Any:

@@ -3,9 +3,8 @@ from bevyframe import *
 blacklist = lambda: ["demo@hereus.net"]
 
 
+@login_required
 def get(request: Request) -> (Page, Response):
-    if request.email.split('@')[0] == 'Guest':
-        return redirect('/login.py')
     return Page(
         title='BevyFrame Test App',
         description='BevyFrame Test App',
