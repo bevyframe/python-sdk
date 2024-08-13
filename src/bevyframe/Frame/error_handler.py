@@ -70,7 +70,7 @@ def error_handler(self, request, status_code, exception) -> Response:
                 title=https_codes[status_code],
                 style=self.style,
                 childs=e_boxes,
-                selector=f'body_{request.user.id.settings.theme_color}'
+                color=request.user.id.settings.theme_color
             ).render(),
             status_code=status_code
         )

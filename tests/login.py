@@ -34,10 +34,8 @@ def get(request: Request) -> Page:
 
 def post(request: Request) -> Response:
     resp = redirect('/')
-    try:
-        ID(request.form['email'], request.form['password'])
-        resp.login(request.form['email'], request.form['password'])
+    if resp.login(request.form['email'], request.form['password']):
         print(', success', end='', flush=True)
-    except CredentialsDidntWorked:
+    else:
         print(', failed', end='', flush=True)
     return resp

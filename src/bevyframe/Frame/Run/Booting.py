@@ -4,7 +4,7 @@ import importlib.metadata
 
 def booting(self, host: str, port: int, debug: bool):
     print(f"BevyFrame {importlib.metadata.version('bevyframe')} ⍺")
-    print('Development server, do not use in production deployment!')
+    print('Development server, do not use in production deployment')
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     print(f" * Serving BevyFrame app '{self.package}'")

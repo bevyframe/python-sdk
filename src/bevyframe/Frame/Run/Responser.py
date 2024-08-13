@@ -26,14 +26,14 @@ def responser(self, recv, req_time, r: Request, default_network):
             in_routes = False
             if recv['path'].split('?')[0] in self.routes:
                 in_routes = True
-                resp = self.routes[recv['path'].split('?')[0]](Request(recv, self) if r is None else r)
+                resp = self.routes[recv['path'].split('?')[0]](r)
             else:
                 for rt in self.routes:
                     if not in_routes:
                         match, variables = match_routing(rt, recv['path'].split('?')[0])
                         in_routes = match
                         if in_routes:
-                            resp = self.routes[rt](Request(recv, self) if r is None else r, **variables)
+                            resp = self.routes[rt](r, **variables)
                 if resp is None:
                     page_script_path = f"./{recv['path'].split('?')[0]}"
                     for i in range(0, 3):
@@ -42,7 +42,7 @@ def responser(self, recv, req_time, r: Request, default_network):
                         page_script_path += '/__init__.py'
                     if os.path.isfile(page_script_path):
                         if page_script_path.endswith('.py'):
-                            r = (Request(recv, self) if r is None else r)
+                            r = (r)
                             page_script_spec = importlib.util.spec_from_file_location(
                                 os.path.splitext(os.path.basename(page_script_path))[0],
                                 page_script_path
@@ -92,11 +92,11 @@ def responser(self, recv, req_time, r: Request, default_network):
                                     }
                                 )
                     else:
-                        resp = self.error_handler(Request(recv, self) if r is None else r, 404, '')
+                        resp = self.error_handler(r, 404, '')
         except Exception:
-            resp = self.error_handler(Request(recv, self) if r is None else r, 500, traceback.format_exc())
+            resp = self.error_handler(r, 500, traceback.format_exc())
     if resp is None:
-        resp = self.error_handler(Request(recv, self) if r is None else r, 404, '')
+        resp = self.error_handler(r, 404, '')
     if isinstance(resp, Page):
         resp.data['keywords'] = self.keywords if resp.data['keywords'] == [] else resp.data['keywords']
         resp.data['author'] = self.developer if resp.data['author'] == '' else resp.data['author']

@@ -6,7 +6,7 @@ import json
 
 
 class Request:
-    def __init__(self, data: dict[str], app) -> None:
+    def __init__(self, data: dict, app) -> None:
         self.method = data['method']
         self.path = data['path'].split('?')[0]
         self.headers = data['headers']
@@ -37,13 +37,10 @@ class Request:
                     self.query.update({
                         urllib.parse.unquote(i): True
                     })
-        try:
-            self.email = data['credentials']['email']
-            self.password = data['credentials']['password']
-            self._user = None
-            self._data = None
-        except TypeError:
-            pass
+        self.email = data['credentials']['email']
+        self.password = data['credentials']['password']
+        self._user = None
+        self._data = None
         self.app = app
         self.cookies = {}
         if 'Cookie' in self.headers:
@@ -57,7 +54,7 @@ class Request:
             try:
                 self._user = TheProtocols.ID(self.email, self.password)
             except TheProtocols.CredentialsDidntWorked:
-                self._user = TheProtocols.ID(f'Guest@{app.default_network}', '')
+                self._user = TheProtocols.ID(f'Guest@{self.app.default_network}', '')
         return self._user
 
     @property
@@ -68,6 +65,9 @@ class Request:
                 f"{self.app.package}{self.path.split('/')[1]}" if self.app.package.endswith('.') else self.app.package
             )()
         return self._data
+
+    def set_data(self, data: dict) -> None:
+        self._data = data
 
     def is_data_assigned(self) -> bool:
         return self._data is not None
