@@ -15,6 +15,7 @@ from bevyframe.Frame.Run.Sender import sender
 from bevyframe.Frame.Run.WSGI_Receiver import wsgi_receiver
 from bevyframe.Features.Style import compile_object as compile_style
 from bevyframe.Helpers.Identifiers import https_codes
+from bevyframe.Features.Database import Database
 
 
 class Frame:
@@ -64,6 +65,7 @@ class Frame:
         self.icon = icon
         self.keywords = keywords
         self.default_logging_str = None
+        self.db: (Database, None) = None
         if did:
             self.route('/.well-known/atproto-did')(lambda request: Response(body=did, content_type='plain/text'))
         if administrator:
@@ -81,7 +83,7 @@ class Frame:
     def default_logging(self, func):
         return default_logging(self, func)
 
-    def run(self, host: str = '127.0.0.1', port: int = 5000, debug: bool = True):
+    def run(self, host: str = '127.0.0.1', port: int = 5000, debug: bool = False):
         server_socket = booting(self, host, port, debug)
         try:
             while True:

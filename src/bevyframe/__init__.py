@@ -8,3 +8,4 @@ from bevyframe.Objects.Response import Response, redirect
 from bevyframe.Features.Login import login_required
 from bevyframe.Frame import Frame
 from bevyframe.cmdline import cmdline
+from bevyframe.Features.Database import Database, DataTypes

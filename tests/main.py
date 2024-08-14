@@ -1,5 +1,6 @@
 from bevyframe import *
 from TheProtocols import User
+from datetime import datetime, UTC
 import hereus_ui_3_2
 
 app = Frame(
@@ -13,10 +14,31 @@ app = Frame(
     loginview='login.py',
     did='did:plc:demo'
 )
+Database(app, 'sqlite:///test.db')
+
+
+class Test(app.db.Model):
+    __tablename__ = 'test'
+    id = DataTypes.Column(DataTypes.Integer, primary_key=True)
+    email = DataTypes.Column(DataTypes.String)
+    ip = DataTypes.Column(DataTypes.String)
+    when = DataTypes.Column(DataTypes.Datetime)
+
+
+# Shared to all scripts
+app.environment = {
+    'database': {
+        'tables': {
+            'test': Test
+        }
+    }
+}
 
 
 @app.default_logging
 def log(r: Request, time: str) -> str:
+    app.db.add(Test(email=r.email, ip=r.ip, when=datetime.now(UTC)))
+    app.db.commit()
     u = r.email
     if u.split('@')[0] == 'Guest':
         u = r.ip
@@ -37,4 +59,5 @@ def index(request: Request, email) -> Page:
 
 
 if __name__ == '__main__':
-    app.run('0.0.0.0', 80, True)
+    app.db.create_all()
+    app.run('0.0.0.0', 80, debug=True)
