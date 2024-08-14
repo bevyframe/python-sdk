@@ -9,6 +9,7 @@ import jinja2
 from TheProtocols.Data import DataRoot
 
 from bevyframe.Features.Login import get_session_token
+from bevyframe.Helpers.Exceptions import Error404
 from bevyframe.Helpers.Identifiers import mime_types
 from bevyframe.Helpers.MatchRouting import match_routing
 from bevyframe.Objects.Request import Request
@@ -102,8 +103,8 @@ def responser(self, recv, req_time, r: Request):
                                             'Connection': 'keep-alive'
                                         }
                                     )
-                    else:
-                        resp = self.error_handler(r, 404, '')
+        except Error404:
+            resp = self.error_handler(r, 404, '')
         except Exception:
             resp = self.error_handler(r, 500, traceback.format_exc())
     if resp is None:

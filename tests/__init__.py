@@ -5,7 +5,10 @@ blacklist = lambda: ["demo@hereus.net"]
 
 @login_required
 def get(request: Request) -> (Page, Response):
-    last_ip = request.app.db.query(request.env['database']['tables']['test']).filter_by(email=request.email).first().ip
+    last_ip_query = request.app.db.query(request.env['database']['tables']['test']).filter_by(email=request.email).all()
+    if len(last_ip_query) == 0:
+        raise Error404
+    last_ip = last_ip_query[-1].ip
     return Page(
         title='BevyFrame Test App',
         description='BevyFrame Test App',
