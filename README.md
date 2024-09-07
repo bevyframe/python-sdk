@@ -57,11 +57,11 @@ pip install https://github.com/islekcaganmert/bevyframe/releases/download/0.5/Be
 <small>*now included in LuOS developer tools</small>
 
 ## Links
-- Documentation: *Soon*
+- Documentation: https://bevyframe.islekcaganmert.me/
 - Source Code: https://github.com/islekcaganmert/bevyframe
 - Issue Tracker: https://github.com/islekcaganmert/bevyframe/issues
 - Fediverse Tag: [#bevyframe](https://mastodon.social/tags/bevyframe)
 - X Hashtag: [#bevyframe](https://x.com/search?q=%23bevyframe)
-- Lemmy: [!bevyframe@lemmy.today](https://lemmy.today/c/bevyframe)
 - Reddit: [r/bevyframe](https://www.reddit.com/r/bevyframe)
+- Lemmy: [!bevyframe@lemmy.today](https://lemmy.today/c/bevyframe)
 - Discord: *Soon*

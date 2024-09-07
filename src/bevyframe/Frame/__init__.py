@@ -52,8 +52,7 @@ class Frame:
         self.tp_token = None
         self.tp = TheProtocols(
             package,
-            permissions,
-            secure=False
+            permissions
         )
         if isinstance(style, str):
             if os.path.isfile(style):
