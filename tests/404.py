@@ -1,7 +1,7 @@
 from bevyframe import *
 
 
-def get(r: Request) -> Page:
+def get(_: Context) -> Page:
     return Page(
         title='BevyFrame Test App',
         description='BevyFrame Test App',

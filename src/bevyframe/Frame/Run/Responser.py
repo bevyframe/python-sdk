@@ -5,29 +5,25 @@ import traceback
 import importlib.metadata
 from datetime import datetime, UTC
 import jinja2
-
-from TheProtocols.Data import DataRoot
-
 from bevyframe.Features.Login import get_session_token
 from bevyframe.Helpers.Exceptions import Error404
 from bevyframe.Helpers.Identifiers import mime_types
 from bevyframe.Helpers.MatchRouting import match_routing
-from bevyframe.Objects.Request import Request
+from bevyframe.Objects.Context import Context
 from bevyframe.Objects.Response import Response
 from bevyframe.Widgets.Page import Page
 from bevyframe.Features.Style import compile_object as compile_to_css
 
 
-def responser(self, recv, req_time, r: Request):
+def responser(self, recv, req_time, r: Context, display_status_code: int):
     resp = None
     if recv['method'].lower() == 'options':
-        resp = Response('', status_code=204)
+        resp = r.create_response(status_code=204)
     else:
         # noinspection PyBroadException
         try:
             in_routes = False
             if recv['path'].split('?')[0] in self.routes:
-                in_routes = True
                 resp = self.routes[recv['path'].split('?')[0]](r)
             else:
                 for rt in self.routes:
@@ -53,23 +49,18 @@ def responser(self, recv, req_time, r: Request):
                                 page_script_spec.loader.exec_module(page_script)
                                 if 'whitelist' in page_script.__dict__:
                                     if r.email not in page_script.whitelist():
-                                        return self.error_handler(r, 401, '')
+                                        return self.error_handler(r, 401, ''), True
                                 elif 'blacklist' in page_script.__dict__:
                                     if r.email in page_script.blacklist():
-                                        return self.error_handler(r, 401, '')
+                                        return self.error_handler(r, 401, ''), True
                                 if recv['method'].lower() in page_script.__dict__:
                                     if 'log' in page_script.__dict__:
                                         formatted_log = page_script.log(r, req_time)
                                         if formatted_log is not None:
-                                            print(f'\r(   ) ', end='', flush=True)
-                                            print(
-                                                '                   ' if r.email.split('@')[0] == 'Guest' else
-                                                ''.join([' ' for i in range(len(r.email))])
-                                            , end='', flush=True)
-                                            print('                       ', end='', flush=True)
-                                            print(''.join([' ' for i in range(len(r.method))]), end='', flush=True)
-                                            print(''.join([' ' for i in range(len(r.path))]), end='', flush=True)
-                                            print('        ', end='', flush=True)
+                                            if isinstance(formatted_log, tuple):
+                                                display_status_code = formatted_log[1]
+                                                formatted_log = formatted_log[0]
+                                            print('\r' + ''.join([' ' for i in range(len(recv['log']))]), end='', flush=True)
                                             print(f'\r(   ) ', end='', flush=True)
                                             print(
                                                 formatted_log.replace('\n', '').replace('\r', '')
@@ -83,7 +74,7 @@ def responser(self, recv, req_time, r: Request):
                             with open(page_script_path, 'rb') as f:
                                 if page_script_path.endswith('.html'):
                                     body = jinja2.Template(f.read().decode()).render(request=r, style=f"<style>{self.style}</style>")
-                                    resp = Response(
+                                    resp = r.create_response(
                                         body,
                                         headers={
                                             'Content-Type': 'text/html',
@@ -92,7 +83,7 @@ def responser(self, recv, req_time, r: Request):
                                         }
                                     )
                                 else:
-                                    resp = Response(
+                                    resp = r.create_response(
                                         f.read(),
                                         headers={
                                             'Content-Type': mime_types.get(
@@ -119,9 +110,9 @@ def responser(self, recv, req_time, r: Request):
             'href': '/favicon.ico',
             'type': 'image/x-icon'
         } else resp.data['icon']
-        resp.style = self.style + compile_to_css(self.style)
+        resp.style = self.style + compile_to_css(resp.style)
     if not isinstance(resp, Response):
-        resp = Response(resp)
+        resp = r.create_response(resp)
     if isinstance(resp.body, Page):
         resp.body = resp.body.render()
     elif isinstance(resp.body, dict):
@@ -138,14 +129,12 @@ def responser(self, recv, req_time, r: Request):
     resp.headers['Connection'] = 'Keep-Alive'
     resp.headers['Date'] = datetime.now(UTC).strftime('%a, %d %b %Y %H:%M:%S GMT')
     try:
-        resp.headers['Set-Cookie'] = 's=' + get_session_token(self.secret, **(
-            resp.credentials if resp.credentials != {} else recv['credentials']
-        )) + '; '
+        if resp.credentials['email'] != r.email or resp.credentials['token'] != r.token:
+            resp.headers['Set-Cookie'] = 's=' + get_session_token(self.secret, **resp.credentials) + '; secure; '
     except TypeError:
-        resp.headers['Set-Cookie'] = ''
+        pass
     if r and r.is_data_assigned:
-        DataRoot(
-            r.user,
-            f"{self.package}{recv['path'].split('/')[1]}" if self.package.endswith('.') else self.package
-        )(r.data)
-    return resp
+        r.tp.data(r.data)
+    if r and r.is_preferences_assigned:
+        r.tp.preferences(r.data)
+    return resp, display_status_code

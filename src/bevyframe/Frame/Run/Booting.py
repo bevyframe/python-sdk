@@ -10,7 +10,7 @@ def booting(self, host: str, port: int, debug: bool):
     print(f" * Serving BevyFrame app '{self.package}'")
     if debug or self.debug:
         self.debug = True
-    print(f" * Debug mode: {'on' if self.debug else 'off'}")
+    print(f" * Mode: {'debug' if self.debug else 'test'}")
     server_socket.bind((host, port))
     server_socket.listen(1)
     # noinspection HttpUrlsUsage

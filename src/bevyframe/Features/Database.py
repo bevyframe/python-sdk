@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, Column as Col, Integer as Int, String as Str, DateTime as Dt, Boolean as Bool
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, query
 
 
 class DataTypes:
@@ -28,7 +28,7 @@ class Database:
     def commit(self):
         self.__session.commit()
 
-    def query(self, model):
+    def query(self, model) -> query.Query[object]:
         return self.__session.query(model)
 
     @property

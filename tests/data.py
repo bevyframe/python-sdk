@@ -1,12 +1,12 @@
 from bevyframe import *
 
 
-def post(r: Request) -> Page:
-    r.data['value'] = r.form['entry']
-    return get(r)
+def post(context: Context) -> str:
+    context.data['value'] = context.form['entry']
+    return get(context)
 
 
-def get(r: Request) -> Page:
-    if 'value' not in r.data.keys():
-        r.data = {'value': 'Hello, World!'}
-    return r.render_template('data.html', value=r.data['value'])
+def get(context: Context) -> str:
+    if 'value' not in context.data.keys():
+        context.data = {'value': 'Hello, World!'}
+    return context.render_template('data.html', value=context.data['value'])

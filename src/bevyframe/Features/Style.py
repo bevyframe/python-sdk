@@ -124,11 +124,11 @@ def compiler_bridge(c: str, source: dict, d: dict, light_theme: dict, dark_theme
                             q = z[k].__dict__
                             kwargs = {g: q[g] for g in q if not g.startswith('__')}
                             for o in ['background_color', 'color']:
-                                for l in ['active', 'inactive']:
-                                    if f'{l}_item_{o}' in kwargs and j == 'Navbar':
-                                        if f'nav.Navbar a.{l} button' not in d:
-                                            d[f'nav.Navbar a.{l} button'] = {}
-                                        d[f'nav.Navbar a.{l} button' + (' font' if 'b' not in o else '')][o] = kwargs[f'{l}_item_{o}']
+                                for state in ['active', 'inactive']:
+                                    if f'{state}_item_{o}' in kwargs and j == 'Navbar':
+                                        if f'nav.Navbar a.{state} button' not in d:
+                                            d[f'nav.Navbar a.{state} button'] = {}
+                                        d[f'nav.Navbar a.{state} button' + (' font' if 'b' not in o else '')][o] = kwargs[f'{state}_item_{o}']
                             d[f'.body_{i.lower()} {m[j]}.{k.lower()}'] = compile_style(backend=True, **kwargs)
                     kwargs = {k: z[k] for k in z if not isinstance(z[k], type) and not k.startswith('__')}
                     d[f'.body_{i.lower()} {m[j]}'.removesuffix(' body')] = compile_style(backend=True, **kwargs)

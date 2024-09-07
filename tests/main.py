@@ -1,5 +1,5 @@
 from bevyframe import *
-from TheProtocols import User
+from TheProtocols import User, Permission
 from datetime import datetime, UTC
 import hereus_ui_3_2
 
@@ -12,7 +12,11 @@ app = Frame(
     icon='/favicon.png',
     keywords=['Test'],
     loginview='login.py',
-    did='did:plc:demo'
+    did='did:plc:demo',
+    default_network='localhost',
+    permissions=[
+        Permission.InterApp
+    ]
 )
 Database(app, 'sqlite:///test.db')
 
@@ -36,22 +40,27 @@ app.environment = {
 
 
 @app.default_logging
-def log(r: Request, time: str) -> str:
-    app.db.add(Test(email=r.email, ip=r.ip, when=datetime.now(UTC)))
+def log(context: Context, time: str) -> (str, tuple[str, bool]):
+    app.db.add(Test(email=context.email, ip=context.ip, when=datetime.now(UTC)))
     app.db.commit()
-    u = r.email
+    u = context.email
     if u.split('@')[0] == 'Guest':
-        u = r.ip
-    return f'{u} {'sent form to' if r.method == 'POST' else 'landed on'} {r.path} at {time.split(' ')[0]} on {time.split(' ')[1]}'
+        u = context.ip
+    if context.path in ['/favicon.png']:
+        last = app.db.query(Test).order_by(Test.id).all()[-1]
+        end = f' at {time.split(' ')[0]} on {time.split(' ')[1]}' if last.email != context.email and last.ip != context.ip else ''
+        return f'{"".join([' ' for _ in range(len(u))])} and requested {context.path}{end}', False
+    else:
+        return f'{u} {'sent form to' if context.method == 'POST' else 'loaded'} {context.path} at {time.split(' ')[0]} on {time.split(' ')[1]}'
 
 
 @app.route('/user/<email>')
-def index(request: Request, email) -> Page:
+def index(context: Context, email) -> Page:
     u = User(email)
     return Page(
         title='',
         description='',
-        color=request.user.id.settings.theme_color,
+        color=context.user.id.settings.theme_color,
         childs=[
             Title(f"{u.name} {u.surname}")
         ]
@@ -60,4 +69,4 @@ def index(request: Request, email) -> Page:
 
 if __name__ == '__main__':
     app.db.create_all()
-    app.run('0.0.0.0', 80, debug=True)
+    app.run('0.0.0.0', 3000, debug=True)

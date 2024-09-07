@@ -1,6 +1,6 @@
 from datetime import datetime
 from bevyframe.Features.Login import get_session
-from bevyframe.Objects.Request import Request
+from bevyframe.Objects.Context import Context
 
 
 def wsgi_receiver(self, environ):
@@ -33,11 +33,11 @@ def wsgi_receiver(self, environ):
         pass
     if recv['credentials'] is None:
         recv['credentials'] = {
-            'email': 'Guest@hereus.net',
+            'email': f'Guest@{self.default_network}',
             'password': ''
         }
 
-    r = Request(recv, self)
+    r = Context(recv, self)
     if self.default_logging_str is None:
         if recv['credentials']['email'].split('@')[0] == 'Guest':
             print(f"(   ) {recv['ip']} [{req_time}]", end=' ')

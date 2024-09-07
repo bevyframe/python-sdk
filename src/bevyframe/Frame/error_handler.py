@@ -65,7 +65,7 @@ def error_handler(self, request, status_code, exception) -> Response:
                             )
                         )
                     )
-        return Response(
+        return request.create_response(
             body=Page(
                 title=https_codes[status_code],
                 style=self.style,

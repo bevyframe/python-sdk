@@ -1,14 +1,16 @@
 import socket
 from datetime import datetime
 from bevyframe.Features.Login import get_session
-from bevyframe.Objects.Request import Request
+from bevyframe.Objects.Context import Context
 
 
 def receiver(self, server_socket: socket.socket):
     client_socket, client_address = server_socket.accept()
     req_time = datetime.now().strftime('%Y-%M-%d %H:%m:%S')
     raw = client_socket.recv(1024).decode()
-    recv = {
+    if not raw.endswith('\r\n\r\n'):
+        raw += client_socket.recv(1024).decode()
+    recv: dict = {
         'method': '',
         'path': '',
         'protocol': '',
@@ -18,42 +20,61 @@ def receiver(self, server_socket: socket.socket):
         'query': {},
         'ip': client_address[0]
     }
-    for crl in range(len(raw.split('\r'))):
-        for lfl in range(len(raw.split('\r')[crl].split('\n'))):
-            line = raw.split('\r')[crl].split('\n')[lfl]
-            if crl == lfl == 0:
-                recv['method'], recv['path'], recv['protocol'] = line.split(' ')
-            else:
-                if ': ' in line:
-                    recv['headers'].update({line.split(': ')[0]: line.split(': ')[1]})
-                else:
-                    recv['body'] += (line + '\r\n')
+    raw = raw.replace('\r\n', '\n').replace('\n\r', '\n').replace('\r', '\n')
+    found_body = False
+    for crl in range(len(raw.split('\n'))):
+        line = raw.split('\n')[crl]
+        if crl == 0:
+            s = line.split(' ')
+            recv['method'], recv['protocol'] = s[0], s[-1]
+            recv['path'] = line.removeprefix(f"{s[0]} ").removesuffix(f" {s[-1]}")
+        elif found_body:
+            recv['body'] += (line + '\r\n')
+        else:
+            if line == '':
+                found_body = True
+            elif ': ' in line:
+                recv['headers'].update({
+                    line.split(': ')[0]: line.removeprefix(f"{line.split(': ')[0]}: ")
+                })
     recv['path'] = '/'.join([('' if i == '..' else i) for i in recv['path'].split('/')])
     try:
         recv['credentials'] = get_session(
             self.secret,
             recv['headers']['Cookie'].split('s=')[1].split(';')[0]
         ) if 's=' in recv['headers']['Cookie'] else None
-        if recv['credentials'] is None:
-            recv['credentials'] = {
-                'email': f"Guest@{self.default_network}",
-                'password': ''
-            }
     except KeyError:
         pass
     if recv['credentials'] is None:
         recv['credentials'] = {
-            'email': 'Guest@hereus.net',
-            'password': ''
+            'email': f'Guest@{self.default_network}',
+            'token': ''
         }
-
-    r = Request(recv, self)
+    else:
+        try:
+            recv['credentials'] = {
+                'email': recv['credentials']['email'],
+                'token': recv['credentials']['token']
+            }
+        except KeyError:
+            recv['credentials'] = {
+                'email': f'Guest@{self.default_network}',
+                'token': ''
+            }
+    r = Context(recv, self)
+    display_status_code = True
     if self.default_logging_str is None:
         if recv['credentials']['email'].split('@')[0] == 'Guest':
-            print(f"(   ) {client_address[0]} [{req_time}]", end=' ')
+            recv['log'] = f"(   ) {client_address[0]} [{req_time}]"
         else:
-            print(f"\r(   ) {recv['credentials']['email']} [{req_time}]", end=' ')
-        print(f"{recv['method']} {recv['path']} {recv['protocol']}", end='', flush=True)
+            recv['log'] = f"\r(   ) {recv['credentials']['email']} [{req_time}]"
+        recv['log'] = f"{recv['method']} {recv['path']} {recv['protocol']}"
     else:
-        print('(   ) ' + self.default_logging_str(r, req_time).replace('\n', '').replace('\r', ''), end='', flush=True)
-    return recv, client_socket, req_time, r
+        formatted_log = self.default_logging_str(r, req_time)
+        if isinstance(formatted_log, tuple):
+            display_status_code = formatted_log[1]
+            formatted_log = formatted_log[0]
+        formatted_log = formatted_log.replace('\n', '').replace('\r', '')
+        recv['log'] = ('(   ) ' if display_status_code else '      ') + formatted_log
+    print(recv['log'], end='', flush=True)
+    return recv, client_socket, req_time, r, display_status_code

@@ -1,15 +1,14 @@
 from bevyframe import *
-from TheProtocols import ID, CredentialsDidntWorked
 
 
-def log(r: Request, time: str) -> str:
+def log(r: Context, time: str) -> (str, None):
     if r.method == 'POST':
         return f'{r.form['email']} is trying to login at {time.split(' ')[0]} on {time.split(' ')[1]}'
     else:
         return None
 
 
-def get(request: Request) -> Page:
+def get(context: Context) -> Page:
     return Page(
         title='Login - BevyFrame Test App',
         description='BevyFrame Test App',
@@ -20,7 +19,7 @@ def get(request: Request) -> Page:
                 childs=[
                     Line([z])
                     for z in [
-                        Textbox(y[0], selector='grey', type=y[1], placeholder=y[2])
+                        Textbox(y[0], selector='grey', type=y[1], placeholder=y[2], value=context.headers['Cookie'])
                         for y in [
                             ['email', 'text', 'Email Address'],
                             ['password', 'password', 'Password']
@@ -32,10 +31,11 @@ def get(request: Request) -> Page:
     )
 
 
-def post(request: Request) -> Response:
-    resp = redirect('/')
-    if resp.login(request.form['email'], request.form['password']):
+def post(context: Context) -> (Response, Page):
+    resp = context.redirect('/')
+    if resp.login(context.form['email'], context.form['password']):
         print(', success', end='', flush=True)
+        return resp
     else:
         print(', failed', end='', flush=True)
-    return resp
+        return get(context)

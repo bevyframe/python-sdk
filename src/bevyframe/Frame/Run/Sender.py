@@ -1,7 +1,7 @@
 from bevyframe.Helpers.Identifiers import https_codes
 
 
-def sender(self, recv, resp, client_socket):
+def sender(self, recv, resp, client_socket, display_status_code):
     r = f"{recv['protocol']} {resp.status_code} {https_codes[resp.status_code]}\r\n"
     for header in resp.headers:
         r += f"{header}: {resp.headers[header]}\r\n"
@@ -12,4 +12,4 @@ def sender(self, recv, resp, client_socket):
     r += resp.body
     client_socket.sendall(r)
     client_socket.close()
-    print(f'\r({resp.status_code})')
+    print(f'\r({resp.status_code})' if display_status_code else '')

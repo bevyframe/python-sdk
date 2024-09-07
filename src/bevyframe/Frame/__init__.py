@@ -1,9 +1,11 @@
+import importlib.metadata
+import sys
 from typing import Any
 import getpass
 import os
 from bevyframe.Objects.Response import Response
 import requests
-import TheProtocols
+from TheProtocols import *
 import json
 from bevyframe.Frame.error_handler import error_handler
 from bevyframe.Frame.route import route
@@ -16,6 +18,7 @@ from bevyframe.Frame.Run.WSGI_Receiver import wsgi_receiver
 from bevyframe.Features.Style import compile_object as compile_style
 from bevyframe.Helpers.Identifiers import https_codes
 from bevyframe.Features.Database import Database
+import logging
 
 
 class Frame:
@@ -25,6 +28,7 @@ class Frame:
             developer,
             administrator,
             secret,
+            permissions,
             style,
             icon='/favicon.ico',
             keywords=None,
@@ -45,6 +49,12 @@ class Frame:
         self.debug = False
         self.developer = developer
         self.routes = {}
+        self.tp_token = None
+        self.tp = TheProtocols(
+            package,
+            permissions,
+            secure=False
+        )
         if isinstance(style, str):
             if os.path.isfile(style):
                 self.style = json.load(open(style, 'rb'))
@@ -67,11 +77,22 @@ class Frame:
         self.default_logging_str = None
         self.db: (Database, None) = None
         if did:
-            self.route('/.well-known/atproto-did')(lambda request: Response(body=did, content_type='plain/text'))
-        if administrator:
-            self.admin = TheProtocols.ID(administrator, getpass.getpass(f'Password for {administrator}: '))
+            self.route('/.well-known/atproto-did')(lambda request: Response(
+                body=did,
+                credentials={},
+                headers={'content_type': 'plain/text'},
+                status_code=200,
+                app=self
+            ))
+        self.__wsgi_server = None if sys.argv[0].endswith('.py') else sys.argv[0].split("/")[-1]
+        if self.__wsgi_server:
+            print(f"Taking control from {self.__wsgi_server}...")
             print()
-            print(f"Welcome {self.admin.id}!")
+            print(f"BevyFrame {importlib.metadata.version('bevyframe')} ⍺")
+            print(f" * Serving BevyFrame app '{self.package}'")
+            print(f" * Mode: wsgi")
+            # noinspection HttpUrlsUsage
+            print(f" * Running via {sys.argv[0].split('/')[-1]}")
         print()
 
     def error_handler(self, request, status_code, exception) -> Response:
@@ -87,19 +108,21 @@ class Frame:
         server_socket = booting(self, host, port, debug)
         try:
             while True:
-                recv, client_socket, req_time, r = receiver(self, server_socket)
-                resp = responser(self, recv, req_time, r)
-                sender(self, recv, resp, client_socket)
+                recv, client_socket, req_time, r, display_status_code = receiver(self, server_socket)
+                resp, display_status_code = responser(self, recv, req_time, r, display_status_code)
+                sender(self, recv, resp, client_socket, display_status_code)
         except KeyboardInterrupt:
             server_socket.close()
             print('\r  \nServer was been terminated!\n')
 
     def __call__(self, environ, start_response):
-        debug_ = self.debug
         self.debug = False
         recv, req_time, r = wsgi_receiver(self, environ)
-        resp = responser(self, recv, req_time, r)
+        resp, display_status_code = responser(self, recv, req_time, r)
         start_response(f"{resp.status_code} {https_codes[resp.status_code].upper()}", [(str(i), str(resp.headers[i])) for i in resp.headers])
-        print(f'\r({resp.status_code})')
-        self.debug = debug_
+        print(f'\r({resp.status_code})' if display_status_code else '')
         return [resp.body.encode()]
+
+    def __del__(self):
+        if self.__wsgi_server:
+            print(f"\nReturning control is back to {self.__wsgi_server}...")

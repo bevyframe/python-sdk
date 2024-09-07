@@ -16,12 +16,13 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Application Frameworks",
 ]
 requires-python = ">=3.9"
-dependencies = ["requests==2.32.3", "PyJWT==2.8.0", "TheProtocols==3.0.1"]
+dependencies = ["certifi==2024.7.4", "cffi==1.17.0", "charset-normalizer==3.3.2", "cryptography==43.0.0", "idna==3.7", "PyJWT==2.8.0", "requests==2.32.3", "TheProtocols==3.1.0", "urllib3==2.2.2", "Jinja2==3.1.4", "MarkupSafe==2.1.5"]
 
 [project.urls]
+Homepage = "https://bevyframe.islekcaganmert.me"
 Donate = "https://www.buymeacoffee.com/islekcaganmert"
-Documentation = "https://github.com/islekcaganmert/bevyframe/wiki"
-Changes = "https://github.com/islekcaganmert/bevyframe/commits/master"
+Documentation = "https://bevyframe.islekcaganmert.me/docs"
+Changes = "https://bevyframe.islekcaganmert.me/changes"
 "Source Code" = "https://github.com/islekcaganmert/bevyframe"
 "Issue Tracker" = "https://github.com/islekcaganmert/bevyframe/issues"
 Chat = "https://lemmy.today/c/bevyframe"
