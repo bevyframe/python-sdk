@@ -9,6 +9,7 @@ from bevyframe.Widgets.Page import Page
 
 
 class Context:
+
     def __init__(self, data: dict, app) -> None:
         self.method = data['method']
         self.path = data['path'].split('?')[0]
@@ -23,7 +24,7 @@ class Context:
             data['body'] = data['body'].removesuffix('\r\n')
         while data['body'].startswith('\r\n'):
             data['body'] = data['body'].removeprefix('\r\n')
-        self.body = urllib.parse.unquote(data['body'])
+        self.body = urllib.parse.unquote(data['body'].replace('+', ' '))
         self.form = {}
         for b in data['body'].split('\r\n'):
             for i in b.split('&'):
@@ -41,11 +42,17 @@ class Context:
                     self.query.update({
                         urllib.parse.unquote(i): True
                     })
-        self.email = data['credentials']['email']
-        self.token = data['credentials']['token']
+        try:
+            self.email = data['credentials']['email']
+            self.token = data['credentials']['token']
+        except KeyError:
+            self.email = 'Guest@' + app.default_network
+            self.token = ''
         self._user = None
         self._data = None
         self.is_data_assigned = False
+        self._preferences = None
+        self.is_preferences_assigned = False
         self.app = app
         self.tp: TheProtocols = app.tp
         self.cookies = {}
@@ -64,11 +71,13 @@ class Context:
                     self._user = self.tp.restore_session(self.email, self.token)
             except CredentialsDidntWorked:
                 self._user = self.tp.create_session(f'Guest@{self.app.default_network}', '')
+            except NetworkException:
+                self._user = self.tp.create_session(f'Guest@{self.app.default_network}', '')
         return self._user
 
     def get_data(self) -> dict:
         if self._data is None:
-            self._data = self._user.data()
+            self._data = self.user.data()
         return self._data
 
     def set_data(self, data: dict) -> None:
@@ -97,7 +106,7 @@ class Context:
             app=self.app
         )
 
-    def redirect(self, to_url) -> Response:
+    def start_redirect(self, to_url) -> Response:
         return self.create_response(
             headers={'Location': to_url},
             status_code=303,

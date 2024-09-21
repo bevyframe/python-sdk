@@ -16,9 +16,9 @@ def get_session(secret, token) -> (dict, None):
 
 
 def login_required(func):
-    def wrapper(r):
+    def wrapper(r, *args, **kwargs):
         if r.email.split('@')[0] == 'Guest':
-            return r.redirect(f"/{r.app.loginview.removeprefix('/')}")
+            return r.start_redirect(f"/{r.app.loginview.removeprefix('/')}")
         else:
-            return func(r)
+            return func(r, *args, **kwargs)
     return wrapper

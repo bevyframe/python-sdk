@@ -7,9 +7,19 @@ from bevyframe.Objects.Context import Context
 def receiver(self, server_socket: socket.socket):
     client_socket, client_address = server_socket.accept()
     req_time = datetime.now().strftime('%Y-%M-%d %H:%m:%S')
-    raw = client_socket.recv(1024).decode()
-    if not raw.endswith('\r\n\r\n'):
-        raw += client_socket.recv(1024).decode()
+    request = client_socket.recv(4096).decode()
+    body = b""
+    if 'connection: keep-alive' in request.lower():
+        content_length = None
+        for header in request.split("\r\n"):
+            if header.startswith("Content-Length:"):
+                content_length = int(header.split(":")[1].strip())
+                break
+        if content_length:
+            client_socket.sendall(b'HTTP/1.1 100 Continue\r\n\r\n')
+            while len(body) < content_length:
+                body += client_socket.recv(4096)
+    raw = (request.encode() + b'\r\n' + body).decode()
     recv: dict = {
         'method': '',
         'path': '',
@@ -21,6 +31,7 @@ def receiver(self, server_socket: socket.socket):
         'ip': client_address[0]
     }
     raw = raw.replace('\r\n', '\n').replace('\n\r', '\n').replace('\r', '\n')
+    raw = raw.replace('\n\n', '\n')
     found_body = False
     for crl in range(len(raw.split('\n'))):
         line = raw.split('\n')[crl]
@@ -50,25 +61,13 @@ def receiver(self, server_socket: socket.socket):
             'email': f'Guest@{self.default_network}',
             'token': ''
         }
-    else:
-        try:
-            recv['credentials'] = {
-                'email': recv['credentials']['email'],
-                'token': recv['credentials']['token']
-            }
-        except KeyError:
-            recv['credentials'] = {
-                'email': f'Guest@{self.default_network}',
-                'token': ''
-            }
     r = Context(recv, self)
     display_status_code = True
     if self.default_logging_str is None:
         if recv['credentials']['email'].split('@')[0] == 'Guest':
-            recv['log'] = f"(   ) {client_address[0]} [{req_time}]"
+            recv['log'] = f"(   ) {client_address[0]} [{req_time}] {recv['method']} {recv['path']}"
         else:
-            recv['log'] = f"\r(   ) {recv['credentials']['email']} [{req_time}]"
-        recv['log'] = f"{recv['method']} {recv['path']} {recv['protocol']}"
+            recv['log'] = f"\r(   ) {recv['credentials']['email']} [{req_time}] {recv['method']} {recv['path']}"
     else:
         formatted_log = self.default_logging_str(r, req_time)
         if isinstance(formatted_log, tuple):

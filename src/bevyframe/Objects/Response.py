@@ -23,3 +23,9 @@ class Response:
             return True
         except CredentialsDidntWorked:
             return False
+
+    def __str__(self):
+        if 'Location' in self.headers:
+            return f"window.location.href = '{self.headers['Location']}'"
+        else:
+            return self.__repr__()

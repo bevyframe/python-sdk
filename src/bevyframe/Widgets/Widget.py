@@ -47,9 +47,12 @@ class Widget:
             vertical_align: str = None,
             cursor: str = None,
             text_decoration: str = None,
+            onclick = None,
             **kwargs
     ):
         self.data = kwargs
+        if onclick is not None:
+            self.data['onclick'] = str(onclick)
         self.element = item
         self.style = {} if style is None else style
         self.content = []

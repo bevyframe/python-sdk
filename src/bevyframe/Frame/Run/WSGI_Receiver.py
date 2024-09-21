@@ -24,28 +24,27 @@ def wsgi_receiver(self, environ):
             self.secret,
             recv['headers']['Cookie'].split('s=')[1].split(';')[0]
         ) if 's=' in recv['headers']['Cookie'] else None
-        if recv['credentials'] is None:
-            recv['credentials'] = {
-                'email': f"Guest@{self.default_network}",
-                'password': ''
-            }
     except KeyError:
         pass
     if recv['credentials'] is None:
         recv['credentials'] = {
             'email': f'Guest@{self.default_network}',
-            'password': ''
+            'token': ''
         }
-
     r = Context(recv, self)
+    display_status_code = True
     if self.default_logging_str is None:
         if recv['credentials']['email'].split('@')[0] == 'Guest':
-            print(f"(   ) {recv['ip']} [{req_time}]", end=' ')
+            recv['log'] = f"(   ) {recv['ip']} [{req_time}]"
         else:
-            print(f"\r(   ) {recv['credentials']['email']} [{req_time}]",
-                  end=' ')
-        print(f"{recv['method']} {recv['path']} {recv['protocol']}", end='', flush=True)
+            recv['log'] = f"\r(   ) {recv['credentials']['email']} [{req_time}]"
+        recv['log'] = f"{recv['method']} {recv['path']} {recv['protocol']}"
     else:
-        print('WSGI: ' + self.default_logging_str(r, req_time).replace('\n', '').replace('\r', ''), end='', flush=True)
-
-    return recv, req_time, r
+        formatted_log = self.default_logging_str(r, req_time)
+        if isinstance(formatted_log, tuple):
+            display_status_code = formatted_log[1]
+            formatted_log = formatted_log[0]
+        formatted_log = formatted_log.replace('\n', '').replace('\r', '')
+        recv['log'] = ('(   ) ' if display_status_code else '      ') + formatted_log
+    print(recv['log'], end='', flush=True)
+    return recv, req_time, r, display_status_code

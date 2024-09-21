@@ -116,11 +116,14 @@ class Frame:
 
     def __call__(self, environ, start_response):
         self.debug = False
-        recv, req_time, r = wsgi_receiver(self, environ)
-        resp, display_status_code = responser(self, recv, req_time, r)
+        recv, req_time, r, display_status_code = wsgi_receiver(self, environ)
+        resp, display_status_code = responser(self, recv, req_time, r, display_status_code)
         start_response(f"{resp.status_code} {https_codes[resp.status_code].upper()}", [(str(i), str(resp.headers[i])) for i in resp.headers])
         print(f'\r({resp.status_code})' if display_status_code else '')
-        return [resp.body.encode()]
+        if isinstance(resp.body, bytes):
+            return [resp.body]
+        else:
+            return [resp.body.encode()]
 
     def __del__(self):
         if self.__wsgi_server:

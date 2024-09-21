@@ -20,7 +20,7 @@ class Box(Container):
         super().__init__(
             selector='the_box',
             childs=childs if isinstance(childs, list) else [childs],
-            onclick=onclick if onclick else '',
+            onclick='' if onclick is None else onclick,
             **kwargs
         )
 

@@ -32,7 +32,7 @@ def get(context: Context) -> Page:
 
 
 def post(context: Context) -> (Response, Page):
-    resp = context.redirect('/')
+    resp = context.start_redirect('/')
     if resp.login(context.form['email'], context.form['password']):
         print(', success', end='', flush=True)
         return resp
