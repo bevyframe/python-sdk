@@ -1,10 +1,13 @@
 import jwt
 
 
-def get_session_token(secret, email, token) -> str:
+def get_session_token(secret, email, token=None, password=None) -> str:
     return jwt.encode({
         'email': email,
         'token': token
+    } if token is not None else {
+        'email': email,
+        'password': password
     }, secret, algorithm='HS256')
 
 

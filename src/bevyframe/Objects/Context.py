@@ -44,7 +44,8 @@ class Context:
                     })
         try:
             self.email = data['credentials']['email']
-            self.token = data['credentials']['token']
+            self.token = data['credentials'].get('token', None)
+            self.password = data['credentials'].get('password', None)
         except KeyError:
             self.email = 'Guest@' + app.default_network
             self.token = ''
@@ -67,8 +68,10 @@ class Context:
             try:
                 if self.email.split('@')[0] == 'Guest':
                     self._user = self.tp.create_session(f'Guest@{self.app.default_network}', '')
-                else:
+                elif self.token:
                     self._user = self.tp.restore_session(self.email, self.token)
+                else:
+                    self._user = self.tp.create_session(self.email, self.password)
             except CredentialsDidntWorked:
                 self._user = self.tp.create_session(f'Guest@{self.app.default_network}', '')
             except NetworkException:
@@ -98,10 +101,14 @@ class Context:
             headers: dict = None,
             status_code: int = 200
     ) -> Response:
+        if credentials is None:
+            credentials = {'email': self.email, 'token': self.token}
+        if credentials['token'] is None:
+            credentials = {'email': self.email, 'password': self.password}
         return Response(
             body,
             headers=headers if headers is not None else {'Content-Type': 'text/html; charset=utf-8'},
-            credentials=credentials if credentials is not None else {'email': self.email, 'token': self.token},
+            credentials=credentials,
             status_code=status_code,
             app=self.app
         )

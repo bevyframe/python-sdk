@@ -65,12 +65,23 @@ def error_handler(self, request, status_code, exception) -> Response:
                             )
                         )
                     )
-        return request.create_response(
-            body=Page(
-                title=https_codes[status_code],
-                style=self.style,
-                childs=e_boxes,
-                color=request.user.id.settings.theme_color
-            ).render(),
-            status_code=status_code
-        )
+        try:
+            return request.create_response(
+                body=Page(
+                    title=https_codes[status_code],
+                    style=self.style,
+                    childs=e_boxes,
+                    color=request.user.id.settings.theme_color
+                ).render(),
+                status_code=status_code
+            )
+        except AttributeError:
+            return request.create_response(
+                body=Page(
+                    title=https_codes[status_code],
+                    style=self.style,
+                    childs=e_boxes,
+                    color="blank"
+                ).render(),
+                status_code=status_code
+            )

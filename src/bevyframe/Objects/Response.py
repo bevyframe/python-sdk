@@ -20,6 +20,11 @@ class Response:
                 'email': email,
                 'token': self.tp.create_session(email, password).token
             }
+            if self.credentials['token'] is None:
+                self.credentials = {
+                    'email': email,
+                    'password': password
+                }
             return True
         except CredentialsDidntWorked:
             return False

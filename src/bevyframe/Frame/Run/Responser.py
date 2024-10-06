@@ -5,7 +5,7 @@ import traceback
 import importlib.metadata
 from datetime import datetime, UTC
 import jinja2
-from bevyframe.Features.Login import get_session_token
+from bevyframe.Features.Login import get_session_token, get_session
 from bevyframe.Helpers.Exceptions import Error404
 from bevyframe.Helpers.Identifiers import mime_types
 from bevyframe.Helpers.MatchRouting import match_routing
@@ -129,15 +129,12 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
     resp.headers['Connection'] = 'Keep-Alive'
     resp.headers['Date'] = datetime.now(UTC).strftime('%a, %d %b %Y %H:%M:%S GMT')
     try:
-        try:
-            if resp.credentials['email'] != r.email or resp.credentials['token'] != r.token or 'Cookie' not in recv['headers']:
-                resp.headers['Set-Cookie'] = 's=' + get_session_token(self.secret, **resp.credentials) + ';'
-            else:
-                resp.headers['Set-Cookie'] = recv['headers']['Cookie']
-        except TypeError:
+        if resp.credentials['email'] != r.email:
+            resp.headers['Set-Cookie'] = 's=' + get_session_token(self.secret, **resp.credentials) + ';'
+        else:
             resp.headers['Set-Cookie'] = recv['headers']['Cookie']
-    except KeyError:
-        pass
+    except TypeError:
+        resp.headers['Set-Cookie'] = recv['headers']['Cookie']
     if r and r.is_data_assigned:
         r.user.data(r.data)
     if r and r.is_preferences_assigned:
