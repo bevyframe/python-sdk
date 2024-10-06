@@ -129,12 +129,15 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
     resp.headers['Connection'] = 'Keep-Alive'
     resp.headers['Date'] = datetime.now(UTC).strftime('%a, %d %b %Y %H:%M:%S GMT')
     try:
-        if resp.credentials['email'] != r.email or resp.credentials['token'] != r.token or 'Cookie' not in recv['headers']:
-            resp.headers['Set-Cookie'] = 's=' + get_session_token(self.secret, **resp.credentials) + ';'
-        else:
+        try:
+            if resp.credentials['email'] != r.email or resp.credentials['token'] != r.token or 'Cookie' not in recv['headers']:
+                resp.headers['Set-Cookie'] = 's=' + get_session_token(self.secret, **resp.credentials) + ';'
+            else:
+                resp.headers['Set-Cookie'] = recv['headers']['Cookie']
+        except TypeError:
             resp.headers['Set-Cookie'] = recv['headers']['Cookie']
-    except TypeError:
-        resp.headers['Set-Cookie'] = recv['headers']['Cookie']
+    except KeyError:
+        pass
     if r and r.is_data_assigned:
         r.user.data(r.data)
     if r and r.is_preferences_assigned:
