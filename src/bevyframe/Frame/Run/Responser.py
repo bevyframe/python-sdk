@@ -121,7 +121,7 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
         resp.body = json.dumps(resp.body)
     resp.headers['Content-Length'] = len(resp.body.encode() if isinstance(resp.body, str) else resp.body)
     resp.headers['Server'] = f"BevyFrame/{importlib.metadata.version('bevyframe')}"
-    resp.headers['Access-Control-Allow-Origin'] = '*' if self.cors else f"https://{recv['headers']['Host']}"
+    resp.headers['Access-Control-Allow-Origin'] = '*' if self.cors else f"https://{recv['headers'].get('Host', '')}"
     resp.headers['Access-Control-Max-Age'] = '86400'
     resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH, CONNECT, TRACE'
     resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, X-PINGOTHER, Authorization'
@@ -132,11 +132,11 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
         if resp.credentials['email'] != r.email:
             resp.headers['Set-Cookie'] = 's=' + get_session_token(self.secret, **resp.credentials) + ';'
         else:
-            resp.headers['Set-Cookie'] = recv['headers']['Cookie']
+            resp.headers['Set-Cookie'] = recv['headers'].get('Cookie', '')
     except TypeError:
-        resp.headers['Set-Cookie'] = recv['headers']['Cookie']
-    if r and r.is_data_assigned:
-        r.user.data(r.data)
-    if r and r.is_preferences_assigned:
-        r.user.preferences(r.data)
+        resp.headers['Set-Cookie'] = recv['headers'].get('Cookie', '')
+    if r and hasattr(r.data, 'is_edited') and r.data.is_edited():
+        r.user.data(dict(r.data))
+    if r and hasattr(r.preferences, 'is_edited') and r.preferences.is_edited():
+        r.user.preferences(dict(r.preferences))
     return resp, display_status_code

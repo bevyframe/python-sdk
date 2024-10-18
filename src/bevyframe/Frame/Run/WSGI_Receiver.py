@@ -4,7 +4,7 @@ from bevyframe.Objects.Context import Context
 
 
 def wsgi_receiver(self, environ):
-    req_time = datetime.now().strftime('%Y-%M-%d %H:%m:%S')
+    req_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     recv = {
         'method': environ['REQUEST_METHOD'],
         'path': environ['PATH_INFO'],

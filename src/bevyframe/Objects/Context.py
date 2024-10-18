@@ -1,11 +1,26 @@
 import urllib.parse
+from os import pread
+
 from TheProtocols import *
-from typing import Any
+from typing import Any, Callable
 import json
 import jinja2
 
 from bevyframe.Objects.Response import Response
 from bevyframe.Widgets.Page import Page
+from bevyframe.Helpers.LazyInitDict import LazyInitDict
+
+
+def lazy_init_data(con) -> Callable[[Any], None]:
+    def initialize(self) -> None:
+        self._data = con.user.data()
+    return initialize
+
+
+def lazy_init_pref(con) -> Callable[[Any], None]:
+    def initialize(self) -> None:
+        self._data = con.user.preferences()
+    return initialize
 
 
 class Context:
@@ -50,10 +65,8 @@ class Context:
             self.email = 'Guest@' + app.default_network
             self.token = ''
         self._user = None
-        self._data = None
-        self.is_data_assigned = False
-        self._preferences = None
-        self.is_preferences_assigned = False
+        self.data = LazyInitDict(lazy_init_data(self))
+        self.preferences = LazyInitDict(lazy_init_pref(self))
         self.app = app
         self.tp: TheProtocols = app.tp
         self.cookies = {}
@@ -63,7 +76,7 @@ class Context:
                     self.cookies.update({cookie.split('=')[0]: cookie.split('=')[1]})
 
     @property
-    def user(self):
+    def user(self) -> Session:
         if self._user is None:
             try:
                 if self.email.split('@')[0] == 'Guest':
@@ -78,17 +91,13 @@ class Context:
                 self._user = self.tp.create_session(f'Guest@{self.app.default_network}', '')
         return self._user
 
-    def get_data(self) -> dict:
-        if self._data is None:
-            self._data = self.user.data()
-        return self._data
+    def get_preferences(self) -> dict:
+        if self._preferences is None:
+            self._preferences = self._preferences_first = self.user.data()
+        return self._preferences
 
-    def set_data(self, data: dict) -> None:
-        self.is_data_assigned = True
-        self._data = data
-
-    # noinspection PyTypeChecker
-    data = property(get_data, set_data)
+    def set_preferences(self, preferences: dict) -> None:
+        self._preferences = preferences
 
     def render_template(self, template: str, **kwargs) -> str:
         with open(template.removeprefix('/')) as f:

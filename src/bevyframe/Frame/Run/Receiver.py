@@ -6,7 +6,7 @@ from bevyframe.Objects.Context import Context
 
 def receiver(self, server_socket: socket.socket):
     client_socket, client_address = server_socket.accept()
-    req_time = datetime.now().strftime('%Y-%M-%d %H:%m:%S')
+    req_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     request = client_socket.recv(4096).decode()
     body = b""
     if 'connection: keep-alive' in request.lower():
