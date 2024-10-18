@@ -115,7 +115,7 @@ class Frame:
             print('\r  \nServer was been terminated!\n')
 
     def __call__(self, environ, start_response):
-        self.debug = False
+        self.debug = True
         recv, req_time, r, display_status_code = wsgi_receiver(self, environ)
         resp, display_status_code = responser(self, recv, req_time, r, display_status_code)
         start_response(f"{resp.status_code} {https_codes[resp.status_code].upper()}", [(str(i), str(resp.headers[i])) for i in resp.headers])

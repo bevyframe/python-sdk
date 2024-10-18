@@ -7,7 +7,7 @@ def wsgi_receiver(self, environ):
     req_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     recv = {
         'method': environ['REQUEST_METHOD'],
-        'path': environ['PATH_INFO'],
+        'path': environ['PATH_INFO'] + '?' + environ['QUERY_STRING'],
         'protocol': environ['SERVER_PROTOCOL'],
         'headers': {},
         'body': environ['wsgi.input'].read().decode(),
@@ -35,10 +35,9 @@ def wsgi_receiver(self, environ):
     display_status_code = True
     if self.default_logging_str is None:
         if recv['credentials']['email'].split('@')[0] == 'Guest':
-            recv['log'] = f"(   ) {recv['ip']} [{req_time}]"
+            recv['log'] = f"(   ) {recv['ip']} [{req_time}] {recv['method']} {recv['path']}"
         else:
-            recv['log'] = f"\r(   ) {recv['credentials']['email']} [{req_time}]"
-        recv['log'] = f"{recv['method']} {recv['path']} {recv['protocol']}"
+            recv['log'] = f"\r(   ) {recv['credentials']['email']} [{req_time}] {recv['method']} {recv['path']}"
     else:
         formatted_log = self.default_logging_str(r, req_time)
         if isinstance(formatted_log, tuple):
