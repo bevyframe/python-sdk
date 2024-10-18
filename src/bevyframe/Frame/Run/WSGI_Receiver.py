@@ -7,7 +7,7 @@ def wsgi_receiver(self, environ):
     req_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     recv = {
         'method': environ['REQUEST_METHOD'],
-        'path': environ['PATH_INFO'] + '?' + environ['QUERY_STRING'],
+        'path': environ['PATH_INFO'],
         'protocol': environ['SERVER_PROTOCOL'],
         'headers': {},
         'body': environ['wsgi.input'].read().decode(),
@@ -15,6 +15,8 @@ def wsgi_receiver(self, environ):
         'query': {},
         'ip': environ['REMOTE_ADDR']
     }
+    if environ['QUERY_STRING']:
+        recv['path'] += f"?{environ['QUERY_STRING']}"
     for header in environ:
         if header.startswith('HTTP_'):
             key = header[5:].removeprefix('HTTP_').replace('_', '-').title()
