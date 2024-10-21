@@ -47,7 +47,7 @@ class Widget:
             vertical_align: str = None,
             cursor: str = None,
             text_decoration: str = None,
-            onclick = None,
+            onclick=None,
             **kwargs
     ):
         self.data = kwargs

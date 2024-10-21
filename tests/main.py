@@ -6,7 +6,6 @@ import hereus_ui_3_2
 app = Frame(
     package='dev.islekcaganmert.bevyframe.stdin',
     developer='islekcaganmert@hereus.net',
-    administrator=None,
     secret='5d9547e68c469b5e4b97b273e760',  # secrets.token_hex(secrets.randbits(4))
     style=hereus_ui_3_2,
     icon='/favicon.png',

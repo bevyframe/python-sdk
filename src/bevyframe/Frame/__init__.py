@@ -1,7 +1,6 @@
 import importlib.metadata
 import sys
 from typing import Any
-import getpass
 import os
 from bevyframe.Objects.Response import Response
 import requests
@@ -18,7 +17,6 @@ from bevyframe.Frame.Run.WSGI_Receiver import wsgi_receiver
 from bevyframe.Features.Style import compile_object as compile_style
 from bevyframe.Helpers.Identifiers import https_codes
 from bevyframe.Features.Database import Database
-import logging
 
 
 class Frame:
@@ -26,7 +24,6 @@ class Frame:
             self,
             package,
             developer,
-            administrator,
             secret,
             permissions,
             style,

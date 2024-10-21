@@ -1,5 +1,4 @@
 import urllib.parse
-from os import pread
 
 from TheProtocols import *
 from typing import Any, Callable
@@ -90,14 +89,6 @@ class Context:
             except NetworkException:
                 self._user = self.tp.create_session(f'Guest@{self.app.default_network}', '')
         return self._user
-
-    def get_preferences(self) -> dict:
-        if self._preferences is None:
-            self._preferences = self._preferences_first = self.user.data()
-        return self._preferences
-
-    def set_preferences(self, preferences: dict) -> None:
-        self._preferences = preferences
 
     def render_template(self, template: str, **kwargs) -> str:
         with open(template.removeprefix('/')) as f:

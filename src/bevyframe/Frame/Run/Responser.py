@@ -5,7 +5,7 @@ import traceback
 import importlib.metadata
 from datetime import datetime, UTC
 import jinja2
-from bevyframe.Features.Login import get_session_token, get_session
+from bevyframe.Features.Login import get_session_token
 from bevyframe.Helpers.Exceptions import Error404
 from bevyframe.Helpers.Identifiers import mime_types
 from bevyframe.Helpers.MatchRouting import match_routing
@@ -60,7 +60,7 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
                                             if isinstance(formatted_log, tuple):
                                                 display_status_code = formatted_log[1]
                                                 formatted_log = formatted_log[0]
-                                            print('\r' + ''.join([' ' for i in range(len(recv['log']))]), end='', flush=True)
+                                            print('\r' + ''.join([' ' for _ in range(len(recv['log']))]), end='', flush=True)
                                             print(f'\r(   ) ', end='', flush=True)
                                             print(
                                                 formatted_log.replace('\n', '').replace('\r', '')

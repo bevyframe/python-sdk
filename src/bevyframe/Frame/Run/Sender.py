@@ -15,7 +15,7 @@ def send_in_chunks(sock, data, chunk_size):
     sock.send(b'')
 
 
-def sender(self, recv, resp, client_socket, display_status_code):
+def sender(_, recv, resp, client_socket, display_status_code):
     r = f"{recv['protocol']} {resp.status_code} {https_codes[resp.status_code]}\r\n"
     # r += "Transfer-Encoding: chunked\r\n"
     for header in resp.headers:
