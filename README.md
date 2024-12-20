@@ -1,4 +1,4 @@
-# BevyFrame 0.5 ɑ
+# BevyFrame 0.6 ɑ
 
 Python Web Framework that turns your Python scripts to a web page.
 With decentralized features integrated, it makes programming easier than ever.
@@ -51,7 +51,7 @@ pip install bevyframe
 
 Wheel
 ```bash
-pip install https://github.com/islekcaganmert/bevyframe/releases/download/0.5/BevyFrame-0.5.0-py3-none-any.whl
+pip install https://github.com/islekcaganmert/bevyframe/releases/download/0.6/BevyFrame-0.6.0-py3-none-any.whl
 ```
 
 <small>*now included in LuOS developer tools</small>
