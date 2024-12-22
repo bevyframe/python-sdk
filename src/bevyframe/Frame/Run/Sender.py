@@ -24,7 +24,10 @@ def sender(_, recv, resp, client_socket, display_status_code):
     r = r.encode()
     if not isinstance(resp.body, bytes):
         resp.body = resp.body.encode()
-    client_socket.sendall(r)
+    try:
+        client_socket.sendall(r)
+    except BrokenPipeError:
+        return
     # if b' 100 ' in client_socket.recv(4096):
     send_in_chunks(client_socket, resp.body, 4096)
     client_socket.close()

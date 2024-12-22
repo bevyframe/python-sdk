@@ -14,7 +14,6 @@ class Page:
                 'initial-scale': '1.0'
             },
             'description': 'BevyFrame App',
-            'keywords': [],
             'author': '',
             'icon': {
                 'href': '/favicon.ico',
@@ -62,7 +61,6 @@ class Page:
                     Widget('meta', charset=self.charset),
                     Widget('meta', name='viewport', content=f'width={self.viewport["width"]}, initial-scale={self.viewport["initial-scale"]}'),
                     Widget('meta', name='description', content=self.description),
-                    Widget('meta', name='keywords', content=', '.join(self.keywords)),
                     Widget('meta', name='author', content=self.author),
                     Widget('link', rel='icon', href=self.icon['href'], type=self.icon['type']),
                     Widget('title', innertext=self.title)

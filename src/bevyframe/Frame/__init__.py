@@ -28,15 +28,12 @@ class Frame:
             permissions,
             style,
             icon='/favicon.ico',
-            keywords=None,
             default_network='hereus.net',
             loginview='Login.py',
             environment=None,
             cors=False,
             did=None
     ) -> None:
-        if keywords is None:
-            keywords = []
         self.cors = cors
         self.environment = environment if environment else {}
         self.loginview = loginview
@@ -69,7 +66,6 @@ class Frame:
             self.style = style
         self.style = compile_style(self.style)
         self.icon = icon
-        self.keywords = keywords
         self.default_logging_str = None
         self.db: (Database, None) = None
         if did:
@@ -81,7 +77,10 @@ class Frame:
                 app=self
             ))
         self.__wsgi_server = None if sys.argv[0].endswith('.py') else sys.argv[0].split("/")[-1]
+        if sys.argv[0].split('/')[-1] == 'bevyframe':
+            self.__wsgi_server = None
         if self.__wsgi_server:
+            print(sys.argv)
             print(f"Taking control from {self.__wsgi_server}...")
             print()
             print(f"BevyFrame {importlib.metadata.version('bevyframe')} ⍺")
@@ -100,7 +99,13 @@ class Frame:
     def default_logging(self, func):
         return default_logging(self, func)
 
+    @property
+    def reverse_routes(self) -> dict:
+        return {self.routes[i]: i for i in self.routes}
+
     def run(self, host: str = '127.0.0.1', port: int = 5000, debug: bool = False):
+        if self.__wsgi_server:
+            return
         server_socket = booting(self, host, port, debug)
         try:
             while True:

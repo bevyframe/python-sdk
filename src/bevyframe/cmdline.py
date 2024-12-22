@@ -1,46 +1,95 @@
+from bevyframe.Frame import Frame
+from bevyframe.Features.Database import Database
+import json
 import os
-import secrets
+from random import randint
 import sys
+import importlib
+import importlib.util
 
 
-def cmdline():
-    args = sys.argv[1:]
+def init(*args) -> int:
+    if os.system("which pymake > /dev/null 2>&1") != 0:
+        print("ERROR: pymake is not installed")
+        input("Please create your standard Python environment, then click any key...")
+    else:
+        print('\n', end='', flush=True)
+        os.system("pymake init --no-module")
+    os.system("mv ./src/ ./pages/")
+    with open('.gitignore') as f:
+        gitignore = f.read().splitlines()
+    if '.secret' not in gitignore:
+        gitignore.append(".secret")
+    if '*.db' not in gitignore:
+        gitignore.append("*.db")
+    if './pages/assets' not in gitignore:
+        gitignore.append("./pages/.assets")
+    with open('.gitignore', 'w') as f:
+        f.writelines([f"{i}\n" for i in gitignore])
+    with open('.secret', 'w') as f:
+        secret = ''.join([hex(randint(0, 15)).removeprefix('0x') for _ in range(128)])
+        f.write(secret)
+    os.mkdir('assets')
+    os.mkdir('models')
+    os.mkdir('functions')
+    with open('README.md') as f:
+        project_name = f.read().splitlines()[0].removeprefix('# ')
+    manifest = {
+        "@context": "https://bevyframe.islekcaganmert.me/ns/manifest",
+        "app": {
+            "package": input("Package: "),
+            "style": input("\nStyle name or CSS URL/path: "),
+            "icon": "/.assets/favicon.png",
+            "loginview": "/Login.py",
+            "database_filename": "app",
+            "cors": False,
+            "routing": {}
+        },
+        "accounts": {
+            "default_network": input("\nDefault Network: "),
+            "permissions": []
+        },
+        "development": {
+            "host": "0.0.0.0",
+            "port": 3000,
+            "debug": True
+        },
+        "production": {
+            "web": {
+                "host": "0.0.0.0",
+                "port": 80
+            },
+            "ios": False,
+            "android": False,
+            "nt": False,
+            "macos": False,
+            "snap": False,
+            "flatpak": False,
+            "luos": False
+        },
+        "requirements": [],
+    }
+    with open('./manifest.json', 'w') as f:
+        f.write(json.dumps(manifest))
+    os.remove('./requirements.txt')
+    os.remove('./pages/main.py')
+    os.system("bevyframe new / '" + project_name.replace('\'', '\\\'') + "'")
+    frame = build_frame([])[0]
+    frame.db.create_all()
+    print()
+    return 0
 
-    if len(args) == 0:
-        print("Usage: python -m bevyframe <path to project>")
-        sys.exit(1)
-    elif args[0] == "init":
-        with open('src/main.py', 'w') as f:
-            f.write(f'''
+
+def new(*args) -> int:
+    with open(f'./pages/{args[0].removeprefix("/").removesuffix("/")}' + ('' if args[0].endswith('.py') else '/__init__.py'), 'w') as f:
+        f.write(f'''
 from bevyframe import *
 
-app = Frame(
-    package="{input("Package: ")}",
-    developer="{input("Developer: ")}",
-    administrator=False,
-    secret="{secrets.token_hex(secrets.randbits(6))}",
-    style="{input("Style Path/URL: ")}",
-    icon="{input("Icon Path/URL: ")}",
-    keywords=[],
-    default_network="{input("Default Network: ")}",
-    loginview='Login.py'
-)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80, debug=True)
-            '''.removeprefix('\n'))
-        print('Creating / page.', end=' ', flush=True)
-        os.system('bevyframe new /')
-    elif args[0] == "new":
-        with open(f'src/{args[1].removeprefix("/").removesuffix("/")}' + ('' if args[1].endswith('.py') else '/__init__.py'), 'w') as f:
-            f.write(f'''
-from bevyframe import *
-
-
-def get(r: Request) -> Page:
+def get(r: Context) -> Page:
     return Page(
-        title="{input("Title: ")}",
-        selector=f'body_{"{r.user.id.settings.theme_color}"}',
+        title="{input("Title: ") if len(sys.argv) < 3 else args[1]}",
+        color=r.user.id.settings.theme_color,
         childs=[
             # Place Navbar above Root,
             Root([
@@ -48,4 +97,79 @@ def get(r: Request) -> Page:
             ])
         ]
     )
-        '''.removeprefix('\n'))
+            '''.removeprefix('\n'))
+    return 0
+
+
+def build_frame(*args) -> tuple[Frame, dict]:
+    if 'manifest.json' not in os.listdir('./'):
+        print('\nNo manifest.json found. This project is available for managed run.')
+        print('Please run your app via `pymake run` or `cd src && python main.py && cd ..`\n')
+        sys.path.pop(0)
+        sys.exit(1)
+    with open('./manifest.json') as f:
+        manifest = json.load(f)
+    with open('./.secret') as f:
+        secret = f.read()
+    style = manifest['app']['style']
+    if style.startswith('https://'):
+        pass
+    elif style.startswith('/'):
+        pass
+    else:
+        style = importlib.import_module(style)
+    app = Frame(
+        package=manifest['app']['package'],
+        developer="TO BE REMOVED",
+        secret=secret,
+        permissions=manifest['accounts']['permissions'],
+        style=style,
+        icon=manifest['app']['icon'],
+        default_network=manifest['accounts']['default_network'],
+        loginview=manifest['app']['loginview'],
+        environment={},  # TO BE IMPLEMENTED
+        cors=manifest['app']['cors'],
+    )
+    app.routes = manifest['app']['routing']
+    if 'logging.py' in os.listdir('./'):
+        logging_spec = importlib.util.spec_from_file_location('logging', './logging.py')
+        logging = importlib.util.module_from_spec(logging_spec)
+        logging_spec.loader.exec_module(logging)
+        app.default_logging(logging.logging)
+    if 'environment.py' in os.listdir('./'):
+        environment_spec = importlib.util.spec_from_file_location('environment', './environment.py')
+        environment = importlib.util.module_from_spec(environment_spec)
+        environment_spec.loader.exec_module(environment)
+        app.environment = environment.environment
+    Database(app, f"sqlite:///{manifest['app']['database_filename']}.db")
+    return app, {
+        'port': manifest['development']['port'],
+        'host': manifest['development']['host'],
+        'debug': manifest['development']['debug'],
+    }
+
+
+def run(*args) -> int:
+    app, runtime_args = build_frame(*args)
+    app.run(host=runtime_args['host'], port=runtime_args['port'], debug=runtime_args['debug'])
+    return 0
+
+
+def cmdline() -> int:
+    sys.path.insert(0, './')
+    args = sys.argv[1:]
+    if len(args) == 0:
+        print("Usage: python -m bevyframe <path to project>")
+        return 256
+    command = args.pop(0)
+    if command == "init":
+        ret = init(*args)
+    elif command == "new":
+        ret = new(*args)
+    elif command == "run":
+        ret = run(*args)
+    else:
+        print("Unknown command")
+        ret = 1
+    sys.path.pop(0)
+    return ret

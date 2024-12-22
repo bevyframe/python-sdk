@@ -91,7 +91,7 @@ class Context:
         return self._user
 
     def render_template(self, template: str, **kwargs) -> str:
-        with open(template.removeprefix('/')) as f:
+        with open("./pages/" + template.removeprefix('/')) as f:
             return jinja2.Template(f.read()).render(request=self, style=f"<style>{self.app.style}</style>", **kwargs)
 
     def create_response(
@@ -119,6 +119,10 @@ class Context:
             status_code=303,
             credentials={'email': self.email, 'token': self.token}
         )
+
+    @staticmethod
+    def get_asset(path: str) -> str:
+        return "/assets/" + path
 
     @property
     def json(self) -> Any:

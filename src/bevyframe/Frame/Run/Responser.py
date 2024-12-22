@@ -17,32 +17,64 @@ from bevyframe.Features.Style import compile_object as compile_to_css
 
 def responser(self, recv, req_time, r: Context, display_status_code: int):
     resp = None
-    if recv['method'].lower() == 'options':
+    path = recv['path']
+    reverse_routes = self.reverse_routes
+    if path.startswith('/assets/'):
+        file_path = f"./{path.split('?')[0]}"
+        for _ in range(0, 3):
+            file_path = file_path.replace('//', '/')
+        if os.path.isfile(file_path):
+            with open(file_path, 'rb') as f:
+                resp = r.create_response(
+                    f.read(),
+                    headers={
+                        'Content-Type': mime_types.get(
+                            file_path.split('.')[-1],
+                            'plain/text'
+                        ),
+                        'Content-Length': len(f.read()),
+                        'Connection': 'keep-alive'
+                    }
+                )
+    elif recv['method'].lower() == 'options':
         resp = r.create_response(status_code=204)
+    elif path.split('?')[0] in reverse_routes:
+        path = reverse_routes[path.split('?')[0]]
+        while '<' in path:
+            p1 = path.split('<')[0]
+            var = path.removeprefix(p1 + '<').split('>')[0]
+            p2 = path.removeprefix(p1 + '<' + var + '>')
+            path = p1 + r.query.get(var) + p2
+        resp = r.start_redirect(path)
     else:
         # noinspection PyBroadException
         try:
             in_routes = False
-            if recv['path'].split('?')[0] in self.routes:
-                resp = self.routes[recv['path'].split('?')[0]](r)
+            if path.split('?')[0] in self.routes:
+                resp = self.routes[path.split('?')[0]](r)
             else:
                 for rt in self.routes:
                     if not in_routes:
-                        match, variables = match_routing(rt, recv['path'].split('?')[0])
+                        match, variables = match_routing(rt, path.split('?')[0])
                         in_routes = match
+                        for v in variables:
+                            r.query.update({v: variables[v]})
                         if in_routes:
-                            resp = self.routes[rt](r, **variables)
+                            if callable(self.routes[rt]):
+                                resp = self.routes[rt](r)
+                            else:
+                                path = self.routes[rt]
                 if resp is None:
-                    page_script_path = f"./{recv['path'].split('?')[0]}"
+                    file_path = f"./pages/{path.split('?')[0]}"
                     for i in range(0, 3):
-                        page_script_path = page_script_path.replace('//', '/')
-                    if not os.path.isfile(page_script_path):
-                        page_script_path += '/__init__.py'
-                    if os.path.isfile(page_script_path):
-                        if page_script_path.endswith('.py'):
+                        file_path = file_path.replace('//', '/')
+                    if not os.path.isfile(file_path):
+                        file_path += '/__init__.py'
+                    if os.path.isfile(file_path):
+                        if file_path.endswith('.py'):
                             page_script_spec = importlib.util.spec_from_file_location(
-                                os.path.splitext(os.path.basename(page_script_path))[0],
-                                page_script_path
+                                os.path.splitext(os.path.basename(file_path))[0],
+                                file_path
                             )
                             page_script = importlib.util.module_from_spec(page_script_spec)
                             try:
@@ -71,9 +103,9 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
                             except FileNotFoundError:
                                 resp = self.error_handler(r, 404, '')
                         else:
-                            with open(page_script_path, 'rb') as f:
-                                if page_script_path.endswith('.html'):
-                                    body = jinja2.Template(f.read().decode()).render(request=r, style=f"<style>{self.style}</style>")
+                            with open(file_path, 'rb') as f:
+                                if file_path.endswith('.html'):
+                                    body = jinja2.Template(f.read().decode()).render(context=r, style=f"<style>{self.style}</style>")
                                     resp = r.create_response(
                                         body,
                                         headers={
@@ -87,8 +119,8 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
                                         f.read(),
                                         headers={
                                             'Content-Type': mime_types.get(
-                                                page_script_path.split('.')[-1],
-                                                'application/octet-stream'
+                                                file_path.split('.')[-1],
+                                                'plain/text'
                                             ),
                                             'Content-Length': len(f.read()),
                                             'Connection': 'keep-alive'
@@ -101,7 +133,6 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
     if resp is None:
         resp = self.error_handler(r, 404, '')
     if isinstance(resp, Page):
-        resp.data['keywords'] = self.keywords if resp.data['keywords'] == [] else resp.data['keywords']
         resp.data['author'] = self.developer if resp.data['author'] == '' else resp.data['author']
         resp.data['icon'] = {
             'href': self.icon,
