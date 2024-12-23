@@ -8,5 +8,5 @@ from bevyframe.Objects.Response import Response
 from bevyframe.Features.Login import login_required
 from bevyframe.Frame import Frame
 from bevyframe.cmdline import cmdline
-from bevyframe.Features.Database import Database, DataTypes
+from bevyframe.Features.Database import Database, DataTypes, DeclarativeBase
 from bevyframe.Helpers.Exceptions import *

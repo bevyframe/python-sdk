@@ -1,5 +1,6 @@
+from bevyframe.Features.ContextManager import ContextManager
 from bevyframe.Frame import Frame
-from bevyframe.Features.Database import Database
+from bevyframe.Features.Database import Database, DeclarativeBase
 import json
 import os
 from random import randint
@@ -30,8 +31,9 @@ def init(*args) -> int:
         secret = ''.join([hex(randint(0, 15)).removeprefix('0x') for _ in range(128)])
         f.write(secret)
     os.mkdir('assets')
-    os.mkdir('models')
     os.mkdir('functions')
+    with open('models.py', 'w') as f:
+        f.write('from bevyframe import *\nBase = DeclarativeBase()\n')
     with open('README.md') as f:
         project_name = f.read().splitlines()[0].removeprefix('# ')
     manifest = {
@@ -141,7 +143,12 @@ def build_frame(*args) -> tuple[Frame, dict]:
         environment = importlib.util.module_from_spec(environment_spec)
         environment_spec.loader.exec_module(environment)
         app.environment = environment.environment
-    Database(app, f"sqlite:///{manifest['app']['database_filename']}.db")
+    if 'models.py' in os.listdir('./'):
+        models_spec = importlib.util.spec_from_file_location('models', './models.py')
+        models = importlib.util.module_from_spec(models_spec)
+        models_spec.loader.exec_module(models)
+        Database(app, f"sqlite:///{manifest['app']['database_filename']}.db", models.Base)
+        app.db.create_all()
     return app, {
         'port': manifest['development']['port'],
         'host': manifest['development']['host'],

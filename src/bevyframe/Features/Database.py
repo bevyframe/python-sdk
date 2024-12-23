@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, Column as Col, Integer as Int, String as Str, DateTime as Dt, Boolean as Bool
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.declarative import declarative_base as DeclarativeBase
 from sqlalchemy.orm import sessionmaker, query
 
 
@@ -12,11 +12,11 @@ class DataTypes:
 
 
 class Database:
-    def __init__(self, app, url) -> None:
+    def __init__(self, app, url, base) -> None:
         self.__engine = create_engine(url)
         self.__url = url
         self.__session = sessionmaker(bind=self.__engine)()
-        self.__base = declarative_base()
+        self.__base = base
         app.db = self
 
     def add(self, data):

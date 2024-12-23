@@ -5,6 +5,7 @@ from typing import Any, Callable
 import json
 import jinja2
 
+from bevyframe.Features.Database import Database
 from bevyframe.Objects.Response import Response
 from bevyframe.Widgets.Page import Page
 from bevyframe.Helpers.LazyInitDict import LazyInitDict
@@ -73,6 +74,10 @@ class Context:
             for cookie in self.headers['Cookie'].split('; '):
                 if '=' in cookie:
                     self.cookies.update({cookie.split('=')[0]: cookie.split('=')[1]})
+
+    @property
+    def db(self) -> Database:
+        return self.app.db
 
     @property
     def user(self) -> Session:
