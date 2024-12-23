@@ -6,4 +6,4 @@ tests/
 .DS_Store
 requirements.old
 .secret
-./pages/.assets
+*.db

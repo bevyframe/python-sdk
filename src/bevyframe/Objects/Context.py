@@ -4,7 +4,7 @@ from TheProtocols import *
 from typing import Any, Callable
 import json
 import jinja2
-
+import os
 from bevyframe.Features.Database import Database
 from bevyframe.Objects.Response import Response
 from bevyframe.Widgets.Page import Page
@@ -95,9 +95,45 @@ class Context:
                 self._user = self.tp.create_session(f'Guest@{self.app.default_network}', '')
         return self._user
 
-    def render_template(self, template: str, **kwargs) -> str:
+    def render_template(self, template: str, **kwargs) -> (Response, str):
+        functions = '''
+            const _bridge = (func, ...args) => {
+                fetch(`${location.protocol}//${location.host}/.well_known/bevyframe/proxy`,{
+                    method:'POST',headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({func:func,args:args})
+                }).then(res => res.json()).then(data => {
+                    if (data.error) {throw new Error(data.error);}
+                    else if (data.type === 'return') {return data.value;}
+                    else if (data.type === 'script') {eval(data.value);}
+                    else if (data.type === 'view') {
+                        if (data.element === 'body') {document.body.innerHTML = data.value;}
+                        else {document.querySelector(data.element).innerHTML = data.value;}
+                    }
+                }).catch(err => {  });
+            };
+        '''
+        for i in os.listdir('./functions/'):
+            if i.endswith('.py'):
+                i = i[:-3]
+                functions += " const " + i + " = (...args) => {_bridge('" + i + "', ...args)};"
+        functions = (functions
+                     .replace('    ', '')
+                     .replace('  ', ' ')
+                     .replace('\n', '')
+                     .strip())
         with open("./pages/" + template.removeprefix('/')) as f:
-            return jinja2.Template(f.read()).render(request=self, style=f"<style>{self.app.style}</style>", **kwargs)
+            html = f.read()
+            if '<body' in html:
+                prop = html.split('<body')[1].split('>')[0].split(' ')
+                for i in prop:
+                    if i.split('=')[0] == 'login_required' and self.email.split('@')[0] == 'Guest':
+                        return self.start_redirect(f"/{self.app.loginview.removeprefix('/')}")
+            return jinja2.Template(html).render(
+                context=self,
+                style=f"<style>{self.app.style}</style>",
+                functions=f"<script>{functions}</script>",
+                **kwargs
+            )
 
     def create_response(
             self,

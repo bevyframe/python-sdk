@@ -63,7 +63,13 @@ def receiver(self, server_socket: socket.socket):
         }
     r = Context(recv, self)
     display_status_code = True
-    if self.default_logging_str is None:
+    if recv['path'] == '/.well_known/bevyframe/proxy':
+        if recv['credentials']['email'].split('@')[0] == 'Guest':
+            recv['log'] = f"(   ) {client_address[0]} [{req_time}] "
+        else:
+            recv['log'] = f"\r(   ) {recv['credentials']['email']} [{req_time}] "
+        recv['log'] += f"{r.json['func']}({', '.join([repr(i) for i in r.json['args']])}) -> "
+    elif self.default_logging_str is None:
         if recv['credentials']['email'].split('@')[0] == 'Guest':
             recv['log'] = f"(   ) {client_address[0]} [{req_time}] {recv['method']} {recv['path']}"
         else:

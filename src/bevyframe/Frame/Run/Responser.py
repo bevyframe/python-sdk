@@ -13,13 +13,16 @@ from bevyframe.Objects.Context import Context
 from bevyframe.Objects.Response import Response
 from bevyframe.Widgets.Page import Page
 from bevyframe.Features.Style import compile_object as compile_to_css
+from bevyframe.Features.Bridge import process_proxy
 
 
 def responser(self, recv, req_time, r: Context, display_status_code: int):
     resp = None
     path = recv['path']
     reverse_routes = self.reverse_routes
-    if path.startswith('/assets/'):
+    if path == '/.well_known/bevyframe/proxy':
+        resp = process_proxy(r)
+    elif path.startswith('/assets/'):
         file_path = f"./{path.split('?')[0]}"
         for _ in range(0, 3):
             file_path = file_path.replace('//', '/')
@@ -103,18 +106,10 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
                             except FileNotFoundError:
                                 resp = self.error_handler(r, 404, '')
                         else:
-                            with open(file_path, 'rb') as f:
-                                if file_path.endswith('.html'):
-                                    body = jinja2.Template(f.read().decode()).render(context=r, style=f"<style>{self.style}</style>")
-                                    resp = r.create_response(
-                                        body,
-                                        headers={
-                                            'Content-Type': 'text/html',
-                                            'Content-Length': len(body),
-                                            'Connection': 'keep-alive'
-                                        }
-                                    )
-                                else:
+                            if file_path.endswith('.html'):
+                                resp = r.render_template(file_path.removeprefix('./pages/'))
+                            else:
+                                with open(file_path, 'rb') as f:
                                     resp = r.create_response(
                                         f.read(),
                                         headers={

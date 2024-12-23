@@ -1,6 +1,5 @@
-from bevyframe.Features.ContextManager import ContextManager
 from bevyframe.Frame import Frame
-from bevyframe.Features.Database import Database, DeclarativeBase
+from bevyframe.Features.Database import Database
 import json
 import os
 from random import randint
@@ -23,8 +22,6 @@ def init(*args) -> int:
         gitignore.append(".secret")
     if '*.db' not in gitignore:
         gitignore.append("*.db")
-    if './pages/assets' not in gitignore:
-        gitignore.append("./pages/.assets")
     with open('.gitignore', 'w') as f:
         f.writelines([f"{i}\n" for i in gitignore])
     with open('.secret', 'w') as f:
