@@ -128,7 +128,6 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
     if resp is None:
         resp = self.error_handler(r, 404, '')
     if isinstance(resp, Page):
-        resp.data['author'] = self.developer if resp.data['author'] == '' else resp.data['author']
         resp.data['icon'] = {
             'href': self.icon,
             'type': mime_types[self.icon.split('.')[-1]]

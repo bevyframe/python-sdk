@@ -1,5 +1,6 @@
 from bevyframe.Frame import Frame
 from bevyframe.Features.Database import Database
+from bevyframe.Helpers.MainPyCompiler import MainPyCompiler as main
 import json
 import os
 from random import randint
@@ -119,22 +120,21 @@ def build_frame(*args) -> tuple[Frame, dict]:
         style = importlib.import_module(style)
     app = Frame(
         package=manifest['app']['package'],
-        developer="TO BE REMOVED",
         secret=secret,
         permissions=manifest['accounts']['permissions'],
         style=style,
         icon=manifest['app']['icon'],
         default_network=manifest['accounts']['default_network'],
         loginview=manifest['app']['loginview'],
-        environment={},  # TO BE IMPLEMENTED
+        environment={},
         cors=manifest['app']['cors'],
     )
     app.routes = manifest['app']['routing']
-    if 'logging.py' in os.listdir('./'):
-        logging_spec = importlib.util.spec_from_file_location('logging', './logging.py')
-        logging = importlib.util.module_from_spec(logging_spec)
-        logging_spec.loader.exec_module(logging)
-        app.default_logging(logging.logging)
+    if 'default_logging.py' in os.listdir('./'):
+        default_logging_spec = importlib.util.spec_from_file_location('default_logging', './default_logging.py')
+        default_logging = importlib.util.module_from_spec(default_logging_spec)
+        default_logging_spec.loader.exec_module(default_logging)
+        app.default_logging(default_logging.default_logging)
     if 'environment.py' in os.listdir('./'):
         environment_spec = importlib.util.spec_from_file_location('environment', './environment.py')
         environment = importlib.util.module_from_spec(environment_spec)
@@ -172,6 +172,8 @@ def cmdline() -> int:
         ret = new(*args)
     elif command == "run":
         ret = run(*args)
+    elif command == "main":
+        ret = main(*args)
     else:
         print("Unknown command")
         ret = 1

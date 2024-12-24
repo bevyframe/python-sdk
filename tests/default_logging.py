@@ -3,7 +3,7 @@ from bevyframe import *
 from models import Test
 
 
-def logging(context: Context, time: str) -> (str, tuple[str, bool]):
+def default_logging(context: Context, time: str) -> (str, tuple[str, bool]):
     context.db.add(Test(email=context.email, ip=context.ip, when=datetime.now(UTC)))
     context.db.commit()
     u = context.email

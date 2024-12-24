@@ -23,7 +23,6 @@ class Frame:
     def __init__(
             self,
             package,
-            developer,
             secret,
             permissions,
             style,
@@ -41,7 +40,6 @@ class Frame:
         self.secret = secret
         self.package = package
         self.debug = False
-        self.developer = developer
         self.routes = {}
         self.tp_token = None
         self.tp = TheProtocols(
