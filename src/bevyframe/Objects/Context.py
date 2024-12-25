@@ -26,6 +26,9 @@ def lazy_init_pref(con) -> Callable[[Any], None]:
 class Browser:
     def __init__(self, headers: dict) -> None:
         self.language = headers.get('Accept-Language', 'en-US').split(',')[0].split(';')[0].strip()
+        self.ram = headers.get('Device-Memory', 0)
+        self.bandwidth = headers.get('Downlink', 0)
+        self.network_profile = headers.get('ECT', 'NotGiven')
         self.user_agent = ua = headers.get('User-Agent', 'Mozilla/5.0 (;) AppleWebKit/0.0 (KHTML, like Gecko) Chrome/0.0.0.0 Safari/0.0)')
         try:
             ua = ua.removeprefix(ua.split('(')[0] + '(')

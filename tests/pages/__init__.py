@@ -19,6 +19,9 @@ def get(context: Context) -> (Page, Response):
             Label(f"You are using {context.browser.device}"),
             Label(f"You are using {context.browser.name} {context.browser.version} which uses WebKit {context.browser.webkit_version}"),
             Label(f"Your browser's language is set to {context.browser.language}"),
+            Label(f"Your device has {context.browser.ram} GB of RAM"),
+            Label(f"Your bandwith is {context.browser.bandwidth} Mbps"),
+            Label(f"Your network type is {context.browser.network_profile}"),
             Box(
                 width=Size.max_content,
                 text_align=Align.center,

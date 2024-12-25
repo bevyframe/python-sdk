@@ -4,10 +4,8 @@ import os
 import traceback
 import importlib.metadata
 from datetime import datetime, UTC
-import jinja2
 from bevyframe.Features.Login import get_session_token
 from bevyframe.Helpers.Exceptions import Error404
-from bevyframe.Helpers.Identifiers import mime_types
 from bevyframe.Helpers.MatchRouting import match_routing
 from bevyframe.Objects.Activity import Activity
 from bevyframe.Objects.Context import Context
@@ -15,6 +13,7 @@ from bevyframe.Objects.Response import Response
 from bevyframe.Widgets.Page import Page
 from bevyframe.Features.Style import compile_object as compile_to_css
 from bevyframe.Features.Bridge import process_proxy
+import mimetypes
 
 
 def responser(self, recv, req_time, r: Context, display_status_code: int):
@@ -32,10 +31,7 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
                 resp = r.create_response(
                     f.read(),
                     headers={
-                        'Content-Type': mime_types.get(
-                            file_path.split('.')[-1],
-                            'plain/text'
-                        ),
+                        'Content-Type': mimetypes.types_map.get(f".{file_path.split('.')[-1]}", 'plain/text'),
                         'Content-Length': len(f.read()),
                         'Connection': 'keep-alive'
                     }
@@ -98,8 +94,7 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
                                         print('\r' + ''.join([' ' for _ in range(len(recv['log']))]), end='', flush=True)
                                         print(f'\r(   ) ', end='', flush=True)
                                         print(
-                                            formatted_log.replace('\n', '').replace('\r', '')
-                                            , end='', flush=True)
+                                            formatted_log.replace('\n', '').replace('\r', ''), end='', flush=True)
                                 if recv['headers'].get('Accept', '') == 'application/activity+json' and 'activity' in page_script.__dict__:
                                     resp = page_script.activity(r)
                                     if isinstance(resp, Activity):
@@ -120,10 +115,7 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
                                     resp = r.create_response(
                                         f.read(),
                                         headers={
-                                            'Content-Type': mime_types.get(
-                                                file_path.split('.')[-1],
-                                                'plain/text'
-                                            ),
+                                            'Content-Type': mimetypes.types_map.get(f".{file_path.split('.')[-1]}", 'plain/text'),
                                             'Content-Length': len(f.read()),
                                             'Connection': 'keep-alive'
                                         }
@@ -137,7 +129,7 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
     if isinstance(resp, Page):
         resp.data['icon'] = {
             'href': self.icon,
-            'type': mime_types[self.icon.split('.')[-1]]
+            'type': mimetypes.types_map[f".{self.icon.split('.')[-1]}"]
         } if resp.data['icon'] == {
             'href': '/favicon.ico',
             'type': 'image/x-icon'
@@ -157,7 +149,13 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
     resp.headers['Access-Control-Max-Age'] = '86400'
     resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH, CONNECT, TRACE'
     resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, X-PINGOTHER, Authorization'
-    resp.headers['Vary'] = 'Origin, Accept-Encoding'
+    resp.headers['Strict-Transport-Security'] = 'max-age=86400'
+    resp.headers['X-Content-Type-Options'] = 'nosniff'
+    resp.headers['X-Frame-Options'] = resp.headers['X-Frame-Options'] if 'X-Frame-Options' in resp.headers else 'DENY'
+    resp.headers['X-XSS-Protection'] = '1; mode = block'
+    resp.headers['Cache-Control'] = 'private'
+    resp.headers['Accept-CH'] = 'Device-Memory, Downlink, ECT'
+    resp.headers['Expires'] = '0'
     resp.headers['Date'] = datetime.now(UTC).strftime('%a, %d %b %Y %H:%M:%S GMT')
     try:
         if resp.credentials['email'] != r.email:

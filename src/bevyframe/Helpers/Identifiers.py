@@ -29,13 +29,3 @@ https_codes = {
     506: 'Variant Also Negotiates',
     511: 'Network Authentication Required'
 }
-mime_types = {
-    'html': 'text/html',
-    'txt': 'text/plain',
-    'jpg': 'image/jpeg',
-    'png': 'image/png',
-    'pdf': 'application/pdf',
-    'ico': 'image/x-icon',
-    'css': 'text/css',
-    'json': 'application/json'
-}
