@@ -29,10 +29,8 @@ class Browser:
         self.user_agent = ua = headers.get('User-Agent', 'Mozilla/5.0 (;) AppleWebKit/0.0 (KHTML, like Gecko) Chrome/0.0.0.0 Safari/0.0)')
         try:
             ua = ua.removeprefix(ua.split('(')[0] + '(')
-            self.device = ua.split(';')[0]
-            ua = ua.removeprefix(self.device + ';').removeprefix(' ')
-            self.os = ua.split(')')[0]
-            ua = ua.removeprefix(self.os + ')').removeprefix(' AppleWebKit/')
+            self.device = ua.split(')')[0]
+            ua = ua.removeprefix(self.device + ')').removeprefix(' AppleWebKit/')
             self.webkit_version = ua.split('(')[0]
             ua = ua.split(')')[1].removeprefix(' ')
             self.name = ua.split('/')[0]
