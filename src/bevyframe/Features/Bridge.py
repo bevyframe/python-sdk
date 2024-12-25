@@ -25,6 +25,8 @@ class change_html:
 
 
 def process_proxy(context: Context) -> dict:
+    if context.headers.get('Origin', '://').split('/')[2] != context.headers.get('Host'):
+        return {'error': 'cross-origin not allowed'}
     name: str = context.json['func']
     args: list = context.json['args']
     if '/' in name or '.' in name:
