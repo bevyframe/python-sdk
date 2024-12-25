@@ -151,11 +151,11 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
     resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH, CONNECT, TRACE'
     resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, X-PINGOTHER, Authorization'
     resp.headers['Vary'] = 'Origin, Accept-Encoding'
-    resp.headers['Connection'] = 'Keep-Alive'
     resp.headers['Date'] = datetime.now(UTC).strftime('%a, %d %b %Y %H:%M:%S GMT')
     try:
         if resp.credentials['email'] != r.email:
             resp.headers['Set-Cookie'] = 's=' + get_session_token(self.secret, **resp.credentials) + ';'
+            print('\n', resp.credentials['email'], '\n', r.email, '\n', resp.headers['Set-Cookie'])
         else:
             resp.headers['Set-Cookie'] = recv['headers'].get('Cookie', '')
     except TypeError:

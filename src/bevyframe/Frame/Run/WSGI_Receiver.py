@@ -8,9 +8,9 @@ def wsgi_receiver(self, environ):
     recv = {
         'method': environ['REQUEST_METHOD'],
         'path': environ['PATH_INFO'],
-        'protocol': environ['SERVER_PROTOCOL'],
+        'protocol': environ.get('SERVER_PROTOCOL', 'http/1.1'),
         'headers': {},
-        'body': environ['wsgi.input'].read().decode(),
+        'body': environ['wsgi.input'].read().decode() if 'wsgi.input' in environ else '',
         'credentials': None,
         'query': {},
         'ip': environ['REMOTE_ADDR']

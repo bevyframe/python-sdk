@@ -9,14 +9,12 @@ import json
 from bevyframe.Frame.error_handler import error_handler
 from bevyframe.Frame.route import route
 from bevyframe.Frame.default_logging import default_logging
-from bevyframe.Frame.Run.Booting import booting
-from bevyframe.Frame.Run.Receiver import receiver
 from bevyframe.Frame.Run.Responser import responser
-from bevyframe.Frame.Run.Sender import sender
 from bevyframe.Frame.Run.WSGI_Receiver import wsgi_receiver
 from bevyframe.Features.Style import compile_object as compile_style
 from bevyframe.Helpers.Identifiers import https_codes
 from bevyframe.Features.Database import Database
+from bevyframe.Frame.Run.wsgi_runner import make_server
 
 
 class Frame:
@@ -78,7 +76,6 @@ class Frame:
         if sys.argv[0].split('/')[-1] == 'bevyframe':
             self.__wsgi_server = None
         if self.__wsgi_server:
-            print(sys.argv)
             print(f"Taking control from {self.__wsgi_server}...")
             print()
             print(f"BevyFrame {importlib.metadata.version('bevyframe')} ⍺")
@@ -102,20 +99,24 @@ class Frame:
         return {self.routes[i]: i for i in self.routes}
 
     def run(self, host: str = '127.0.0.1', port: int = 5000, debug: bool = False):
-        if self.__wsgi_server:
-            return
-        server_socket = booting(self, host, port, debug)
-        try:
-            while True:
-                recv, client_socket, req_time, r, display_status_code = receiver(self, server_socket)
-                resp, display_status_code = responser(self, recv, req_time, r, display_status_code)
-                sender(self, recv, resp, client_socket, display_status_code)
-        except KeyboardInterrupt:
-            server_socket.close()
-            print('\r  \nServer was been terminated!\n')
+        with make_server(self, host, port) as server:
+            try:
+                print(f"BevyFrame {importlib.metadata.version('bevyframe')} ⍺")
+                print('Development server, do not use in production deployment')
+                print(f" * Serving BevyFrame app '{self.package}'")
+                if debug or self.debug:
+                    self.debug = True
+                print(f" * Mode: {'debug' if self.debug else 'test'}")
+                # noinspection HttpUrlsUsage
+                print(f" * Running on http://{host}:{port}/".replace(":80/", "/").replace('://0.0.0.0', '://localhost'))
+                print()
+                server.serve_forever()
+            except KeyboardInterrupt:
+                print('\r  \nServer was been terminated!\n')
 
     def __call__(self, environ, start_response):
-        self.debug = True
+        if self.__wsgi_server:
+            self.debug = False
         recv, req_time, r, display_status_code = wsgi_receiver(self, environ)
         resp, display_status_code = responser(self, recv, req_time, r, display_status_code)
         start_response(f"{resp.status_code} {https_codes[resp.status_code].upper()}", [(str(i), str(resp.headers[i])) for i in resp.headers])
