@@ -68,22 +68,21 @@ def error_handler(self, request, status_code, exception) -> Response:
                         )
                     )
         try:
+            color = request.user.id.settings.theme_color
+        except AttributeError:
+            color = 'blank'
+        if 'htm' in request.headers.get('Accept', '*/*'):
             return request.create_response(
                 body=Page(
                     title=https_codes[status_code],
                     style=self.style,
                     childs=e_boxes,
-                    color=request.user.id.settings.theme_color
+                    color=color,
                 ).render(),
                 status_code=status_code
             )
-        except AttributeError:
+        else:
             return request.create_response(
-                body=Page(
-                    title=https_codes[status_code],
-                    style=self.style,
-                    childs=e_boxes,
-                    color="blank"
-                ).render(),
+                body=f"\n{exception}\n",
                 status_code=status_code
             )

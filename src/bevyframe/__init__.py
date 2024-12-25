@@ -11,3 +11,4 @@ from bevyframe.cmdline import cmdline
 from bevyframe.Features.Database import Database, DataTypes, DeclarativeBase
 from bevyframe.Helpers.Exceptions import *
 from bevyframe.Features.Bridge import JavaScript, change_html
+from bevyframe.Objects.Activity import Activity

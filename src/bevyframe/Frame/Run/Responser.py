@@ -9,6 +9,7 @@ from bevyframe.Features.Login import get_session_token
 from bevyframe.Helpers.Exceptions import Error404
 from bevyframe.Helpers.Identifiers import mime_types
 from bevyframe.Helpers.MatchRouting import match_routing
+from bevyframe.Objects.Activity import Activity
 from bevyframe.Objects.Context import Context
 from bevyframe.Objects.Response import Response
 from bevyframe.Widgets.Page import Page
@@ -88,18 +89,24 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
                                 elif 'blacklist' in page_script.__dict__:
                                     if r.email in page_script.blacklist():
                                         return self.error_handler(r, 401, ''), True
-                                if recv['method'].lower() in page_script.__dict__:
-                                    if 'log' in page_script.__dict__:
-                                        formatted_log = page_script.log(r, req_time)
-                                        if formatted_log is not None:
-                                            if isinstance(formatted_log, tuple):
-                                                display_status_code = formatted_log[1]
-                                                formatted_log = formatted_log[0]
-                                            print('\r' + ''.join([' ' for _ in range(len(recv['log']))]), end='', flush=True)
-                                            print(f'\r(   ) ', end='', flush=True)
-                                            print(
-                                                formatted_log.replace('\n', '').replace('\r', '')
-                                                , end='', flush=True)
+                                if 'log' in page_script.__dict__:
+                                    formatted_log = page_script.log(r, req_time)
+                                    if formatted_log is not None:
+                                        if isinstance(formatted_log, tuple):
+                                            display_status_code = formatted_log[1]
+                                            formatted_log = formatted_log[0]
+                                        print('\r' + ''.join([' ' for _ in range(len(recv['log']))]), end='', flush=True)
+                                        print(f'\r(   ) ', end='', flush=True)
+                                        print(
+                                            formatted_log.replace('\n', '').replace('\r', '')
+                                            , end='', flush=True)
+                                if recv['headers'].get('Accept', '') == 'application/activity+json' and 'activity' in page_script.__dict__:
+                                    resp = page_script.activity(r)
+                                    if isinstance(resp, Activity):
+                                        resp = resp.render()
+                                    else:
+                                        resp = self.error_handler(r, 500, 'Activity must return `Activity`')
+                                elif recv['method'].lower() in page_script.__dict__:
                                     resp = getattr(page_script, recv['method'].lower())(r)
                                 else:
                                     resp = self.error_handler(r, 405, '')
