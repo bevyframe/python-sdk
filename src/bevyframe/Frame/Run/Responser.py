@@ -162,7 +162,6 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
     try:
         if resp.credentials['email'] != r.email:
             resp.headers['Set-Cookie'] = 's=' + get_session_token(self.secret, **resp.credentials) + ';'
-            print('\n', resp.credentials['email'], '\n', r.email, '\n', resp.headers['Set-Cookie'])
         else:
             resp.headers['Set-Cookie'] = recv['headers'].get('Cookie', '')
     except TypeError:

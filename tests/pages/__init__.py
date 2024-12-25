@@ -16,6 +16,9 @@ def get(context: Context) -> (Page, Response):
         color=context.user.id.settings.theme_color,
         childs=[
             Title(f'Hello, {context.user.id.name} {context.user.id.surname} from {context.user.network}!'),
+            Label(f"You have {context.browser.os} on {context.browser.device}"),
+            Label(f"You are using {context.browser.name} {context.browser.version} which uses WebKit {context.browser.webkit_version}"),
+            Label(f"Your browser's language is set to {context.browser.language}"),
             Box(
                 width=Size.max_content,
                 text_align=Align.center,

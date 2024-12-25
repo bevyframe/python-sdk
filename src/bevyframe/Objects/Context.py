@@ -23,12 +23,34 @@ def lazy_init_pref(con) -> Callable[[Any], None]:
     return initialize
 
 
-class Context:
+class Browser:
+    def __init__(self, headers: dict) -> None:
+        self.language = headers.get('Accept-Language', 'en-US').split(',')[0].split(';')[0].strip()
+        self.user_agent = ua = headers.get('User-Agent', 'Mozilla/5.0 (;) AppleWebKit/0.0 (KHTML, like Gecko) Chrome/0.0.0.0 Safari/0.0)')
+        try:
+            ua = ua.removeprefix(ua.split('(')[0] + '(')
+            self.device = ua.split(';')[0]
+            ua = ua.removeprefix(self.device + ';').removeprefix(' ')
+            self.os = ua.split(')')[0]
+            ua = ua.removeprefix(self.os + ')').removeprefix(' AppleWebKit/')
+            self.webkit_version = ua.split('(')[0]
+            ua = ua.split(')')[1].removeprefix(' ')
+            self.name = ua.split('/')[0]
+            self.version = ua.split('/')[1].split(' ')[0]
+        except IndexError:
+            self.device = ''
+            self.os = ''
+            self.webkit_version = 'NotCompatible'
+            self.name = 'Hidden'
+            self.version = ''
 
+
+class Context:
     def __init__(self, data: dict, app) -> None:
         self.method = data['method']
         self.path = data['path'].split('?')[0]
         self.headers = data['headers']
+        self.browser = Browser(self.headers)
         self.ip = data.get('ip', '127.0.0.1')
         self.query = {}
         self.env = app.environment() if callable(app.environment) else app.environment
