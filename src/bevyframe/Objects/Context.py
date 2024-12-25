@@ -132,6 +132,7 @@ class Context:
                 context=self,
                 style=f"<style>{self.app.style}</style>",
                 functions=f"<script>{functions}</script>",
+                safe=lambda x: x.replace('<', '&lt;').replace('>', '&gt;'),
                 **kwargs
             )
 
