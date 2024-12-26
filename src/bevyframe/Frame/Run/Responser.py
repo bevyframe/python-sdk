@@ -5,6 +5,8 @@ import traceback
 import importlib.metadata
 from datetime import datetime, UTC
 from bevyframe.Features.Login import get_session_token
+from bevyframe.Features.ServiceWorker import service_worker
+from bevyframe.Features.WebManifest import web_manifest
 from bevyframe.Helpers.Exceptions import Error404
 from bevyframe.Helpers.MatchRouting import match_routing
 from bevyframe.Objects.Activity import Activity
@@ -15,13 +17,20 @@ from bevyframe.Features.Style import compile_object as compile_to_css
 from bevyframe.Features.Bridge import process_proxy
 import mimetypes
 
+from bevyframe.Widgets.Widget import Widget
+
 
 def responser(self, recv, req_time, r: Context, display_status_code: int):
     resp = None
     path = recv['path']
     reverse_routes = self.reverse_routes
-    if path == '/.well_known/bevyframe/proxy':
+    if path == '/.well-known/bevyframe/proxy':
         resp = process_proxy(r)
+    elif path == '/.well-known/bevyframe/pwa.webmanifest':
+        resp = web_manifest()
+    elif path == '/sw.js':
+        resp = r.create_response(service_worker())
+        resp.headers['Content-Type'] = 'application/javascript'
     elif path.startswith('/assets/'):
         file_path = f"./{path.split('?')[0]}"
         for _ in range(0, 3):
@@ -135,6 +144,11 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
             'type': 'image/x-icon'
         } else resp.data['icon']
         resp.style = self.style + compile_to_css(resp.style)
+        if recv['path'] == '/':
+            resp.content.append(Widget('script', innertext="if (typeof navigator.serviceWorker !== 'undefined') navigator.serviceWorker.register('sw.js');"))
+    elif isinstance(resp, str) and resp.startswith('<!DOCTYPE html>'):
+        if recv['path'] == '/':
+            resp += "<script>if (typeof navigator.serviceWorker !== 'undefined') navigator.serviceWorker.register('sw.js');</script>"
     if not isinstance(resp, Response):
         resp = r.create_response(resp)
     if isinstance(resp.body, Page):

@@ -1,15 +1,31 @@
 {
   "@context": "https://bevyframe.islekcaganmert.me/ns/manifest",
   "app": {
+    "name": "BevyFrame Test App",
+    "short_name": "Test App",
+    "orientation": "any",
     "package": "com.example.demo",
     "style": "hereus_ui_3_2",
     "icon": "/assets/favicon.png",
     "loginview": "/login.py",
+    "shareview": "/share.py",
+    "offlineview": "/offline.py",
+    "accept_media": ["image/*", "video/*"],
     "database_filename": "test",
+    "allow_multiple_instance": true,
+    "shortcuts": {
+      "/env.html": "View Environment",
+      "/demo.html": "Greet",
+      "/data.py": "Decentralized Data"
+    },
     "cors": false,
     "routing": {
       "/user/<email>": "/profile.py"
     }
+  },
+  "publishing": {
+    "description": "An example application showcasing BevyFrame.",
+    "screenshots": []
   },
   "accounts": {
     "default_network": "hereus.net",

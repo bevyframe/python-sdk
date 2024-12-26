@@ -121,7 +121,7 @@ class Context:
     def render_template(self, template: str, **kwargs) -> (Response, str):
         functions = '''
             const _bridge = (func, ...args) => {
-                fetch(`${location.protocol}//${location.host}/.well_known/bevyframe/proxy`,{
+                fetch(`${location.protocol}//${location.host}/.well-known/bevyframe/proxy`,{
                     method:'POST',headers:{'Content-Type':'application/json'},
                     body:JSON.stringify({func:func,args:args})
                 }).then(res => res.json()).then(data => {

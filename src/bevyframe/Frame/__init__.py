@@ -10,7 +10,7 @@ from bevyframe.Frame.error_handler import error_handler
 from bevyframe.Frame.route import route
 from bevyframe.Frame.default_logging import default_logging
 from bevyframe.Frame.Run.Responser import responser
-from bevyframe.Frame.Run.WSGI_Receiver import wsgi_receiver
+from bevyframe.Frame.Run.Receiver import receiver
 from bevyframe.Features.Style import compile_object as compile_style
 from bevyframe.Helpers.Identifiers import https_codes
 from bevyframe.Features.Database import Database
@@ -117,7 +117,7 @@ class Frame:
     def __call__(self, environ, start_response):
         if self.__wsgi_server:
             self.debug = False
-        recv, req_time, r, display_status_code = wsgi_receiver(self, environ)
+        recv, req_time, r, display_status_code = receiver(self, environ)
         resp, display_status_code = responser(self, recv, req_time, r, display_status_code)
         start_response(f"{resp.status_code} {https_codes[resp.status_code].upper()}", [(str(i), str(resp.headers[i])) for i in resp.headers])
         print(f'\r({resp.status_code})' if display_status_code else '')
