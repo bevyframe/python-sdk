@@ -154,9 +154,20 @@ def build_frame(*args) -> tuple[Frame, dict]:
 
 
 def run(*args) -> int:
-    app, runtime_args = build_frame(*args)
-    app.run(host=runtime_args['host'], port=runtime_args['port'], debug=runtime_args['debug'])
-    return 0
+    if len(args) == 0:
+        print("Platform not provided. web/ios/android/nt/macos/snap/flatpak/luos")
+        return 1
+    if args[0] == 'web':
+        app, runtime_args = build_frame(*args)
+        app.run(host=runtime_args['host'], port=runtime_args['port'], debug=runtime_args['debug'])
+        return 0
+    elif args[0] in ['nt', 'macos', 'snap', 'flatpak']:
+        try:
+            from bevyframe.Platforms.Desktop import Desktop
+            return Desktop().start()
+        except ModuleNotFoundError:
+            print(f"SDK for {args[0]} is not installed.\n")
+            return 1
 
 
 def dispatcher(*args) -> int:

@@ -30,6 +30,15 @@ Chat = "https://lemmy.today/c/bevyframe"
 [project.scripts]
 bevyframe = "bevyframe:cmdline"
 
+[project.optional-dependencies]
+ios = []
+android = []
+nt = ["pywebview==5.3.2", "psutil==6.1.1"]
+macos = ["pywebview==5.3.2", "psutil==6.1.1"]
+snap = ["pywebview==5.3.2", "psutil==6.1.1"]
+flatpak = ["pywebview==5.3.2", "psutil==6.1.1"]
+luos = []
+
 [build-system]
 requires = ["setuptools","wheel"]
 build-backend = "setuptools.build_meta"
