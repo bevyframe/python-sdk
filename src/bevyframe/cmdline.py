@@ -12,7 +12,7 @@ import importlib.util
 def init(*args) -> int:
     if os.system("which pymake > /dev/null 2>&1") != 0:
         print("ERROR: pymake is not installed")
-        input("Please create your standard Python environment, then click any key...")
+        input("Please create your standard Python environment, then click any key to continue...")
     else:
         print('\n', end='', flush=True)
         os.system("pymake init --no-module")
@@ -159,6 +159,15 @@ def run(*args) -> int:
     return 0
 
 
+def dispatcher(*args) -> int:
+    with open('./dispatcher.json', 'w') as f:
+        f.write(json.dumps({
+            "@context": "https://bevyframe.islekcaganmert.me/ns/dispatcher",
+            "domains": {}
+        }))
+    return 0
+
+
 def cmdline() -> int:
     sys.path.insert(0, './')
     args = sys.argv[1:]
@@ -174,6 +183,8 @@ def cmdline() -> int:
         ret = run(*args)
     elif command == "main":
         ret = main(*args)
+    elif command == "dispatcher":
+        ret = dispatcher(*args)
     else:
         print("Unknown command")
         ret = 1

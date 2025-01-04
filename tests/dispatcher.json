@@ -1,0 +1,6 @@
+{
+  "@context": "https://bevyframe.islekcaganmert.me/ns/dispatcher",
+  "domains": {
+    "demo.localhost": "demo"
+  }
+}
