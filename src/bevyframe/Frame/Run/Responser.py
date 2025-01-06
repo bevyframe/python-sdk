@@ -1,6 +1,7 @@
 import importlib.util
 import json
 import os
+import subprocess
 import traceback
 import importlib.metadata
 from datetime import datetime, UTC
@@ -116,19 +117,33 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
                                     resp = self.error_handler(r, 405, '')
                             except FileNotFoundError:
                                 resp = self.error_handler(r, 404, '')
+                        elif file_path.endswith('.html'):
+                            resp = r.render_template(file_path.removeprefix('./pages/'))
+                        elif (
+                            "x" in
+                            subprocess.check_output(["ls", "-l", file_path]).decode().strip().strip('\n').split(' ')[0]
+                        ):
+                            lines: list[bytes] = bytes(subprocess.check_output([file_path])).split(b'\n')
+                            _p, status_code, *_a = lines.pop(0).split(b' ')
+                            status_code = int(status_code.decode())
+                            headers = {}
+                            while lines[0] != b'':
+                                l = lines.pop(0)
+                                t = l.split(b': ', 1)
+                                headers.update({t[0].decode(): t[1].decode()})
+                            lines.pop(0)
+                            body = b'\n'.join(lines)
+                            resp = r.create_response(body, headers=headers, status_code=status_code)
                         else:
-                            if file_path.endswith('.html'):
-                                resp = r.render_template(file_path.removeprefix('./pages/'))
-                            else:
-                                with open(file_path, 'rb') as f:
-                                    resp = r.create_response(
-                                        f.read(),
-                                        headers={
-                                            'Content-Type': mimetypes.types_map.get(f".{file_path.split('.')[-1]}", 'plain/text'),
-                                            'Content-Length': len(f.read()),
-                                            'Connection': 'keep-alive'
-                                        }
-                                    )
+                            with open(file_path, 'rb') as f:
+                                resp = r.create_response(
+                                    f.read(),
+                                    headers={
+                                        'Content-Type': mimetypes.types_map.get(f".{file_path.split('.')[-1]}", 'plain/text'),
+                                        'Content-Length': len(f.read()),
+                                        'Connection': 'keep-alive'
+                                    }
+                                )
         except Error404:
             resp = self.error_handler(r, 404, '')
         except Exception:
