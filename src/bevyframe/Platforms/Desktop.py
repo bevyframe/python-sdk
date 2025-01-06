@@ -74,23 +74,7 @@ class Desktop:
             url=f"http://127.0.0.1:{self.port}/",
             min_size=(520, 390)
         )
-        self.menu = [
-            wm.Menu(
-                'Test Menu',
-                [
-                    wm.MenuAction('Change Active Window Content', lambda: None),
-                    wm.MenuSeparator(),
-                    wm.Menu(
-                        'Random',
-                        [
-                            wm.MenuAction('Click Me', lambda: None),
-                            wm.MenuAction('File Dialog', lambda: None),
-                        ],
-                    ),
-                ],
-            ),
-            wm.Menu('Nothing Here', [wm.MenuAction('This will do nothing', lambda: None)]),
-        ]
+        self.menu = []  # WORK ON THIS
 
     def start(self) -> int:
         webview.start(
