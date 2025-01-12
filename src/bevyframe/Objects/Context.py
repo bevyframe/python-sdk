@@ -46,6 +46,24 @@ class Browser:
             self.version = ''
 
 
+class Run:
+    def __init__(self, commands: list[str]) -> None:
+        self.commands = commands
+
+    def __getattr__(self, name: str) -> callable:
+        return Run(self.commands + [name])
+
+    def __call__(self, *args) -> None:
+        self.commands[-1] = self.commands[-1] + '(' + ', '.join(repr(arg) for arg in args) + ')'
+        return self
+
+    def __str__(self) -> str:
+        return '.'.join(self.commands)
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+
 class Context:
     def __init__(self, data: dict, app) -> None:
         self.method = data['method']
@@ -101,6 +119,10 @@ class Context:
     @property
     def db(self) -> Database:
         return self.app.db
+
+    @property
+    def execute(self) -> Run:
+        return Run([])
 
     @property
     def user(self) -> Session:

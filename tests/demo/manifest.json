@@ -4,6 +4,7 @@
     "name": "BevyFrame Test App",
     "short_name": "Test App",
     "orientation": "any",
+    "version": "1.0.0",
     "package": "com.example.demo",
     "style": "hereus_ui_3_2",
     "icon": "/assets/favicon.png",
@@ -42,7 +43,15 @@
       "port": 80
     },
     "ios": false,
-    "android": false,
+    "android": {
+      "api_level": [33, 35],
+      "permissions": [],
+      "features": [],
+      "adaptive_icon": {
+        "foreground": "",
+        "background": ""
+      }
+    },
     "nt": false,
     "macos": false,
     "snap": false,

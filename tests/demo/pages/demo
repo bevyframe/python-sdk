@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "bash 200"
+echo "Content-Type: text/plain"
+echo "Hello World\n"
