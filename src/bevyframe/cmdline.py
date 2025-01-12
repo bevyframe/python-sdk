@@ -196,19 +196,6 @@ def cmdline() -> int:
         ret = main(*args)
     elif command == "dispatcher":
         ret = dispatcher(*args)
-    elif command == "build":
-        if len(args) == 0:
-            print("Platform not specified.")
-            ret = 1
-        if args[0] == 'macos':
-            pass
-        elif args[0] == 'snap':
-            pass
-        elif args[0] == 'flatpak':
-            pass
-        else:
-            print(f"Unknown platform")
-            ret = 1
     else:
         print("Unknown command")
         ret = 1
