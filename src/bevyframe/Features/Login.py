@@ -9,7 +9,7 @@ import os
 class totp:
     @staticmethod
     def create_secret() -> str:
-        return base64.b32encode(os.urandom(20)).decode()
+        return base64.b32encode(os.urandom(30)).decode()
 
     @staticmethod
     def generate(secret: str) -> str:
