@@ -9,7 +9,14 @@ from bevyframe.Features.Database import Database
 from bevyframe.Objects.Response import Response
 from bevyframe.Widgets.Page import Page
 from bevyframe.Helpers.LazyInitDict import LazyInitDict
-from bevyframe.wsgi import app
+
+default_keys = [
+    'method', 'path', 'headers', 'browser', 'ip', 'query',
+    'env', 'tp', 'body', 'form', 'email', 'token', 'data',
+    'preferences', 'app', 'cookies', 'not_locked', 'user',
+    'db', 'get_asset', 'render_template', 'start_redirect',
+    'create_response', 'execute', 'json',
+]
 
 
 def lazy_init_data(con) -> Callable[[Any], None]:
@@ -67,123 +74,56 @@ class Run:
 
 class Context:
     def __init__(self, data: dict, app) -> None:
-        self._method = data['method']
-        self._path = data['path'].split('?')[0]
-        self._headers = data['headers']
-        self._browser = Browser(self.headers)
-        self._ip = data.get('ip', '127.0.0.1')
-        self._query = {}
-        self._env = app.environment() if callable(app.environment) else app.environment
-        if not isinstance(self._env, dict):
-            self._env = {}
-        self._tp = app.tp
+        self.not_locked = True
+        self.app = app
+        self.method = data['method']
+        self.path = data['path'].split('?')[0]
+        self.headers = data['headers']
+        self.browser = Browser(self.headers)
+        self.ip = data.get('ip', '127.0.0.1')
+        self.query = {}
+        self.env = app.environment() if callable(app.environment) else app.environment
+        if not isinstance(self.env, dict):
+            self.env = {}
+        self.tp = app.tp
         while data['body'].endswith('\r\n'):
             data['body'] = data['body'].removesuffix('\r\n')
         while data['body'].startswith('\r\n'):
             data['body'] = data['body'].removeprefix('\r\n')
-        self._body = urllib.parse.unquote(data['body'].replace('+', ' '))
-        self._form = {}
+        self.body = urllib.parse.unquote(data['body'].replace('+', ' '))
+        self.form = {}
         for b in data['body'].split('\r\n'):
             for i in b.split('&'):
                 if '=' in i:
-                    self._form.update({
+                    self.form.update({
                         urllib.parse.unquote(i.split('=')[0].replace('+', ' ')): urllib.parse.unquote(i.split('=')[1].replace('+', ' '))
                     })
         if '?' in data['path']:
             for i in data['path'].split('?')[1].split('&'):
                 if '=' in i:
-                    self._query.update({
+                    self.query.update({
                         urllib.parse.unquote(i.split('=')[0].replace('+', ' ')): urllib.parse.unquote(i.split('=')[1].replace('+', ' '))
                     })
                 else:
-                    self._query.update({
+                    self.query.update({
                         urllib.parse.unquote(i): True
                     })
         try:
-            self._email = data['credentials']['email']
-            self._token = data['credentials'].get('token', None)
-            self._password = data['credentials'].get('password', None)
+            self.email = data['credentials']['email']
+            self.token = data['credentials'].get('token', None)
+            # self.password = data['credentials'].get('password', None)
         except KeyError:
-            self._email = 'Guest@' + app.default_network
-            self._token = ''
-        self._user = None
-        self._data = LazyInitDict(lazy_init_data(self))
-        self._preferences = LazyInitDict(lazy_init_pref(self))
-        self._app = app
-        self._tp: TheProtocols = app.tp
-        self._cookies = {}
-        if 'Cookie' in self._headers:
-            for cookie in self._headers['Cookie'].split('; '):
+            self.email = 'Guest@' + app.default_network
+            self.token = ''
+        self.data = LazyInitDict(lazy_init_data(self))
+        self.preferences = LazyInitDict(lazy_init_pref(self))
+        self.tp: TheProtocols = app.tp
+        self.cookies = {}
+        if 'Cookie' in self.headers:
+            for cookie in self.headers['Cookie'].split('; '):
                 if '=' in cookie:
-                    self._cookies.update({cookie.split('=')[0]: cookie.split('=')[1]})
-
-    @property
-    def method(self) -> str:
-        return self._method
-
-    @property
-    def path(self) -> str:
-        return self._path
-
-    @property
-    def headers(self) -> dict:
-        return self._headers
-
-    @property
-    def browser(self) -> Browser:
-        return self._browser
-
-    @property
-    def ip(self) -> str:
-        return self._ip
-
-    @property
-    def query(self) -> dict:
-        return self._query
-
-    @property
-    def env(self) -> dict:
-        return self._env
-
-    @property
-    def form(self) -> dict:
-        return self._form
-
-    @property
-    def email(self) -> str:
-        return self._email
-
-    @property
-    def token(self) -> str:
-        return self._token
-
-    @property
-    def password(self) -> str:
-        return self._password
-
-    @property
-    def user(self) -> str:
-        return self._user
-
-    @property
-    def data(self) -> LazyInitDict:
-        return self._data
-
-    @property
-    def preferences(self) -> LazyInitDict:
-        return self._preferences
-
-    @property
-    def app(self) -> any:
-        return self._app
-
-    @property
-    def tp(self) -> TheProtocols:
-        return self._tp
-
-    @property
-    def cookies(self) -> dict:
-        return self._cookies
+                    self.cookies.update({cookie.split('=')[0]: cookie.split('=')[1]})
+        self.not_locked = False
 
     @property
     def db(self) -> Database:
@@ -257,4 +197,23 @@ class Context:
 
     @property
     def json(self) -> Any:
-        return json.loads(self._body)
+        return json.loads(self.body)
+
+    def __setattr__(self, name: str, value: any) -> None:
+        if name in default_keys and self.not_locked:
+            object.__setattr__(self, name, value)
+            return
+        if self.email not in self.app.vars:
+            self.app.vars[self.email] = {}
+        return self.app.vars[self.email].update({name: value})
+
+    def __getattr__(self, name: str) -> any:
+        if name in default_keys:
+            if name == 'not_locked' and 'not_locked' not in self.__dict__:
+                return True
+            object.__getattribute__(self, name)
+        return self.app.vars.get(self.email, {}).get(name, None)
+
+    def __delattr__(self, name: str) -> None:
+        if self.email not in self._app.vars and name in self.app.vars[self.email]:
+            del self.app.vars[name]

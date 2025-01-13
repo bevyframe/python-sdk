@@ -12,6 +12,7 @@ def activity(context: Context) -> Activity:
 
 def get(context: Context) -> Page:
     u = User(context.query['email'])
+    context.last_visited_profile = context.query['email']
     return Page(
         title='',
         description='',

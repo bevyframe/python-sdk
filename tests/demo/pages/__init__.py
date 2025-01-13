@@ -22,6 +22,7 @@ def get(context: Context) -> (Page, Response):
             Label(f"Your device has {context.browser.ram} GB of RAM"),
             Label(f"Your bandwith is {context.browser.bandwidth} Mbps"),
             Label(f"Your network type is {context.browser.network_profile}"),
+            Label(f"Your last visited profile is {context.last_visited_profile}"),
             Box(
                 width=Size.max_content,
                 text_align=Align.center,

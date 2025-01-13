@@ -31,6 +31,7 @@ class Frame:
             cors=False,
             did=None
     ) -> None:
+        self.vars = {}
         self.cors = cors
         self.environment = environment if environment else {}
         self.loginview = loginview
