@@ -113,6 +113,8 @@ def responser(self, recv, req_time, r: Context, display_status_code: int):
                                         resp = self.error_handler(r, 500, 'Activity must return `Activity`')
                                 elif recv['method'].lower() in page_script.__dict__:
                                     resp = getattr(page_script, recv['method'].lower())(r)
+                                elif 'application' in page_script.__dict__:
+                                    return getattr(page_script, 'application'), display_status_code
                                 else:
                                     resp = self.error_handler(r, 405, '')
                             except FileNotFoundError:

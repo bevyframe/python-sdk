@@ -41,7 +41,7 @@ class WSGIHandler(BaseHTTPRequestHandler):
         status = ""
         headers = []
 
-        def start_response(status_line, response_headers) -> None:
+        def start_response(status_line, response_headers):
             nonlocal status, headers
             status = status_line
             headers = response_headers
