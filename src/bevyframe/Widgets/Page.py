@@ -1,5 +1,6 @@
 import json
 import bevyframe.Features.Style as Style
+from bevyframe.Features.BridgeJS import client_side_bridge
 from bevyframe.Widgets.Widget import Widget
 
 
@@ -67,6 +68,7 @@ class Page:
                     Widget('title', innertext=self.title)
                 ] + og + [
                     Widget('script', innertext=f'const bf_db = {json.dumps(self.db)}'),
+                    Widget('script', innertext=client_side_bridge()),
                     Widget('style', innertext=Style.compile_object(self.style))
                 ]
             ),

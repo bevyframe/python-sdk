@@ -4,7 +4,7 @@ from TheProtocols import *
 from typing import Any, Callable
 import json
 import jinja2
-import os
+from bevyframe.Features.BridgeJS import client_side_bridge
 from bevyframe.Features.Database import Database
 from bevyframe.Objects.Response import Response
 from bevyframe.Widgets.Page import Page
@@ -141,31 +141,6 @@ class Context:
         return self._user
 
     def render_template(self, template: str, **kwargs) -> (Response, str):
-        functions = '''
-            const _bridge = (func, ...args) => {
-                fetch(`${location.protocol}//${location.host}/.well-known/bevyframe/proxy`,{
-                    method:'POST',headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({func:func,args:args})
-                }).then(res => res.json()).then(data => {
-                    if (data.error) {throw new Error(data.error);}
-                    else if (data.type === 'return') {return data.value;}
-                    else if (data.type === 'script') {eval(data.value);}
-                    else if (data.type === 'view') {
-                        if (data.element === 'body') {document.body.innerHTML = data.value;}
-                        else {document.querySelector(data.element).innerHTML = data.value;}
-                    }
-                }).catch(err => {  });
-            };
-        '''
-        for i in os.listdir('./functions/'):
-            if i.endswith('.py'):
-                i = i[:-3]
-                functions += " const " + i + " = (...args) => {_bridge('" + i + "', ...args)};"
-        functions = (functions
-                     .replace('    ', '')
-                     .replace('  ', ' ')
-                     .replace('\n', '')
-                     .strip())
         with open("./pages/" + template.removeprefix('/')) as f:
             html = f.read()
             if '<body' in html:
@@ -176,7 +151,7 @@ class Context:
             return jinja2.Template(html).render(
                 context=self,
                 style=f"<style>{self.app.style}</style>",
-                functions=f"<script>{functions}</script>",
+                functions=f"<script>{client_side_bridge()}</script>",
                 safe=lambda x: x.replace('<', '&lt;').replace('>', '&gt;'),
                 **kwargs
             )
