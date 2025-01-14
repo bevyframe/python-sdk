@@ -37,13 +37,26 @@ def init(*_) -> int:
     manifest = {
         "@context": "https://bevyframe.islekcaganmert.me/ns/manifest",
         "app": {
+            "name": project_name,
+            "short_name": project_name,
+            "orientation": "any",
+            "version": "1.0.0",
             "package": input("Package: "),
             "style": input("\nStyle name or CSS URL/path: "),
-            "icon": "/.assets/favicon.png",
-            "loginview": "/Login.py",
+            "icon": "/assets/favicon.png",
+            "loginview": "/login.py",
+            "shareview": "/share.py",
+            "offlineview": "/offline.py",
+            "accept_media": [],
             "database_filename": "app",
+            "allow_multiple_instance": True,
+            "shortcuts": {},
             "cors": False,
             "routing": {}
+        },
+        "publishing": {
+            "description": input('Description: '),
+            "screenshots": []
         },
         "accounts": {
             "default_network": input("\nDefault Network: "),
@@ -60,7 +73,15 @@ def init(*_) -> int:
                 "port": 80
             },
             "ios": False,
-            "android": False,
+            "android": {
+            "api_level": [33, 35],
+                "permissions": [],
+                "features": [],
+                "adaptive_icon": {
+                    "foreground": "",
+                    "background": ""
+                }
+            },
             "nt": False,
             "macos": False,
             "snap": False,
@@ -74,6 +95,9 @@ def init(*_) -> int:
     os.remove('./requirements.txt')
     os.remove('./pages/main.py')
     os.system("bevyframe new / '" + project_name.replace('\'', '\\\'') + "'")
+    os.system("bevyframe new /login.py 'Login - " + project_name.replace('\'', '\\\'') + "'")
+    os.system("bevyframe new /share.py '" + project_name.replace('\'', '\\\'') + "'")
+    os.system("bevyframe new /offline.py '" + project_name.replace('\'', '\\\'') + "'")
     frame = build_frame([])[0]
     frame.db.create_all()
     print()
