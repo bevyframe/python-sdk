@@ -3,10 +3,10 @@ class Activity:
         self.properties = kwargs
         self.context = []
 
-    def add_context(self, item) -> None:
+    def add_context(self, item: (str, dict)) -> None:
         self.context.append(item)
 
-    def remove_context(self, item) -> None:
+    def remove_context(self, item: (str, dict)) -> None:
         self.context.remove(item)
 
     def render(self) -> dict:

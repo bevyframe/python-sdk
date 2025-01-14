@@ -5,8 +5,8 @@ import os
 
 
 class JavaScript:
-    def __init__(self, script) -> None:
-        self.script = script
+    def __init__(self, script: str) -> None:
+        self.script: str = script
 
     def __repr__(self) -> str:
         return self.script
@@ -17,8 +17,8 @@ class JavaScript:
 
 class change_html:
     def __init__(self, tag: str, html: str) -> None:
-        self.tag = tag
-        self.html = html
+        self.tag: str = tag
+        self.html: str = html
 
     def __dict__(self) -> dict:
         return {self.tag: self.html}

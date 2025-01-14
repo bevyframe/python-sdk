@@ -9,7 +9,7 @@ import importlib
 import importlib.util
 
 
-def init(*args) -> int:
+def init(*_) -> int:
     if os.system("which pymake > /dev/null 2>&1") != 0:
         print("ERROR: pymake is not installed")
         input("Please create your standard Python environment, then click any key to continue...")
@@ -101,7 +101,7 @@ def get(context: Context) -> Page:
     return 0
 
 
-def build_frame(*args) -> tuple[Frame, dict]:
+def build_frame(*_) -> tuple[Frame, dict]:
     if 'manifest.json' not in os.listdir('./'):
         print('\nNo manifest.json found. This project is available for managed run.')
         print('Please run your app via `pymake run` or `cd src && python main.py && cd ..`\n')
@@ -170,7 +170,7 @@ def run(*args) -> int:
             return 1
 
 
-def dispatcher(*args) -> int:
+def dispatcher(*_) -> int:
     with open('./dispatcher.json', 'w') as f:
         f.write(json.dumps({
             "@context": "https://bevyframe.islekcaganmert.me/ns/dispatcher",

@@ -43,7 +43,7 @@ class BorderLine:
     hidden = 'hidden'
 
 
-def Border(width, style, color):
+def Border(width: str, style: str, color: str) -> str:
     return f"{width} {style} {color}"
 
 
@@ -125,7 +125,7 @@ class Size:
 
 
 class FourSided:
-    def __init__(self, top=None, right=None, bottom=None, left=None):
+    def __init__(self, top=None, right=None, bottom=None, left=None) -> None:
         self.top = top
         self.right = right
         self.bottom = bottom
@@ -133,7 +133,7 @@ class FourSided:
 
 
 class Coordinate:
-    def __init__(self, x=None, y=None):
+    def __init__(self, x=None, y=None) -> None:
         self.x = x
         self.y = y
 
@@ -153,37 +153,37 @@ class Padding(FourSided):
 class Position:
 
     class absolute(FourSided):
-        def __init__(self, top=None, right=None, bottom=None, left=None):
+        def __init__(self, top=None, right=None, bottom=None, left=None) -> None:
             self.item = 'absolute'
             super().__init__(top, right, bottom, left)
 
     class relative(FourSided):
-        def __init__(self, top=None, right=None, bottom=None, left=None):
+        def __init__(self, top=None, right=None, bottom=None, left=None) -> None:
             self.item = 'relative'
             super().__init__(top, right, bottom, left)
 
     class fixed(FourSided):
-        def __init__(self, top=None, right=None, bottom=None, left=None):
+        def __init__(self, top=None, right=None, bottom=None, left=None) -> None:
             self.item = 'fixed'
             super().__init__(top, right, bottom, left)
 
     class sticky(FourSided):
-        def __init__(self, top=None, right=None, bottom=None, left=None):
+        def __init__(self, top=None, right=None, bottom=None, left=None) -> None:
             self.item = 'sticky'
             super().__init__(top, right, bottom, left)
 
 
-def add_style(p1, p2):
+def add_style(p1, p2) -> str:
     return f"calc({p1} + {p2})"
 
 
-def substract_style(p1, p2):
+def substract_style(p1, p2) -> str:
     return f"calc({p1} - {p2})"
 
 
-def multiply_style(p1, p2):
+def multiply_style(p1, p2) -> str:
     return f"calc({p1} * {p2})"
 
 
-def divide_style(p1, p2):
+def divide_style(p1, p2) -> str:
     return f"calc({p1} / {p2})"

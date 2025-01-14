@@ -3,7 +3,7 @@ from bevyframe.Features.Login import get_session
 from bevyframe.Objects.Context import Context
 
 
-def receiver(self, environ):
+def receiver(self, environ: dict) -> tuple[dict[str, (str, dict)], str, Context, bool]:
     req_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     recv = {
         'method': environ['REQUEST_METHOD'],

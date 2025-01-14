@@ -65,7 +65,7 @@ class Widget:
         elif item not in no_content_elements:
             raise WidgetContentEmptyError('Widget content is empty')
 
-    def render(self):
+    def render(self) -> str:
         gen = f'<{self.element}'
         if not self.style == {}:
             gen += f' style="{RenderCSS(self.style)}"'

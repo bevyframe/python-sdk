@@ -1,4 +1,4 @@
-def RenderCSS(style):
+def RenderCSS(style: (str, dict)) -> str:
     if isinstance(style, str):
         return style
     css = ''

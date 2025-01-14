@@ -7,6 +7,7 @@ from wsgiref.simple_server import WSGIServer
 logging.getLogger("http.server").setLevel(logging.CRITICAL)
 
 
+# noinspection PyUnresolvedReferences
 class WSGIHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         self.handle_request()
@@ -32,16 +33,11 @@ class WSGIHandler(BaseHTTPRequestHandler):
             "wsgi.multiprocess": False,
             "wsgi.run_once": False,
         }
-
         for key in self.headers:
             environ[f"HTTP_{key}"] = self.headers.get(key)
-
-        # Pass the environment to the WSGI app
-        response_body = []
         status = ""
         headers = []
-
-        def start_response(status_line, response_headers):
+        def start_response(status_line, response_headers) -> callable:
             nonlocal status, headers
             status = status_line
             headers = response_headers

@@ -32,25 +32,22 @@ class totp:
         return False
 
 
-def get_session_token(secret, email, token=None, password=None) -> str:
+def get_session_token(secret, email: str, token: str = None) -> str:
     return jwt.encode({
         'email': email,
         'token': token
-    } if token is not None else {
-        'email': email,
-        'password': password
     }, secret, algorithm='HS256')
 
 
-def get_session(secret, token) -> (dict, None):
+def get_session(secret: str, token: str) -> (dict, None):
     try:
         return jwt.decode(token, secret, algorithms=['HS256'])
     except jwt.exceptions.DecodeError:
         return None
 
 
-def login_required(func):
-    def wrapper(r, *args, **kwargs):
+def login_required(func) -> callable:
+    def wrapper(r, *args, **kwargs) -> any:
         if r.email.split('@')[0] == 'Guest':
             return r.start_redirect(f"/{r.app.loginview.removeprefix('/')}")
         else:

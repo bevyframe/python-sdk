@@ -1,8 +1,5 @@
-from typing import Any, Callable
-
-
 class LazyInitDict:
-    def __init__(self, init: Callable[[Any], None]) -> None:
+    def __init__(self, init: callable) -> None:
         self._data: dict = {}
         self._pre_data: dict = {}
         self._initialized = False
@@ -24,12 +21,12 @@ class LazyInitDict:
             self.initialize()
         return self._data
 
-    def __getitem__(self, key) -> Any:
+    def __getitem__(self, key: str) -> any:
         if not self._initialized:
             self.initialize()
         return self._data[key]
 
-    def __setitem__(self, key, value) -> None:
+    def __setitem__(self, key: str, value: any) -> None:
         if not self._initialized:
             self.initialize()
         self._data[key] = value
@@ -54,52 +51,52 @@ class LazyInitDict:
             self.initialize()
         return len(self._data)
 
-    def __contains__(self, item) -> bool:
+    def __contains__(self, item: str) -> bool:
         if not self._initialized:
             self.initialize()
         return item in self._data
 
-    def __delitem__(self, key) -> None:
+    def __delitem__(self, key: str) -> None:
         if not self._initialized:
             self.initialize()
         del self._data[key]
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: any) -> bool:
         if not self._initialized:
             self.initialize()
         return self._data == other
 
-    def __ne__(self, other) -> bool:
+    def __ne__(self, other: any) -> bool:
         if not self._initialized:
             self.initialize()
         return self._data != other
 
-    def __lt__(self, other) -> bool:
+    def __lt__(self, other: any) -> bool:
         if not self._initialized:
             self.initialize()
         return self._data < other
 
-    def __le__(self, other) -> bool:
+    def __le__(self, other: any) -> bool:
         if not self._initialized:
             self.initialize()
         return self._data <= other
 
-    def __gt__(self, other) -> bool:
+    def __gt__(self, other: any) -> bool:
         if not self._initialized:
             self.initialize()
         return self._data > other
 
-    def __ge__(self, other) -> bool:
+    def __ge__(self, other: any) -> bool:
         if not self._initialized:
             self.initialize()
         return self._data >= other
 
-    def update(self, other) -> None:
+    def update(self, other: any) -> None:
         if not self._initialized:
             self.initialize()
         self._data.update(other)
 
-    def keys(self):
+    def keys(self) -> any:
         if not self._initialized:
             self.initialize()
         return self._data.keys()
@@ -114,12 +111,12 @@ class LazyInitDict:
             self.initialize()
         return self._data.items()
 
-    def get(self, key, default=None) -> Any:
+    def get(self, key: str, default=None) -> any:
         if not self._initialized:
             self.initialize()
         return self._data.get(key, default)
 
-    def pop(self, key, default=None) -> Any:
+    def pop(self, key: str, default=None) -> any:
         if not self._initialized:
             self.initialize()
         return self._data.pop(key, default)
@@ -139,12 +136,12 @@ class LazyInitDict:
             self.initialize()
         return self._data.copy()
 
-    def fromkeys(self, seq, value=None) -> dict:
+    def fromkeys(self, seq: iter, value=None) -> dict:
         if not self._initialized:
             self.initialize()
         return self._data.fromkeys(seq, value)
 
-    def setdefault(self, key, default=None) -> Any:
+    def setdefault(self, key: str, default=None) -> any:
         if not self._initialized:
             self.initialize()
         return self._data.setdefault(key, default)

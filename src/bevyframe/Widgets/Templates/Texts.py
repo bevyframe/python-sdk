@@ -2,7 +2,7 @@ from bevyframe.Widgets.Widget import Widget
 
 
 class Label(Widget):
-    def __init__(self, innertext, no_newline=False, **kwargs):
+    def __init__(self, innertext: str, no_newline: bool = False, **kwargs) -> None:
         if no_newline:
             super().__init__('a', childs=[innertext], **kwargs)
         else:
@@ -10,17 +10,17 @@ class Label(Widget):
 
 
 class Bold(Widget):
-    def __init__(self, innertext):
+    def __init__(self, innertext: str) -> None:
         super().__init__('b', innertext=innertext)
 
 
 class Italic(Widget):
-    def __init__(self, innertext):
+    def __init__(self, innertext: str) -> None:
         super().__init__('i', innertext=innertext)
 
 
 class Link(Widget):
-    def __init__(self, innertext, url, external=False, selector=None, **kwargs):
+    def __init__(self, innertext: str, url: str, external: bool = False, selector: str = None, **kwargs) -> None:
         super().__init__(
             'a',
             innertext=innertext,
@@ -32,15 +32,15 @@ class Link(Widget):
 
 
 class Title(Widget):
-    def __init__(self, innertext, **kwargs):
+    def __init__(self, innertext: str, **kwargs) -> None:
         super().__init__('h1', innertext=innertext, **kwargs)
 
 
 class SubTitle(Widget):
-    def __init__(self, innertext, **kwargs):
+    def __init__(self, innertext: str, **kwargs) -> None:
         super().__init__('h2', innertext=innertext, **kwargs)
 
 
 class Heading(Widget):
-    def __init__(self, innertext, **kwargs):
+    def __init__(self, innertext: str, **kwargs) -> None:
         super().__init__('h3', innertext=innertext, **kwargs)

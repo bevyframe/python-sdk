@@ -7,7 +7,6 @@ import subprocess
 import sys
 import psutil
 import webview
-import webview.menu as wm
 from bevyframe.cmdline import build_frame
 
 sys.argv[0] = 'bevyframe'

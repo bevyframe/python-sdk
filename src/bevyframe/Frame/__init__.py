@@ -1,7 +1,8 @@
 import importlib.metadata
 import sys
-from typing import Any
 import os
+
+from bevyframe.Objects.Context import Context
 from bevyframe.Objects.Response import Response
 import requests
 from TheProtocols import *
@@ -20,16 +21,15 @@ from bevyframe.Frame.Run.wsgi_runner import make_server
 class Frame:
     def __init__(
             self,
-            package,
-            secret,
-            permissions,
-            style,
-            icon='/favicon.ico',
-            default_network='hereus.net',
+            package: str,
+            secret: str,
+            permissions: list[str],
+            style: any,
+            icon: str = '/favicon.ico',
+            default_network: str = 'hereus.net',
             loginview='Login.py',
-            environment=None,
-            cors=False,
-            did=None
+            environment: (dict, callable) = None,
+            cors: bool = False
     ) -> None:
         self.vars = {}
         self.cors = cors
@@ -65,14 +65,6 @@ class Frame:
         self.icon = icon
         self.default_logging_str = None
         self.db: (Database, None) = None
-        if did:
-            self.route('/.well-known/atproto-did')(lambda request: Response(
-                body=did,
-                credentials={},
-                headers={'content_type': 'plain/text'},
-                status_code=200,
-                app=self
-            ))
         self.__wsgi_server = None if sys.argv[0].endswith('.py') else sys.argv[0].split("/")[-1]
         if sys.argv[0].split('/')[-1] == 'bevyframe':
             self.__wsgi_server = None
@@ -86,17 +78,17 @@ class Frame:
             print(f" * Running via {sys.argv[0].split('/')[-1]}")
         print()
 
-    def error_handler(self, request, status_code, exception) -> Response:
+    def error_handler(self, request: Context, status_code: int, exception: str) -> Response:
         return error_handler(self, request, status_code, exception)
 
-    def route(self, path, whitelist: list = None, blacklist: list = None) -> Any:
+    def route(self, path: str, whitelist: list = None, blacklist: list = None) -> any:
         return route(self, path, whitelist, blacklist)
 
-    def default_logging(self, func):
+    def default_logging(self, func: callable) -> callable:
         return default_logging(self, func)
 
     @property
-    def reverse_routes(self) -> dict:
+    def reverse_routes(self) -> dict[str, str]:
         return {self.routes[i]: i for i in self.routes}
 
     def run(self, host: str = '127.0.0.1', port: int = 5000, debug: bool = False):
@@ -115,7 +107,7 @@ class Frame:
             except KeyboardInterrupt:
                 print('\r  \nServer was been terminated!\n')
 
-    def __call__(self, environ, start_response):
+    def __call__(self, environ: dict, start_response: callable) -> list[bytes]:
         if self.__wsgi_server:
             self.debug = False
         recv, req_time, r, display_status_code = receiver(self, environ)
@@ -133,6 +125,6 @@ class Frame:
                 return start_response(status, headers)
             return resp(environ, _start_response)
 
-    def __del__(self):
+    def __del__(self) -> None:
         if self.__wsgi_server:
             print(f"\nReturning control is back to {self.__wsgi_server}...")

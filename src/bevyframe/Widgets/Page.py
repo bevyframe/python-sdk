@@ -5,7 +5,7 @@ from bevyframe.Widgets.Widget import Widget
 
 
 class Page:
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         self.content = []
         self.data = {
             'lang': 'en',
@@ -44,13 +44,13 @@ class Page:
             else:
                 self.data.update({arg: kwargs[arg]})
 
-    def __getattr__(self, item):
+    def __getattr__(self, item) -> any:
         return self.data[item]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.render()
 
-    def render(self):
+    def render(self) -> str:
         og = []
         for i in self.OpenGraph:
             og.append(Widget('meta', name=f'og:{i}', content=self.OpenGraph[i]))

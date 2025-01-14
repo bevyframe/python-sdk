@@ -1,13 +1,15 @@
 import importlib.util
 import importlib
 import os
+
+from bevyframe.Objects.Context import Context
 from bevyframe.Widgets.Page import Page
 from bevyframe.Objects.Response import Response
 from bevyframe.Helpers.Identifiers import *
 from bevyframe.Widgets.Widget import Widget
 
 
-def error_handler(self, request, status_code, exception) -> Response:
+def error_handler(self, request: Context, status_code: int, exception: str) -> Response:
     # noinspection PyBroadException
     try:
         page_script_spec = importlib.util.spec_from_file_location(

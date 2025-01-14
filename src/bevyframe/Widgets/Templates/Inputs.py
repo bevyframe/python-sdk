@@ -3,27 +3,27 @@ from bevyframe.Widgets.Style import *
 
 
 class TextArea(Widget):
-    def __init__(self, name, **kwargs):
+    def __init__(self, name: str, **kwargs) -> None:
         super().__init__('textarea', selector='textarea', id=name, name=name, **kwargs)
 
 
 class Textbox(Widget):
-    def __init__(self, name, selector='', **kwargs):
+    def __init__(self, name: str, selector='', **kwargs) -> None:
         super().__init__('input', selector=f'textbox {selector}', id=name, name=name, **kwargs)
 
 
 class Button(Widget):
-    def __init__(self, selector='', **kwargs):
+    def __init__(self, selector: str = '', **kwargs) -> None:
         super().__init__('button', selector=f'button {selector}', **kwargs)
 
 
 class Form(Widget):
-    def __init__(self, method, childs):
+    def __init__(self, method: str, childs: list) -> None:
         super().__init__('form', method=method, childs=childs)
 
 
 class FAB(Widget):
-    def __init__(self, onclick, **kwargs):
+    def __init__(self, onclick: any, **kwargs) -> None:
         super().__init__(
             'button',
             selector='button mini',

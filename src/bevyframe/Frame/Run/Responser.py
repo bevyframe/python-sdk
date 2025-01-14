@@ -16,12 +16,12 @@ from bevyframe.Objects.Response import Response
 from bevyframe.Widgets.Page import Page
 from bevyframe.Features.Style import compile_object as compile_to_css
 from bevyframe.Features.Bridge import process_proxy
+from bevyframe.Widgets.Widget import Widget
 import mimetypes
 
-from bevyframe.Widgets.Widget import Widget
 
 
-def responser(self, recv, req_time, r: Context, display_status_code: int):
+def responser(self, recv: dict[str, (str, dict)], req_time: str, r: Context, display_status_code: bool) -> tuple[(Response, callable), bool]:
     resp = None
     path = recv['path']
     reverse_routes = self.reverse_routes

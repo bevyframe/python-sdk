@@ -61,7 +61,7 @@ class Run:
     def __getattr__(self, name: str) -> callable:
         return Run(self.commands + [name])
 
-    def __call__(self, *args) -> None:
+    def __call__(self, *args) -> "Run":
         self.commands[-1] = self.commands[-1] + '(' + ', '.join(repr(arg) for arg in args) + ')'
         return self
 
@@ -133,6 +133,7 @@ class Context:
     def execute(self) -> Run:
         return Run([])
 
+    # noinspection PyAttributeOutsideInit
     @property
     def user(self) -> Session:
         if self._user is None:
