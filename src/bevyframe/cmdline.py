@@ -31,7 +31,7 @@ def init(*_) -> int:
     os.mkdir('assets')
     os.mkdir('functions')
     with open('models.py', 'w') as f:
-        f.write('from bevyframe import *\nBase = DeclarativeBase()\n')
+        f.write('from bevyframe import *\n\nclass Base(DeclarativeBase):\n\tpass\n\n')
     with open('README.md') as f:
         project_name = f.read().splitlines()[0].removeprefix('# ')
     manifest = {
@@ -55,7 +55,7 @@ def init(*_) -> int:
             "routing": {}
         },
         "publishing": {
-            "description": input('Description: '),
+            "description": input('\nDescription: '),
             "screenshots": []
         },
         "accounts": {
@@ -98,8 +98,6 @@ def init(*_) -> int:
     os.system("bevyframe new /login.py 'Login - " + project_name.replace('\'', '\\\'') + "'")
     os.system("bevyframe new /share.py '" + project_name.replace('\'', '\\\'') + "'")
     os.system("bevyframe new /offline.py '" + project_name.replace('\'', '\\\'') + "'")
-    frame = build_frame([])[0]
-    frame.db.create_all()
     print()
     return 0
 

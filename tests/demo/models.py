@@ -1,6 +1,7 @@
 from bevyframe import *
 
-Base = DeclarativeBase()
+class Base(DeclarativeBase):
+    pass
 
 
 class Test(Base):

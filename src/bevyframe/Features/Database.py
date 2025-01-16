@@ -1,8 +1,6 @@
 from sqlalchemy import create_engine, Column as Col, Integer as Int, String as Str, DateTime as Dt, Boolean as Bool
 from sqlalchemy.orm import sessionmaker, query, DeclarativeBase
 
-from bevyframe import Frame
-
 
 class DataTypes:
     Integer = Int
@@ -13,7 +11,7 @@ class DataTypes:
 
 
 class Database:
-    def __init__(self, app: Frame, url: str, base: DeclarativeBase) -> None:
+    def __init__(self, app, url: str, base: DeclarativeBase) -> None:
         self.__engine = create_engine(url)
         self.__url = url
         self.__session = sessionmaker(bind=self.__engine)()
