@@ -12,6 +12,15 @@ class Textbox(Widget):
         super().__init__('input', selector=f'textbox {selector}', id=name, name=name, **kwargs)
 
 
+class Selection(Widget):
+    def __init__(self, name: str, selected: str, options: list[str], selector='', **kwargs) -> None:
+        childs = [
+            Widget('option', innertext=i, selected=i == selected)
+            for i in options
+        ]
+        super().__init__('select', selector=f'textbox {selector}', id=name, name=name, childs=childs, **kwargs)
+
+
 class Button(Widget):
     def __init__(self, selector: str = '', **kwargs) -> None:
         super().__init__('button', selector=f'button {selector}', **kwargs)
