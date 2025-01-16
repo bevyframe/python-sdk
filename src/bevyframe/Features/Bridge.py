@@ -49,7 +49,7 @@ def process_proxy(context: Context) -> dict:
     retval = getattr(func, name)(context, *args)
     print(type(retval).__name__, end='', flush=True)
     if isinstance(retval, JavaScript):
-        return {'type': 'script', 'value': retval.script}
+        return {'type': 'script', 'value': str(retval.script)}
     elif isinstance(retval, change_html):
         return {'type': 'view', 'value': retval.html, 'element': retval.tag}
     elif isinstance(retval, Page):

@@ -48,11 +48,14 @@ class Widget:
             cursor: str = None,
             text_decoration: str = None,
             onclick=None,
+            onchange=None,
             **kwargs
     ):
         self.data = kwargs
         if onclick is not None:
             self.data['onclick'] = str(onclick)
+        if onchange is not None:
+            self.data['onchange'] = str(onchange)
         self.element = item
         self.style = {} if style is None else style
         self.content = []
