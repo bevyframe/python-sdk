@@ -180,6 +180,7 @@ def responser(self, recv: dict[str, (str, dict)], req_time: str, r: Context, dis
     resp.headers['Access-Control-Max-Age'] = '86400'
     resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH, CONNECT, TRACE'
     resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, X-PINGOTHER, Authorization'
+    resp.headers['Access-Control-Allow-Credentials'] = 'Content-Type, X-PINGOTHER, Authorization'
     resp.headers['Strict-Transport-Security'] = 'max-age=86400'
     resp.headers['X-Content-Type-Options'] = 'nosniff'
     resp.headers['X-Frame-Options'] = resp.headers['X-Frame-Options'] if 'X-Frame-Options' in resp.headers else 'DENY'

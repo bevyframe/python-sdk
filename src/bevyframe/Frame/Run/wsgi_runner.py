@@ -37,6 +37,7 @@ class WSGIHandler(BaseHTTPRequestHandler):
             environ[f"HTTP_{key}"] = self.headers.get(key)
         status = ""
         headers = []
+        response_body = []
         def start_response(status_line, response_headers) -> callable:
             nonlocal status, headers
             status = status_line

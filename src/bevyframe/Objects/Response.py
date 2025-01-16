@@ -1,10 +1,9 @@
-from bevyframe import Frame
 from bevyframe.Widgets.Page import Page
 from TheProtocols import *
 
 
 class Response:
-    def __init__(self, body: (Page, str, dict, list), credentials: dict[str, str], headers: dict[str, str], status_code: int, app: Frame) -> None:
+    def __init__(self, body: (Page, str, dict, list), credentials: dict[str, str], headers: dict[str, str], status_code: int, app) -> None:
         self.body = body
         self.credentials = credentials
         self.headers = headers
@@ -17,9 +16,12 @@ class Response:
 
     def login(self, email: str, password: str) -> bool:
         try:
+            s = self.tp.create_session(email, password)
+            if not hasattr(s, 'token'):
+                return False
             self.credentials = {
                 'email': email,
-                'token': self.tp.create_session(email, password).token
+                'token': s.token
             }
             if self.credentials['token'] is None:
                 return False
