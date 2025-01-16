@@ -6,7 +6,8 @@ def client_side_bridge() -> str:
         const _bridge = (func, ...args) => {
             fetch(`${location.protocol}//${location.host}/.well-known/bevyframe/proxy`,{
                 method:'POST',headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({func:func,args:args})
+                credentials: 'include',
+                body:JSON.stringify({func:func,args:args}),
             }).then(res => res.json()).then(data => {
                 if (data.error) {throw new Error(data.error);}
                 else if (data.type === 'return') {return data.value;}

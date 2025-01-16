@@ -16,9 +16,19 @@ class JavaScript:
 
 
 class change_html:
-    def __init__(self, tag: str, html: str) -> None:
+    def __init__(self, tag: str, html) -> None:
         self.tag: str = tag
-        self.html: str = html
+        self.html = html
+        if hasattr(self.html, "render"):
+            self.html = self.html.render()
+        elif isinstance(self.html, list):
+            l = self.html
+            self.html = ''
+            for html in l:
+                if hasattr(html, "render"):
+                    self.html += html.render()
+                else:
+                    self.html += html
 
     def __dict__(self) -> dict:
         return {self.tag: self.html}
