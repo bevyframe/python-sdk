@@ -10,11 +10,15 @@ def receiver(self, environ: dict) -> tuple[dict[str, (str, dict)], str, Context,
         'path': environ['PATH_INFO'],
         'protocol': environ.get('SERVER_PROTOCOL', 'http/1.1'),
         'headers': {},
-        'body': environ['wsgi.input'].read().decode() if 'wsgi.input' in environ else '',
+        'body': environ['wsgi.input'].read() if 'wsgi.input' in environ else b'',
         'credentials': None,
         'query': {},
         'ip': environ['REMOTE_ADDR']
     }
+    try:
+        recv.update({'body': recv.get('body').decode()})
+    except UnicodeDecodeError:
+        pass
     if environ['QUERY_STRING']:
         recv['path'] += f"?{environ['QUERY_STRING']}"
     for header in environ:

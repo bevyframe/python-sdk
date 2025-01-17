@@ -86,18 +86,21 @@ class Context:
         if not isinstance(self.env, dict):
             self.env = {}
         self.tp = app.tp
-        while data['body'].endswith('\r\n'):
-            data['body'] = data['body'].removesuffix('\r\n')
-        while data['body'].startswith('\r\n'):
-            data['body'] = data['body'].removeprefix('\r\n')
-        self.body = urllib.parse.unquote(data['body'].replace('+', ' '))
-        self.form = {}
-        for b in data['body'].split('\r\n'):
-            for i in b.split('&'):
-                if '=' in i:
-                    self.form.update({
-                        urllib.parse.unquote(i.split('=')[0].replace('+', ' ')): urllib.parse.unquote(i.split('=')[1].replace('+', ' '))
-                    })
+        if isinstance(data['body'], str):
+            while data['body'].endswith('\r\n'):
+                data['body'] = data['body'].removesuffix('\r\n')
+            while data['body'].startswith('\r\n'):
+                data['body'] = data['body'].removeprefix('\r\n')
+        self.body = data['body']
+        if 'form' in self.headers.get('Content-Type', ''):
+            self.body = urllib.parse.unquote(self.body.replace('+', ' '))
+            self.form = {}
+            for b in data['body'].split('\r\n'):
+                for i in b.split('&'):
+                    if '=' in i:
+                        self.form.update({
+                            urllib.parse.unquote(i.split('=')[0].replace('+', ' ')): urllib.parse.unquote(i.split('=')[1].replace('+', ' '))
+                        })
         if '?' in data['path']:
             for i in data['path'].split('?')[1].split('&'):
                 if '=' in i:
@@ -201,6 +204,8 @@ class Context:
         return json.loads(self.body)
 
     def __setattr__(self, name: str, value: any) -> None:
+        if name == 'path' and hasattr(self, 'path') and self.path == '/.well-known/bevyframe/proxy':
+            object.__setattr__(self, name, value)
         if name in default_keys and self.not_locked:
             object.__setattr__(self, name, value)
             return
