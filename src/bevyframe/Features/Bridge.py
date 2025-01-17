@@ -1,12 +1,17 @@
 from bevyframe.Objects.Context import Context
 from bevyframe.Widgets.Page import Page
-import importlib.util
+import importlib.metadata
 import os
 
 
 class JavaScript:
-    def __init__(self, script: str) -> None:
+    def __init__(self, script: (str, object, list)) -> None:
+        if isinstance(script, list):
+            script = ''.join([str(i) for i in script])
         self.script: str = script
+
+    def render(self) -> str:
+        return f'<script>{self.script}</script>'
 
     def __repr__(self) -> str:
         return self.script
@@ -35,6 +40,7 @@ class change_html:
 
 
 def process_proxy(context: Context) -> dict:
+    setattr(context, 'path', context.json['path'])
     if context.headers.get('Origin', '://').split('/')[2] != context.headers.get('Host'):
         return {'error': 'cross-origin not allowed'}
     name: str = context.json['func']
