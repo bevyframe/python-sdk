@@ -201,6 +201,28 @@ def dispatcher(*_) -> int:
     return 0
 
 
+def count(filename: str) -> int:
+    if '__pycache__' in filename:
+        return 0
+    if os.path.exists(filename):
+        if os.path.isfile(filename):
+            with open(filename, 'rb') as f:
+                return len(f.readlines())
+        total = 0
+        for i in os.listdir(f'{filename}/'):
+            total += count(f'{filename}/{i}')
+        return total
+    return 0
+
+
+def countlines() -> int:
+    total = 0
+    for i in ['functions', 'pages', 'src', 'widgets', 'default_logging.py', 'environment.py', 'models.py']:
+        total += count(i)
+    print(f"\nTotal {total}\n")
+    return 0
+
+
 def cmdline() -> int:
     sys.path.insert(0, './')
     args = sys.argv[1:]
@@ -218,6 +240,8 @@ def cmdline() -> int:
         ret = main(*args)
     elif command == "dispatcher":
         ret = dispatcher(*args)
+    elif command == "count":
+        ret = countlines()
     else:
         print("Unknown command")
         ret = 1
