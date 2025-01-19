@@ -92,15 +92,10 @@ class Context:
             while data['body'].startswith('\r\n'):
                 data['body'] = data['body'].removeprefix('\r\n')
         self.body = data['body']
-        if 'form' in self.headers.get('Content-Type', ''):
-            self.body = urllib.parse.unquote(self.body.replace('+', ' '))
-            self.form = {}
-            for b in data['body'].split('\r\n'):
-                for i in b.split('&'):
-                    if '=' in i:
-                        self.form.update({
-                            urllib.parse.unquote(i.split('=')[0].replace('+', ' ')): urllib.parse.unquote(i.split('=')[1].replace('+', ' '))
-                        })
+        self._json = {}
+        self._form = {}
+        if 'UserContext' in self.app.disabled:
+            self._user = None
         if '?' in data['path']:
             for i in data['path'].split('?')[1].split('&'):
                 if '=' in i:
@@ -201,25 +196,57 @@ class Context:
 
     @property
     def json(self) -> Any:
-        return json.loads(self.body)
+        if not self._json:
+            self._json = json.loads(self.body)
+        return self._json
+
+    @property
+    def form(self) -> Any:
+        if not self._json:
+            self._form = {}
+            for b in self.body.split('\r\n'):
+                for i in b.split('&'):
+                    if '=' in i:
+                        self._form.update({
+                            urllib.parse.unquote(i.split('=')[0].replace('+', ' ')): urllib.parse.unquote(i.split('=')[1].replace('+', ' '))
+                        })
+        return self._form
 
     def __setattr__(self, name: str, value: any) -> None:
-        if name == 'path' and hasattr(self, 'path') and self.path == '/.well-known/bevyframe/proxy':
+        if name in ['_json', '_form']:
             object.__setattr__(self, name, value)
-        if name in default_keys and self.not_locked:
+        elif name == 'path' and hasattr(self, 'path') and self.path == '/.well-known/bevyframe/proxy':
+            object.__setattr__(self, name, value)
+        elif name in default_keys and self.not_locked:
             object.__setattr__(self, name, value)
             return
-        if self.email not in self.app.vars:
-            self.app.vars[self.email] = {}
-        return self.app.vars[self.email].update({name: value})
+        elif 'UserContext' not in self.app.disabled:
+            if self.email not in self.app.vars:
+                self.app.vars[self.email] = {}
+            return self.app.vars[self.email].update({name: value})
+        return object.__setattr__(self, name, value)
 
     def __getattr__(self, name: str) -> any:
-        if name in default_keys:
-            if name == 'not_locked' and 'not_locked' not in self.__dict__:
+        if name == 'app':
+            try:
+                return object.__getattribute__(self, 'app')
+            except AttributeError:
+                return type('Frame', (), {'disabled': ['UserContext']})()
+        if 'UserContext' not in self.app.disabled:
+            if name in default_keys:
+                if name == 'not_locked' and 'not_locked' not in self.__dict__:
+                    return True
+                return object.__getattribute__(self, name)
+            return self.app.vars.get(self.email, {}).get(name, None)
+        try:
+            return object.__getattribute__(self, name)
+        except AttributeError:
+            if name == 'not_locked':
                 return True
-            object.__getattribute__(self, name)
-        return self.app.vars.get(self.email, {}).get(name, None)
 
     def __delattr__(self, name: str) -> None:
-        if self.email not in self._app.vars and name in self.app.vars[self.email]:
-            del self.app.vars[name]
+        if 'UserContext' not in self.app.disabled:
+            if self.email not in self._app.vars and name in self.app.vars[self.email]:
+                del self.app.vars[name]
+        else:
+            object.__delattr__(self, name)

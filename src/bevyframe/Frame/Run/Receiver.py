@@ -28,7 +28,7 @@ def receiver(self, environ: dict) -> tuple[dict[str, (str, dict)], str, Context,
     try:
         recv['credentials'] = get_session(
             self.secret,
-            recv['headers']['Cookie'].split('s=')[1].split(';')[0]
+            recv['headers']['Cookie'].split(';')[-1].split('s=')[1]
         ) if 's=' in recv['headers']['Cookie'] else None
     except KeyError:
         pass

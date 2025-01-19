@@ -12,13 +12,13 @@ def string_return(text: str) -> callable:
     return app
 
 
-def dispatcher(manifest: dict, apps: dict[str, callable]) -> callable:
+def dispatcher(manifest: dict, apps: dict[str, callable], path: str) -> callable:
     def app(environ, start_response) -> list[bytes]:
         host = environ['HTTP_HOST']
         if host in manifest['domains']:
-            os.chdir(manifest['domains'][host])
+            os.chdir(f"{path}/{manifest['domains'][host]}")
             ret = apps[manifest['domains'][host]](environ, start_response)
-            os.chdir('..')
+            os.chdir(path)
             return ret
         else:
             return string_return(f"'{host}' not found")(environ, start_response)
@@ -32,13 +32,14 @@ elif 'dispatcher.json' in os.listdir():
         manifest = json.load(f)
     apps = {}
     path = os.getcwd()
-    for app in os.listdir():
+    reverse_domains = [manifest['domains'][i] for i in manifest['domains']]
+    for app in reverse_domains:
         if not app.startswith('__') and os.path.isdir(app):
-            os.chdir(app)
-            sys.path.insert(0, os.getcwd())
+            os.chdir(f"{path}/{app}")
+            sys.path.insert(0, f"{path}/{app}")
             apps[app] = build_frame([])[0]
-            sys.path.remove(os.getcwd())
-            os.chdir("..")
-    application = dispatcher(manifest, apps)
+            sys.path.remove(f"{path}/{app}")
+            os.chdir(path)
+    application = dispatcher(manifest, apps, path)
 else:
     application = string_return("Manifest not found")
