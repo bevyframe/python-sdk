@@ -52,7 +52,8 @@ def init(*_) -> int:
             "allow_multiple_instance": True,
             "shortcuts": {},
             "cors": False,
-            "routing": {}
+            "routing": {},
+            "disable_features": []
         },
         "publishing": {
             "description": input('\nDescription: '),
@@ -150,6 +151,7 @@ def build_frame(*_) -> tuple[Frame, dict]:
         loginview=manifest['app']['loginview'],
         environment={},
         cors=manifest['app']['cors'],
+        disable_features=manifest['app']['disable_features']
     )
     app.routes = manifest['app']['routing']
     if 'default_logging.py' in os.listdir('./'):

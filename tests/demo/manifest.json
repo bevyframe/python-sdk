@@ -22,7 +22,10 @@
     "cors": false,
     "routing": {
       "/user/<email>": "/profile.py"
-    }
+    },
+    "disable_features": [
+      "UserContext"
+    ]
   },
   "publishing": {
     "description": "An example application showcasing BevyFrame.",

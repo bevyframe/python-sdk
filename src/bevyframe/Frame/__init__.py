@@ -29,8 +29,10 @@ class Frame:
             default_network: str = 'hereus.net',
             loginview='Login.py',
             environment: (dict, callable) = None,
-            cors: bool = False
+            cors: bool = False,
+            disable_features: list[str] = False,
     ) -> None:
+        self.disabled = disable_features
         self.vars = {}
         self.cors = cors
         self.environment = environment if environment else {}
