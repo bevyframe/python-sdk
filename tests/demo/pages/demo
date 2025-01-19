@@ -1,4 +1,17 @@
 #!/bin/sh
-echo "bash 200"
-echo "Content-Type: text/plain"
-echo "Hello World\n"
+export METHOD=$(grep -i '^Method:' .request | awk '{print $2}')
+export NETWORK=$(grep -i '^Cred.Network:' .request | awk '{print $2}')
+export TOKEN=$(grep -i '^Cred.Token:' .request | awk '{print $2}')
+echo "" > .out
+RESPONSE=$(curl -s -o ./.out -w "%{http_code}" -X POST \
+  -d "{\"cred\": \"${TOKEN}\"}" -H 'Content-Type: application/json' \
+  "https://${NETWORK}/protocols/current_user_info")
+if [ "$RESPONSE" -ne 200 ]; then
+  echo "bash 500"
+  echo "Content-Type: text/plain;charset=UTF-8"
+else
+  echo "bash 200"4
+  echo "Content-Type: text/plain;charset=UTF-8"
+  echo "\nMethod is ${METHOD:-} and your name is $(jq -r '.name' .out) $(jq -r '.surname' .out)"
+fi
+rm .out

@@ -1,14 +1,11 @@
-import urllib.parse
-
-from TheProtocols import *
-from typing import Any, Callable
-import json
-import jinja2
+from TheProtocols.helpers.exceptions import CredentialsDidntWorked, NetworkException
+from TheProtocols.session import Session
 from bevyframe.Features.BridgeJS import client_side_bridge
-from bevyframe.Features.Database import Database
 from bevyframe.Objects.Response import Response
 from bevyframe.Widgets.Page import Page
-from bevyframe.Helpers.LazyInitDict import LazyInitDict
+import urllib.parse
+import jinja2
+import json
 
 default_keys = [
     'method', 'path', 'headers', 'browser', 'ip', 'query',
@@ -19,13 +16,13 @@ default_keys = [
 ]
 
 
-def lazy_init_data(con) -> Callable[[Any], None]:
+def lazy_init_data(con) -> callable:
     def initialize(self) -> None:
         self._data = con.user.data()
     return initialize
 
 
-def lazy_init_pref(con) -> Callable[[Any], None]:
+def lazy_init_pref(con) -> callable:
     def initialize(self) -> None:
         self._data = con.user.preferences()
     return initialize
@@ -86,6 +83,10 @@ class Context:
         if not isinstance(self.env, dict):
             self.env = {}
         self.tp = app.tp
+        try:
+            data['body'] = data.get('body', b'').decode()
+        except UnicodeDecodeError:
+            pass
         if isinstance(data['body'], str):
             while data['body'].endswith('\r\n'):
                 data['body'] = data['body'].removesuffix('\r\n')
@@ -96,8 +97,8 @@ class Context:
         self._form = {}
         if 'UserContext' in self.app.disabled:
             self._user = None
-        if '?' in data['path']:
-            for i in data['path'].split('?')[1].split('&'):
+        if data['query']:
+            for i in data['query'].split('&'):
                 if '=' in i:
                     self.query.update({
                         urllib.parse.unquote(i.split('=')[0].replace('+', ' ')): urllib.parse.unquote(i.split('=')[1].replace('+', ' '))
@@ -106,16 +107,15 @@ class Context:
                     self.query.update({
                         urllib.parse.unquote(i): True
                     })
-        try:
-            self.email = data['credentials']['email']
-            self.token = data['credentials'].get('token', None)
-            # self.password = data['credentials'].get('password', None)
-        except KeyError:
-            self.email = 'Guest@' + app.default_network
-            self.token = ''
-        self.data = LazyInitDict(lazy_init_data(self))
-        self.preferences = LazyInitDict(lazy_init_pref(self))
-        self.tp: TheProtocols = app.tp
+        self.email = data['credentials'].get('email', f"Guest@{app.default_network}")
+        self.token = data['credentials'].get('token', '')
+        if 'TheProtocols' not in self.app.disabled:
+            from bevyframe.Helpers.LazyInitDict import LazyInitDict
+            self.data = LazyInitDict(lazy_init_data(self))
+            self.preferences = LazyInitDict(lazy_init_pref(self))
+        else:
+            self.data = None
+            self.preferences = None
         self.cookies = {}
         if 'Cookie' in self.headers:
             for cookie in self.headers['Cookie'].split('; '):
@@ -123,8 +123,9 @@ class Context:
                     self.cookies.update({cookie.split('=')[0]: cookie.split('=')[1]})
         self.not_locked = False
 
+    # noinspection PyMissingTypeHints
     @property
-    def db(self) -> Database:
+    def db(self):
         return self.app.db
 
     @property
@@ -133,7 +134,9 @@ class Context:
 
     # noinspection PyAttributeOutsideInit
     @property
-    def user(self) -> Session:
+    def user(self) -> (Session, None):
+        if 'TheProtocols' in self.app.disabled:
+            return None
         if self._user is None:
             try:
                 if self.email.split('@')[0] == 'Guest':
@@ -159,7 +162,7 @@ class Context:
             return jinja2.Template(html).render(
                 context=self,
                 style=f"<style>{self.app.style}</style>",
-                functions=f"<script>{client_side_bridge()}</script>",
+                functions=f"<script>{client_side_bridge()}</script>" if 'JsBridge' not in self.app.disabled else "",
                 safe=lambda x: x.replace('<', '&lt;').replace('>', '&gt;'),
                 **kwargs
             )
@@ -195,13 +198,13 @@ class Context:
         return "/assets/" + path
 
     @property
-    def json(self) -> Any:
+    def json(self) -> any:
         if not self._json:
             self._json = json.loads(self.body)
         return self._json
 
     @property
-    def form(self) -> Any:
+    def form(self) -> any:
         if not self._json:
             self._form = {}
             for b in self.body.split('\r\n'):
@@ -250,3 +253,14 @@ class Context:
                 del self.app.vars[name]
         else:
             object.__delattr__(self, name)
+
+    def __str__(self) -> str:
+        return (f"""
+Package: {self.app.package}
+Cred.Network: {self.email.split('@')[1]}
+Cred.Token: {self.token}
+Path: {self.path}
+IP: {self.ip}
+Method: {self.method}
+""" + '\n'.join([f"Header.{i}: {self.headers[i]}" for i in self.headers]) + """
+        """).strip().strip('\n').strip()

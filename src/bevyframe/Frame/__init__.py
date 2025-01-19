@@ -1,21 +1,22 @@
 import importlib.metadata
 import sys
 import os
+from datetime import datetime
 
+from bevyframe.Features.Login import get_session
 from bevyframe.Objects.Context import Context
 from bevyframe.Objects.Response import Response
 import requests
-from TheProtocols import *
 import json
-from bevyframe.Frame.error_handler import error_handler
-from bevyframe.Frame.route import route
-from bevyframe.Frame.default_logging import default_logging
-from bevyframe.Frame.Run.Responser import responser
-from bevyframe.Frame.Run.Receiver import receiver
+import time
 from bevyframe.Features.Style import compile_object as compile_style
 from bevyframe.Helpers.Identifiers import https_codes
-from bevyframe.Features.Database import Database
-from bevyframe.Frame.Run.wsgi_runner import make_server
+from bevyframe.Frame.error_handler import error_handler
+from bevyframe.Frame.route import route
+from bevyframe.Frame.Responser import responser
+from bevyframe.Frame.default_logging import default_logging
+from TheProtocols.theprotocols import TheProtocols
+from bevyframe.Frame.wsgi_runner import make_server
 
 
 class Frame:
@@ -43,10 +44,13 @@ class Frame:
         self.debug = False
         self.routes = {}
         self.tp_token = None
-        self.tp = TheProtocols(
-            package,
-            permissions
-        )
+        if 'TheProtocols' not in self.disabled:
+            self.tp = TheProtocols(
+                package,
+                permissions
+            )
+        else:
+            self.tp = None
         if isinstance(style, str):
             if os.path.isfile(style):
                 self.style = json.load(open(style, 'rb'))
@@ -66,7 +70,7 @@ class Frame:
         self.style = compile_style(self.style)
         self.icon = icon
         self.default_logging_str = None
-        self.db: (Database, None) = None
+        self.db = None
         self.__wsgi_server = None if sys.argv[0].endswith('.py') else sys.argv[0].split("/")[-1]
         if sys.argv[0].split('/')[-1] == 'bevyframe':
             self.__wsgi_server = None
@@ -87,6 +91,8 @@ class Frame:
         return route(self, path, whitelist, blacklist)
 
     def default_logging(self, func: callable) -> callable:
+        if 'CustomLogging' in self.disabled:
+            return lambda: func()
         return default_logging(self, func)
 
     @property
@@ -112,20 +118,57 @@ class Frame:
     def __call__(self, environ: dict, start_response: callable) -> list[bytes]:
         if self.__wsgi_server:
             self.debug = False
-        recv, req_time, r, display_status_code = receiver(self, environ)
+        t0 = time.time()
+        req_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        recv = {
+            'method': environ['REQUEST_METHOD'],
+            'path': environ['PATH_INFO'],
+            'protocol': environ.get('SERVER_PROTOCOL', 'http/1.1'),
+            'headers': {},
+            'body': environ['wsgi.input'].read() if 'wsgi.input' in environ else b'',
+            'credentials': {},
+            'query': environ.get('QUERY_STRING', ''),
+            'ip': environ.get('REMOTE_ADDR', '0.0.0.0')
+        }
+        for header in environ:
+            if header.startswith('HTTP_'):
+                key = header[5:].removeprefix('HTTP_').replace('_', '-').title()
+                recv['headers'].update({key: environ[header]})
+        recv['credentials'] = get_session(
+            self.secret,
+            recv['headers'].get('Cookie', 's=').removesuffix(';').split(';').pop().split('s=')[1]
+        ) if 's=' in recv['headers'].get('Cookie', 's=') else None
+        r = Context(recv, self)
+        display_status_code = True
+        id_on_log = r.ip if r.email.split('@')[0] == 'Guest' else r.email
+        if r.path == '/.well-known/bevyframe/proxy':
+            recv['log'] = f"(   ) {id_on_log} [{req_time}] {r.json['func']}({', '.join([repr(i) for i in r.json['args']])}) -> "
+        elif r.path == '/.well-known/bevyframe/pwa.webmanifest' and 'PWA' not in self.disabled:
+            recv['log'] = f"(   ) {id_on_log} [{req_time}] GET PWA Manifest"
+        elif self.default_logging_str is None:
+            recv['log'] = f"(   ) {id_on_log} [{req_time}] {r.method} {r.path}"
+        else:
+            formatted_log = self.default_logging_str(r, req_time)
+            if isinstance(formatted_log, tuple):
+                formatted_log, display_status_code = formatted_log
+            formatted_log = formatted_log.replace('\n', '').replace('\r', '')
+            recv['log'] = ('(   ) ' if display_status_code else '      ') + formatted_log
+        print(recv['log'], end='', flush=True)
+        t1 = time.time()
         resp, display_status_code = responser(self, recv, req_time, r, display_status_code)
-        if isinstance(resp, Response):
-            start_response(f"{resp.status_code} {https_codes[resp.status_code].upper()}", [(str(i), str(resp.headers[i])) for i in resp.headers])
-            print(f'\r({resp.status_code})' if display_status_code else '')
-            if isinstance(resp.body, bytes):
-                return [resp.body]
-            else:
-                return [resp.body.encode()]
-        elif callable(resp):
+        t2 = time.time()
+        print(f' | Recv: {(t1 - t0) * 1000}, Resp: {(t2 - t1) * 1000}', end='', flush=True)
+        if callable(resp):
             def _start_response(status, headers) -> callable:
                 print(f'\r({status.split(" ", 1)[0]})' if display_status_code else '')
                 return start_response(status, headers)
             return resp(environ, _start_response)
+        start_response(f"{resp.status_code} {https_codes[resp.status_code].upper()}", [(str(i), str(resp.headers[i])) for i in resp.headers])
+        print(f'\r({resp.status_code})' if display_status_code else '')
+        if isinstance(resp.body, bytes):
+            return [resp.body]
+        else:
+            return [resp.body.encode()]
 
     def __del__(self) -> None:
         if self.__wsgi_server:

@@ -1,5 +1,3 @@
-from bevyframe.Objects.Context import Context
-from bevyframe.Widgets.Page import Page
 import importlib.metadata
 import os
 
@@ -39,7 +37,7 @@ class change_html:
         return {self.tag: self.html}
 
 
-def process_proxy(context: Context) -> dict:
+def process_proxy(context) -> dict:
     setattr(context, 'path', context.json['path'])
     if context.headers.get('Origin', '://').split('/')[2] != context.headers.get('Host'):
         return {'error': 'cross-origin not allowed'}
@@ -58,7 +56,7 @@ def process_proxy(context: Context) -> dict:
         return {'type': 'script', 'value': str(retval.script)}
     elif isinstance(retval, change_html):
         return {'type': 'view', 'value': retval.html, 'element': retval.tag}
-    elif isinstance(retval, Page):
+    elif type(retval).__name__ == 'Page':
         return {'type': 'view', 'value': retval.render(), 'element': 'body'}
     else:
         return {'type': 'return', 'value': retval}

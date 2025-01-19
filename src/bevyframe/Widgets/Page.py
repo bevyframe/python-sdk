@@ -69,6 +69,7 @@ class Page:
                 ] + og + [
                     Widget('script', innertext=f'const bf_db = {json.dumps(self.db)}'),
                     Widget('script', innertext=client_side_bridge()),
+                    "<script>if (typeof navigator.serviceWorker !== 'undefined') navigator.serviceWorker.register('sw.js');</script>",
                     Widget('style', innertext=Style.compile_object(self.style))
                 ]
             ),

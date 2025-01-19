@@ -1,11 +1,7 @@
 from bevyframe.Frame import Frame
-from bevyframe.Features.Database import Database
-from bevyframe.Helpers.MainPyCompiler import MainPyCompiler as main
 import json
 import os
-from random import randint
 import sys
-import importlib
 import importlib.util
 
 
@@ -26,6 +22,7 @@ def init(*_) -> int:
     with open('.gitignore', 'w') as f:
         f.writelines([f"{i}\n" for i in gitignore])
     with open('.secret', 'w') as f:
+        from random import randint
         secret = ''.join([hex(randint(0, 15)).removeprefix('0x') for _ in range(128)])
         f.write(secret)
     os.mkdir('assets')
@@ -153,18 +150,20 @@ def build_frame(*_) -> tuple[Frame, dict]:
         cors=manifest['app']['cors'],
         disable_features=manifest['app']['disable_features']
     )
-    app.routes = manifest['app']['routing']
-    if 'default_logging.py' in os.listdir('./'):
+    if "DynamicRouting" not in app.disabled:
+        app.routes = manifest['app']['routing']
+    if 'default_logging.py' in os.listdir('./') and 'CustomLogging' not in app.disabled:
         default_logging_spec = importlib.util.spec_from_file_location('default_logging', './default_logging.py')
         default_logging = importlib.util.module_from_spec(default_logging_spec)
         default_logging_spec.loader.exec_module(default_logging)
         app.default_logging(default_logging.default_logging)
-    if 'environment.py' in os.listdir('./'):
+    if 'Environment' not in app.disabled and 'environment.py' in os.listdir('./'):
         environment_spec = importlib.util.spec_from_file_location('environment', './environment.py')
         environment = importlib.util.module_from_spec(environment_spec)
         environment_spec.loader.exec_module(environment)
         app.environment = environment.environment
-    if 'models.py' in os.listdir('./'):
+    if 'Database' not in app.disabled and 'models.py' in os.listdir('./'):
+        from bevyframe.Features.Database import Database
         models_spec = importlib.util.spec_from_file_location('models', './models.py')
         models = importlib.util.module_from_spec(models_spec)
         models_spec.loader.exec_module(models)
@@ -239,7 +238,8 @@ def cmdline() -> int:
     elif command == "run":
         ret = run(*args)
     elif command == "main":
-        ret = main(*args)
+        from bevyframe.Helpers.MainPyCompiler import MainPyCompiler
+        ret = MainPyCompiler(*args)
     elif command == "dispatcher":
         ret = dispatcher(*args)
     elif command == "count":

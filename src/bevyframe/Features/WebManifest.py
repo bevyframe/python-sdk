@@ -1,4 +1,3 @@
-from bevyframe.Objects.Context import Context
 import mimetypes
 import json
 

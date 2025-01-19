@@ -7,9 +7,9 @@
         <title>Data</title>
         {{ style }}
     </head>
-    <body class="body_{{ request.user.id.settings.theme_color }}">
+    <body class="body_{{ context.user.id.settings.theme_color }}">
         <form method="POST" action="data.py">
-            <input class="textbox " id="entry" name="entry" value="{{ value }}">
+            <input class="textbox " id="entry" name="entry" value="{{ context.data['value'] }}">
         </form>
     </body>
 </html>

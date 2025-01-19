@@ -39,11 +39,11 @@ def get_session_token(secret, email: str, token: str = None) -> str:
     }, secret, algorithm='HS256')
 
 
-def get_session(secret: str, token: str) -> (dict, None):
+def get_session(secret: str, token: str) -> dict:
     try:
         return jwt.decode(token, secret, algorithms=['HS256'])
     except jwt.exceptions.DecodeError:
-        return None
+        return {}
 
 
 def login_required(func) -> callable:

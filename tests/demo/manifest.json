@@ -24,7 +24,6 @@
       "/user/<email>": "/profile.py"
     },
     "disable_features": [
-      "UserContext"
     ]
   },
   "publishing": {
