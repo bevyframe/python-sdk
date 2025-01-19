@@ -1,5 +1,6 @@
 from bevyframe import *
 from models import Test
+from widgets.CustomButton import CustomButton
 
 blacklist = lambda: ["demo@hereus.net"]
 
@@ -28,7 +29,7 @@ def get(context: Context) -> (Page, Response):
                 text_align=Align.center,
                 childs=[
                     Line([Textbox('', type="text", placeholder='textbox', value=last_ip)]),
-                    Line([Button(innertext='Button')]),
+                    Line([CustomButton(innertext='Button')]),
                     Line([Button(selector='small', innertext='Button')]),
                     Line([Button(selector='mini', innertext='Button')])
                 ]
