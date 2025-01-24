@@ -257,6 +257,8 @@ class Context:
     def __str__(self) -> str:
         return (f"""
 Package: {self.app.package}
+Cred.Email: {self.email}
+Cred.Username: {self.email.split('@')[0]}
 Cred.Network: {self.email.split('@')[1]}
 Cred.Token: {self.token}
 Path: {self.path}

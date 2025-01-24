@@ -118,7 +118,6 @@ class Frame:
     def __call__(self, environ: dict, start_response: callable) -> list[bytes]:
         if self.__wsgi_server:
             self.debug = False
-        t0 = time.time()
         req_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         recv = {
             'method': environ['REQUEST_METHOD'],
@@ -154,10 +153,7 @@ class Frame:
             formatted_log = formatted_log.replace('\n', '').replace('\r', '')
             recv['log'] = ('(   ) ' if display_status_code else '      ') + formatted_log
         print(recv['log'], end='', flush=True)
-        t1 = time.time()
         resp, display_status_code = responser(self, recv, req_time, r, display_status_code)
-        t2 = time.time()
-        print(f' | Recv: {(t1 - t0) * 1000}, Resp: {(t2 - t1) * 1000}', end='', flush=True)
         if callable(resp):
             def _start_response(status, headers) -> callable:
                 print(f'\r({status.split(" ", 1)[0]})' if display_status_code else '')

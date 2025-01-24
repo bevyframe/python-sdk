@@ -48,29 +48,37 @@ def responser(self, recv: dict[str, (str, dict)], req_time: str, r: Context, dis
                 )
     elif recv['method'].lower() == 'options':
         resp = r.create_response(status_code=204)
-    if "DynamicRouting" not in self.disabled and path in reverse_routes:
-        path = reverse_routes[path]
-        while '<' in path:
-            p1 = path.split('<')[0]
-            var = path.removeprefix(p1 + '<').split('>')[0]
-            p2 = path.removeprefix(p1 + '<' + var + '>')
-            path = p1 + r.query.get(var) + p2
-        resp = r.start_redirect(path)
-    elif "DynamicRouting" not in self.disabled and path in self.routes:
-        resp = self.routes[path](r)
-        if resp is None:
-            in_routes = False
+    if "DynamicRouting" not in self.disabled:
+        if path in reverse_routes:
+            path = reverse_routes[path]
+            while '<' in path:
+                p1 = path.split('<')[0]
+                var = path.removeprefix(p1 + '<').split('>')[0]
+                p2 = path.removeprefix(p1 + '<' + var + '>')
+                path = p1 + r.query.get(var) + p2
+            resp = r.start_redirect(path)
+        elif path in self.routes:
+            if callable(self.routes[path]):
+                resp = self.routes[path](r)
+            else:
+                path = self.routes[path]
+        else:
             for rt in self.routes:
-                if not in_routes:
+                if rt.endswith('...'):
+                    if path.startswith(rt.removesuffix('...')):
+                        match = True
+                    else:
+                        match = False
+                else:
                     match, variables = match_routing(rt, path)
-                    in_routes = match
                     for v in variables:
                         r.query.update({v: variables[v]})
-                    if in_routes:
-                        if callable(self.routes[rt]):
-                            resp = self.routes[rt](r)
-                        else:
-                            path = self.routes[rt]
+                if match:
+                    if callable(self.routes[rt]):
+                        resp = self.routes[rt](r)
+                    else:
+                        path = self.routes[rt]
+                    break
     # noinspection PyBroadException
     try:
         if resp is None:
@@ -157,7 +165,10 @@ def responser(self, recv: dict[str, (str, dict)], req_time: str, r: Context, dis
                 'href': '/favicon.ico',
                 'type': 'image/x-icon'
             } else resp.data['icon']
-            resp.style = self.style + compile_to_css(resp.style)
+            if isinstance(resp.style, dict):
+                resp.style = self.style + compile_to_css(resp.style)
+            else:
+                resp.style = compile_to_css(resp.style)
             if recv['path'] == '/':
                 resp.content.append(Widget('script', innertext="if (typeof navigator.serviceWorker !== 'undefined') navigator.serviceWorker.register('sw.js');"))
     elif 'Templating' not in self.disabled and isinstance(resp, str) and resp.startswith('<!DOCTYPE html>'):
