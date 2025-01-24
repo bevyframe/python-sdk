@@ -6,7 +6,7 @@
     "orientation": "any",
     "version": "1.0.0",
     "package": "com.example.demo",
-    "style": "hereus_ui_3_2",
+    "style": "hereus_ui_4_0",
     "icon": "/assets/favicon.png",
     "loginview": "/login.py",
     "shareview": "/share.py",

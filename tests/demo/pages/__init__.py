@@ -17,7 +17,8 @@ def get(context: Context) -> (Page, Response):
         color=context.user.id.settings.theme_color,
         childs=[
             Navbar([
-                NavItem('home', '/', 'Home', True)
+                NavItem('home', '/', 'Home', True),
+                NavItem('apps', '/env.html', 'Demo'),
             ]),
             Root([
                 Title(f'Hello, {context.user.id.name} {context.user.id.surname} from {context.user.network}!'),

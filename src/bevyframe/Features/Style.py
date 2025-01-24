@@ -1,5 +1,4 @@
 from types import *
-import re
 from bevyframe.Helpers.RenderCSS import RenderCSS
 from bevyframe.Widgets.Style import *
 
@@ -7,6 +6,8 @@ m = {
     'Label': 'p',
     'Textbox': '.textbox',
     'Button': '.button',
+    'SmallButton': '.button.small',
+    'MiniButton': '.button.mini',
     'Link': 'a',
     'TextArea': 'textarea',
     'Page': 'body',
@@ -21,6 +22,7 @@ def compile_style(
         css: dict = None,
         color: str = None,
         background_color: str = None,
+        background_image: str = None,
         height: str = None,
         width: str = None,
         min_height: str = None,
@@ -52,6 +54,8 @@ def compile_style(
     d = {}
     if css is not None:
         d = css
+    if 'background-attachment' not in d and background_image is not None:
+        d['background-attachment'] = 'fixed'
     if isinstance(margin, str):
         d.update({'margin': margin})
     elif isinstance(margin, Margin):
@@ -94,82 +98,91 @@ def compile_style(
     return d
 
 
-def compiler_bridge(c: str, source: dict, d: dict, light_theme: dict, dark_theme: dict, mobile: dict, desktop: dict) -> tuple:
-    for j in source:
-        if j == 'webkit':
-            for i in source[j]:
-                d[f'::-webkit-{i}'] = source[j][i]
-        elif j in m:
-            y: dict = {k: source[j].__dict__[k] for k in source[j].__dict__ if not k.startswith("__")}
-            for i in y:
-
-                if i in ['Hover', 'Focus']:
-                    z = y[i].__dict__
-                    kwargs = {k: z[k] for k in z if not k.startswith('__')}
-                    d[f'{m[j]}:{i.lower()}'] = compile_style(backend=True, **kwargs)
-
-                elif i == 'LightTheme':
-                    light_theme.update({j: y[i]})
-                elif i == 'DarkTheme':
-                    dark_theme.update({j: y[i]})
-                elif i == 'Mobile':
-                    mobile.update({j: y[i]})
-                elif i == 'Desktop':
-                    desktop.update({j: y[i]})
-
-                elif c != 'main' and i in ['Blank', 'Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Pink']:
-                    z = y[i].__dict__
-                    for k in z:
-                        if isinstance(z[k], type):
-                            q = z[k].__dict__
-                            kwargs = {g: q[g] for g in q if not g.startswith('__')}
-                            for o in ['background_color', 'color']:
-                                for state in ['active', 'inactive']:
-                                    if f'{state}_item_{o}' in kwargs and j == 'Navbar':
-                                        if f'nav.Navbar a.{state} button' not in d:
-                                            d[f'nav.Navbar a.{state} button'] = {}
-                                        d[f'nav.Navbar a.{state} button' + (' font' if 'b' not in o else '')][o] = kwargs[f'{state}_item_{o}']
-                            d[f'.body_{i.lower()} {m[j]}.{k.lower()}'] = compile_style(backend=True, **kwargs)
-                    kwargs = {k: z[k] for k in z if not isinstance(z[k], type) and not k.startswith('__')}
-                    d[f'.body_{i.lower()} {m[j]}'.removesuffix(' body')] = compile_style(backend=True, **kwargs)
-
-                elif j == 'Navbar' and i in ['ActiveItem', 'InactiveItem']:
-                    z = y[i].__dict__
-                    kwargs = {k: z[k] for k in z if not k.startswith('__')}
-                    d[f'nav.Navbar a.{i.lower().removesuffix("item")} button'] = compile_style(backend=True, **kwargs)
-                    if 'color' in z:
-                        d[f'nav.Navbar a.{i.lower().removesuffix("item")} button span'] = compile_style(backend=True, color=z['color'])
-                elif j == 'Navbar' and i == 'RawItem':
-                    z = y[i].__dict__
-                    kwargs = {k: z[k] for k in z if not k.startswith('__')}
-                    d[f'nav.Navbar a'] = compile_style(backend=True, **kwargs)
-
-                elif j == 'Topbar' and i == 'Item':
-                    z = y[i].__dict__
-                    kwargs = {k: z[k] for k in z if not k.startswith('__')}
-                    d[f'nav.Topbar a button'] = compile_style(backend=True, **kwargs)
-                    if 'color' in z:
-                        d[f'nav.Topbar a button span'] = compile_style(backend=True, color=z['color'])
-
-                elif isinstance(y[i], type) and c == 'main':
-                    z = y[i].__dict__
-                    kwargs = {k: z[k] for k in z if not k.startswith('__')}
-                    d[f"{m[j]}.{re.sub(r'(?<!^)(?=[A-Z])', '_', i).lower()}"] = compile_style(backend=True, **kwargs)
-
-                kwargs = {k: y[k] for k in y if not isinstance(y[k], type) and not k.startswith('__')}
-                d[f'{m[j]}'] = compile_style(backend=True, **kwargs)
-
-        elif j == 'Badge':
-            if 'Caution' in source[j].__dict__:
-                z = source[j].Caution.__dict__
-                kwargs = {k: z[k] for k in z if not isinstance(z[k], type) and not k.startswith('__')}
-                d['.caution::after'] = compile_style(backend=True, **kwargs)
-
-    return d, light_theme, dark_theme, mobile, desktop
+def compiler_bridge(source: dict) -> tuple:
+    d = {
+        'nav.Navbar a button': {
+            'border': 'none',
+            'background-color': 'transparent',
+            'padding-top': '14px',
+            'padding-right': '16px',
+            'padding-bottom': '14px',
+            'padding-left': '16px',
+            'align-items': 'left',
+            'border-radius': '15px',
+            'cursor': 'pointer'
+        }
+    }
+    light = {}
+    dark = {}
+    mobile = {}
+    desktop = {}
+    imports = []
+    for val1 in source:
+        if val1 == 'imports':
+            imports = [str(i) for i in source[val1]]
+        elif val1 == 'webkit':
+            for i in source[val1]:
+                d[f'::-webkit-{i}'] = compile_style(backend=True, css=source[val1][i])
+        else:
+            if isinstance(source[val1], type):
+                val1_d = source[val1].__dict__
+                if val1 in m:
+                    d[m[val1]] = compile_style(backend=True, **val1_d)
+                    if 'LightTheme' in val1_d:
+                        val1_d_l = val1_d['LightTheme'].__dict__
+                        light[m[val1]] = compile_style(backend=True, **val1_d_l)
+                        for i in ['Blank', 'Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Pink']:
+                            if i in val1_d_l:
+                                tag = f".body_{i.lower()}" if val1 == 'Page' else f"body.body_{i.lower()} {m[val1]}"
+                                light[tag] = compile_style(backend=True, **val1_d_l[i].__dict__)
+                    if 'DarkTheme' in val1_d:
+                        val1_d_l = val1_d['DarkTheme'].__dict__
+                        dark[m[val1]] = compile_style(backend=True, **val1_d_l)
+                        for i in ['Blank', 'Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Pink']:
+                            if i in val1_d_l:
+                                tag = f".body_{i.lower()}" if val1 == 'Page' else f"body.body_{i.lower()} {m[val1]}"
+                                dark[tag] = compile_style(backend=True, **val1_d_l[i].__dict__)
+                    if 'Hover' in val1_d:
+                        d[f'{m[val1]}:hover'] = compile_style(backend=True, **val1_d['Hover'].__dict__)
+                    if 'Focus' in val1_d:
+                        d[f'{m[val1]}:focus'] = compile_style(backend=True, **val1_d['Focus'].__dict__)
+                    if 'Mobile' in val1_d:
+                        val1_d_l = val1_d['Mobile'].__dict__
+                        mobile[m[val1]] = compile_style(backend=True, **val1_d_l)
+                    if 'Desktop' in val1_d:
+                        val1_d_l = val1_d['Desktop'].__dict__
+                        desktop[m[val1]] = compile_style(backend=True, **val1_d_l)
+                elif val1 == 'Badge' and 'Caution' in val1_d:
+                    val1_d_l = val1_d['Caution'].__dict__
+                    d['.caution::after'] = compile_style(backend=True, **val1_d_l)
+                if val1 == 'Navbar':
+                    if 'RawItem' in val1_d:
+                        val1_d_l = val1_d['RawItem'].__dict__
+                        d['nav.Navbar a button'] = compile_style(backend=True, **val1_d_l)
+                        if 'color' in val1_d_l:
+                            if isinstance(val1_d_l['color'], list):
+                                light[f'nav.Navbar a button span'] = compile_style(backend=True, color=val1_d_l['color'][0])
+                                dark[f'nav.Navbar a button span'] = compile_style(backend=True, color=val1_d_l['color'][1])
+                            else:
+                                d[f'nav.Navbar a button span'] = compile_style(backend=True, color=val1_d_l['color'])
+                    for i in ['Active', 'Inactive']:
+                        if f'{i}Item' in val1_d:
+                            val1_d_l = val1_d[f'{i}Item'].__dict__
+                            d[f'nav.Navbar a.{i.lower()} button'] = compile_style(backend=True, **val1_d_l)
+                            if 'color' in val1_d_l:
+                                if isinstance(val1_d_l['color'], list):
+                                    light[f'nav.Navbar a.{i.lower()} button span'] = compile_style(backend=True, color=val1_d_l['color'][0])
+                                    dark[f'nav.Navbar a.{i.lower()} button span'] = compile_style(backend=True, color=val1_d_l['color'][1])
+                                else:
+                                    d[f'nav.Navbar a.{i.lower()} button span'] = compile_style(backend=True, color=val1_d_l['color'])
+    d.update({'@media (prefers-color-scheme: light)': light})
+    d.update({'@media (prefers-color-scheme: dark)': dark})
+    d.update({f'@media (min-width: 768px)': desktop})
+    d.update({f'@media (max-width: 768px)': mobile})
+    return imports, d
 
 
 def compile_object(obj) -> str:
-    r = {}
     if isinstance(obj, str):
         return obj
     if isinstance(obj, dict):
@@ -180,20 +193,11 @@ def compile_object(obj) -> str:
         listed = {k: getattr(obj, k) for k in dir(obj) if not k.startswith("__")}
     else:
         return ""
-    mobile = {}
-    desktop = {}
-    light_theme = {}
-    dark_theme = {}
-    for c in ['main', 'mobile', 'desktop', 'light', 'dark']:
-        d = {}
-        source = {'main': listed, 'light': light_theme, 'dark': dark_theme, 'mobile': mobile, 'desktop': desktop}[c]
-        if 'imports' in source:
-            d['@imports'] = source['imports']
-        d, light_theme, dark_theme, mobile, desktop = compiler_bridge(c, source, d, light_theme, dark_theme, mobile, desktop)
-        if c == 'main':
-            r = d
-        elif c in ['light', 'dark']:
-            r.update({f'@media (prefers-color-scheme: {c})': d})
-        elif c in ['mobile', 'desktop']:
-            r.update({f'@media ({"min" if c == "desktop" else "max"}-width: 768px)': d})
-    return RenderCSS(r).replace('  ', ' ').replace(' { ', '{').replace('; } ', ';}').replace('{} ', '{}')
+    imports, d = compiler_bridge(listed)
+    imports = " ".join([f"@import url('{i}');" for i in imports])
+    compiled = (RenderCSS(d)
+                .replace('  ', ' ')
+                .replace(' { ', '{')
+                .replace('; } ', ';}')
+                .replace('{} ', '{}'))
+    return imports + compiled
