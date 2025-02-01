@@ -6,6 +6,7 @@ from bevyframe.Widgets.Page import Page
 import urllib.parse
 import jinja2
 import json
+import os
 
 default_keys = [
     'method', 'path', 'headers', 'browser', 'ip', 'query',
@@ -214,6 +215,22 @@ class Context:
                             urllib.parse.unquote(i.split('=')[0].replace('+', ' ')): urllib.parse.unquote(i.split('=')[1].replace('+', ' '))
                         })
         return self._form
+
+    def string(self, path: str, language: str = 'en') -> str:
+        language = language.split('/')[-1].split('-')[0]
+        if language not in os.listdir('./strings/'):
+            language = 'en'
+        if language not in os.listdir('./strings/'):
+            language = os.listdir('./strings/')[0].removesuffix('.json')
+        with open(f"./strings/{language}.json") as f:
+            strings = json.load(f)
+        parts = path.split('/')
+        while parts:
+            strings = strings.get(parts.pop(0), {})
+            if isinstance(strings, str):
+                return strings
+        return str(strings)
+
 
     def __setattr__(self, name: str, value: any) -> None:
         if name in ['_json', '_form']:
