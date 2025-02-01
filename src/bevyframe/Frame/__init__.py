@@ -33,13 +33,14 @@ class Frame:
             cors: bool = False,
             disable_features: list[str] = False,
     ) -> None:
+        self.framework = 'BevyFrame'
         self.disabled = disable_features
         self.vars = {}
         self.cors = cors
         self.environment = environment if environment else {}
         self.loginview = loginview
         self.default_network = default_network
-        self.secret = secret
+        self.secret = bytes.fromhex(secret)
         self.package = package
         self.debug = False
         self.routes = {}

@@ -21,11 +21,9 @@ def init(*_) -> int:
         gitignore.append("*.db")
     with open('.gitignore', 'w') as f:
         f.writelines([f"{i}\n" for i in gitignore])
-    with open('.secret', 'w') as f:
-        from random import randint
-        secret = ''.join([hex(randint(0, 15)).removeprefix('0x') for _ in range(128)])
-        f.write(secret)
+    generate_secret()
     os.mkdir('assets')
+    os.mkdir('strings')
     os.mkdir('functions')
     with open('models.py', 'w') as f:
         f.write('from bevyframe import *\n\nclass Base(DeclarativeBase):\n\tpass\n\n')
@@ -224,6 +222,27 @@ def countlines() -> int:
     return 0
 
 
+def generate_secret() -> int:
+    from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+    from cryptography.hazmat.primitives.hashes import SHA256
+    from cryptography.hazmat.backends import default_backend
+    import os
+    salt = os.urandom(16)
+    print('\nGenerating secret.')
+    raw_key = input('Enter random characters, then click enter: ').encode()
+    key = HKDF(
+        algorithm=SHA256(),
+        length=32,
+        salt=salt,
+        info=b'bevyframe-sessions',
+        backend=default_backend()
+    ).derive(raw_key)
+    print()
+    with open('.secret', 'w') as f:
+        f.write(key.hex())
+    return 0
+
+
 def cmdline() -> int:
     sys.path.insert(0, './')
     args = sys.argv[1:]
@@ -244,6 +263,8 @@ def cmdline() -> int:
         ret = dispatcher(*args)
     elif command == "count":
         ret = countlines()
+    elif command == "secret":
+        ret = generate_secret()
     else:
         print("Unknown command")
         ret = 1

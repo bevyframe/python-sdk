@@ -1,6 +1,9 @@
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
 import hashlib
 import base64
 import hmac
+import json
 import time
 import jwt
 import os
@@ -32,17 +35,27 @@ class totp:
         return False
 
 
-def get_session_token(secret, email: str, token: str = None) -> str:
-    return jwt.encode({
-        'email': email,
-        'token': token
-    }, secret, algorithm='HS256')
+def get_session_token(secret: bytes, email: str, token: str = None) -> str:
+    data = json.dumps({'email': email, 'token': token}).encode()
+    iv = os.urandom(12)
+    cipher = Cipher(algorithms.AES256(secret), modes.GCM(iv), backend=default_backend())
+    encryptor = cipher.encryptor()
+    ciphertext = encryptor.update(data) + encryptor.finalize()
+    return iv.hex() + ':' + ciphertext.hex() + ':' + encryptor.tag.hex()
 
 
-def get_session(secret: str, token: str) -> dict:
+def get_session(secret: bytes, token: str) -> dict:
+    # noinspection PyBroadException
     try:
-        return jwt.decode(token, secret, algorithms=['HS256'])
-    except jwt.exceptions.DecodeError:
+        iv, ciphertext, tag = token.split(':')
+        iv = bytes.fromhex(iv)
+        ciphertext = bytes.fromhex(ciphertext)
+        tag = bytes.fromhex(tag)
+        cipher = Cipher(algorithms.AES(secret), modes.GCM(iv, tag), backend=default_backend())
+        decryptor = cipher.decryptor()
+        plaintext = decryptor.update(ciphertext) + decryptor.finalize()
+        return json.loads(plaintext.decode())
+    except Exception:
         return {}
 
 
