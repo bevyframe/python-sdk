@@ -10,6 +10,7 @@ class Root(Container):
     def __init__(self, childs: list, **kwargs) -> None:
         super().__init__(
             selector='root',
+            id='root',
             childs=childs if isinstance(childs, list) else [childs],
             **kwargs
         )

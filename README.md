@@ -60,8 +60,10 @@ pip install https://github.com/islekcaganmert/bevyframe/releases/download/0.6/Be
 - Documentation: https://bevyframe.islekcaganmert.me/
 - Source Code: https://github.com/islekcaganmert/bevyframe
 - Issue Tracker: https://github.com/islekcaganmert/bevyframe/issues
-- Fediverse Tag: [#bevyframe](https://mastodon.social/tags/bevyframe)
-- X Hashtag: [#bevyframe](https://x.com/search?q=%23bevyframe)
+- Bluesky: [@bevyframe.islekcaganmert.me](https://bsky.app/profile/bevyframe.islekcaganmert.me)
+- Fediverse: [@bevyframe.islekcaganmert.me@bsky.brid.gy]()
+- X: *soon*
 - Reddit: [r/bevyframe](https://www.reddit.com/r/bevyframe)
 - Lemmy: [!bevyframe@lemmy.today](https://lemmy.today/c/bevyframe)
+- Teamly: [BevyFrame](https://teamly.one/invite/d4588169736e497f) (TR)
 - Discord: *Soon*
