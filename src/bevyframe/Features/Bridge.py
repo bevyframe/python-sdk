@@ -9,8 +9,8 @@ class JavaScript:
             script = ''.join([str(i) for i in script])
         self.script: str = script
 
-    def render(self) -> str:
-        return f'<script>{self.script}</script>'
+    def bf_widget(self) -> list[str | dict | list]:
+        return ['script', {}, [self.script]]
 
     def __repr__(self) -> str:
         return self.script
@@ -23,16 +23,16 @@ class change_html:
     def __init__(self, tag: str, html) -> None:
         self.tag: str = tag
         self.html = html
-        if hasattr(self.html, "render"):
-            self.html = self.html.render()
+        if hasattr(self.html, "bf_widget"):
+            self.html = self.html.bf_widget()
         elif isinstance(self.html, list):
             l = self.html
-            self.html = ''
+            self.html = []
             for html in l:
-                if hasattr(html, "render"):
-                    self.html += html.render()
+                if hasattr(html, "bf_widget"):
+                    self.html += [html.bf_widget()]
                 else:
-                    self.html += html
+                    self.html += [html]
 
     def __dict__(self) -> dict:
         return {self.tag: self.html}
@@ -58,6 +58,6 @@ def process_proxy(context) -> dict:
     elif isinstance(retval, change_html):
         return {'type': 'view', 'value': retval.html, 'element': retval.tag}
     elif type(retval).__name__ == 'Page':
-        return {'type': 'view', 'value': retval.render(), 'element': 'body'}
+        return {'type': 'view', 'value': retval.render(), 'element': 'html'}
     else:
         return {'type': 'return', 'value': retval}

@@ -79,6 +79,11 @@ class Context:
         self.headers = data['headers']
         self.browser = Browser(self.headers)
         self.ip = data.get('ip', '127.0.0.1')
+        if self.ip == '127.0.0.1':
+            if 'X-Forwarded-For' in self.headers:
+                self.ip = self.headers['X-Forwarded-For']
+            elif 'X-Real-Ip' in self.headers:
+                self.ip = self.headers['X-Real-Ip']
         self.query = {}
         self.env = app.environment() if callable(app.environment) else app.environment
         if not isinstance(self.env, dict):
@@ -218,9 +223,9 @@ class Context:
 
     def string(self, path: str, language: str = 'en') -> str:
         language = language.split('/')[-1].split('-')[0]
-        if language not in os.listdir('./strings/'):
+        if f"{language}.json" not in os.listdir('./strings/'):
             language = 'en'
-        if language not in os.listdir('./strings/'):
+        if f"{language}.json" not in os.listdir('./strings/'):
             language = os.listdir('./strings/')[0].removesuffix('.json')
         with open(f"./strings/{language}.json") as f:
             strings = json.load(f)

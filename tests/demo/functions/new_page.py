@@ -5,8 +5,7 @@ from widgets.CustomButton import CustomButton
 blacklist = lambda: ["demo@hereus.net"]
 
 
-@login_required
-def get(context: Context) -> (Page, Response):
+def new_page(context: Context) -> (Page, Response):
     last_ip_query = context.db.query(Test).filter_by(email=context.email).all()
     if len(last_ip_query) == 0:
         raise Error404

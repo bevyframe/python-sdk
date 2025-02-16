@@ -23,8 +23,13 @@ def client_side_bridge() -> str:
                 else if (data.type === 'return') return data.value;
                 else if (data.type === 'script') eval(data.value);
                 else if (data.type === 'view') {
-                    if (data.element === 'body') document.body.innerHTML = data.value;
-                    else document.querySelector(data.element).innerHTML = data.value;
+                    const target = data.element === 'body' ? document.body : document.querySelector(data.element);
+                    target.innerHTML = '';
+                    if (Array.isArray(data.value))
+                        for (let element of data.value)
+                            renderWidget(element, target);
+                    else
+                        target.innerHTML = data.value;
                 }
             })
             .catch(err => {  });
@@ -33,7 +38,7 @@ def client_side_bridge() -> str:
     for i in os.listdir('./functions/'):
         if i.endswith('.py'):
             i = i[:-3]
-            functions += " const " + i + " = (...args) => {_bridge('" + i + "', ...args)};"
+            functions += " const " + i + " = (...args) => {return _bridge('" + i + "', ...args)};"
     functions = (functions
                  .replace('    ', '')
                  .replace('  ', ' ')

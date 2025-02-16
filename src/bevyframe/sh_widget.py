@@ -1,5 +1,4 @@
-from bevyframe.Widgets.Widget import Widget
-from bevyframe.Widgets.Page import Page
+from bevyframe.Widgets.Widget import RenderHTML
 from bevyframe.Widgets.Templates import *
 import sys
 
@@ -14,7 +13,7 @@ def main() -> int:
         else:
             args.append(arg)
     if sys.argv[1] in globals():
-        print(globals()[sys.argv[1]](*args, **kwargs).render())
+        print(RenderHTML(*globals()[sys.argv[1]](*args, **kwargs).bf_widget()))
     else:
         print("Widget not found")
     return 0

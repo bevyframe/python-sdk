@@ -113,19 +113,19 @@ def responser(self, recv: dict[str, (str, dict)], req_time: str, r: Context, dis
                             print('\r' + ''.join([' ' for _ in range(len(recv['log']))]), end='', flush=True)
                             print(f'\r(   ) ', end='', flush=True)
                             print(formatted_log.replace('\n', '').replace('\r', ''), end='', flush=True)
-                if recv['headers'].get('Accept', '') == 'application/activity+json':
+                if 'application' in page_script.__dict__:
+                    return getattr(page_script, 'application'), display_status_code
+                elif recv['headers'].get('Accept', '') == 'application/activity+json':
                     if 'activity' in page_script.__dict__:
                         resp = page_script.activity(r)
                         if isinstance(resp, Activity):
-                            resp = resp.render()
+                            resp = resp.bf_widget()
                         else:
                             resp = self.error_handler(r, 500, 'Activity must return `Activity`')
                     else:
                         raise AttributeError(f"'{r.path}' has no attribute 'activity'")
                 elif recv['method'].lower() in page_script.__dict__:
                     resp = getattr(page_script, recv['method'].lower())(r)
-                elif 'application' in page_script.__dict__:
-                    return getattr(page_script, 'application'), display_status_code
                 else:
                     resp = self.error_handler(r, 405, '')
             elif file_path.endswith('.html'):

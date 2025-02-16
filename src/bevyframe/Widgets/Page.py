@@ -1,7 +1,32 @@
 import json
 import bevyframe.Features.Style as Style
 from bevyframe.Features.BridgeJS import client_side_bridge
-from bevyframe.Widgets.Widget import Widget
+
+
+def render_in_js(body) -> str:
+    return """
+const renderWidget = (data, parent = document.body) => {
+    const [tag, attrs, children] = data;
+    const el = document.createElement(tag);
+    Object.entries(attrs || {}).forEach(([key, value]) => {
+        el.setAttribute(key, value);
+    });
+    children.forEach(child => {
+        if (Array.isArray(child)) {
+            renderWidget(child, el);
+        } else { 
+            el.appendChild(document.createTextNode(child));
+        }
+    });
+    parent.appendChild(el);
+}
+const renderAll = () => {
+    document.body.innerHTML = "";
+    for (let element of """ + json.dumps(body) + """) {
+        renderWidget(element);
+    }
+};
+    """
 
 
 class Page:
@@ -48,31 +73,36 @@ class Page:
         return self.data[item]
 
     def __repr__(self) -> str:
-        return self.render()
+        return self.bf_widget()
 
     def render(self) -> str:
         og = []
         for i in self.OpenGraph:
-            og.append(Widget('meta', name=f'og:{i}', content=self.OpenGraph[i]))
-        html = '<!DOCTYPE html>'
-        html += Widget('html', lang=self.lang, childs=[
-            Widget(
-                'head',
-                childs=[
-                    Widget('meta', charset=self.charset),
-                    Widget('meta', name='viewport', content=f'width={self.viewport["width"]}, initial-scale={self.viewport["initial-scale"]}'),
-                    Widget('meta', name='description', content=self.description),
-                    Widget('meta', name='author', content=self.author),
-                    Widget('link', rel='manifest', href='/.well-known/bevyframe/pwa.webmanifest'),
-                    Widget('link', rel='icon', href=self.icon['href'], type=self.icon['type']),
-                    Widget('title', innertext=self.title)
-                ] + og + [
-                    Widget('script', innertext=f'const bf_db = {json.dumps(self.db)}'),
-                    Widget('script', innertext=client_side_bridge()),
-                    "<script>if (typeof navigator.serviceWorker !== 'undefined') navigator.serviceWorker.register('sw.js');</script>",
-                    Widget('style', innertext=Style.compile_object(self.style))
-                ]
-            ),
-            Widget('body', selector=self.selector, childs=self.content)
-        ]).render()
+            og.append(f'<meta name="og:{i}" content="{self.OpenGraph[i]}">')
+        body = [i.bf_widget() for i in self.content]
+        html = f"""
+            <!DOCTYPE html>
+            <html lang="{self.data['lang']}">
+                <head>
+                    <meta charset="{self.charset}" />
+                    <meta name="viewport" content="width={self.viewport["width"]}, initial-scale={self.viewport["initial-scale"]}, maximum-scale=1, user-scalable=0" />
+                    <meta name="description" content="{self.description}" />
+                    <meta name="author" content="{self.author}" />
+                    <link rel="manifest" href="/.well-known/bevyframe/pwa.webmanifest" />
+                    <link rel="icon" href="{self.icon["href"]}" type="{self.icon["type"]}" />
+                    <title>{self.title}</title>
+                    {''.join(og)}
+                    <script>
+                        const bf_db = {json.dumps(self.db)};
+                        { render_in_js(body) }
+                        if (typeof navigator.serviceWorker !== 'undefined') navigator.serviceWorker.register('sw.js');
+                        {client_side_bridge()}
+                    </script>
+                    <style>{Style.compile_object(self.style)}</style>
+                </head>
+                <body class="{self.selector}" onload="renderAll()"></body>
+            </html>
+        """
+        while '  ' in html:
+            html = html.replace('  ', ' ')
         return html

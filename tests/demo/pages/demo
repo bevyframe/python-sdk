@@ -8,10 +8,11 @@ RESPONSE=$(curl -s -o ./.out -w "%{http_code}" -X POST \
   "https://${NETWORK}/protocols/current_user_info")
 if [ "$RESPONSE" -ne 200 ]; then
   echo "bash 500"
-  echo "Content-Type: text/plain;charset=UTF-8"
+  echo "Content-Type: text/html;charset=UTF-8"
 else
-  echo "bash 200"4
-  echo "Content-Type: text/plain;charset=UTF-8"
-  echo "\nMethod is ${METHOD:-} and your name is $(jq -r '.name' .out) $(jq -r '.surname' .out)"
+  echo "bash 200"
+  echo "Content-Type: text/html;charset=UTF-8"
+  echo
+  bf_widget Label "Method is ${METHOD:-} and your name is $(jq -r '.name' .out) $(jq -r '.surname' .out)"
 fi
 rm .out

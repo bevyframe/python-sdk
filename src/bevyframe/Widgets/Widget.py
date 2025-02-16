@@ -22,6 +22,23 @@ no_content_elements = [
 ]
 
 
+def RenderHTML(tag, prop, ch) -> str:
+    gen = f'<{tag}'
+    for i in prop:
+        if isinstance(prop[i], bool):
+            gen += f' {i}'
+        else:
+            gen += f' {i}="' + str(prop[i]).replace('"', '\\"') + '"'
+    if tag in no_content_elements:
+        gen += ' />'
+    else:
+        gen += '>'
+        for i in ch:
+            gen += str(i)
+        gen += f'</{tag}>'
+    return gen
+
+
 class Widget:
     def __init__(
             self,
@@ -68,30 +85,27 @@ class Widget:
         elif item not in no_content_elements:
             raise WidgetContentEmptyError('Widget content is empty')
 
-    def render(self) -> str:
-        gen = f'<{self.element}'
+    def bf_widget(self) -> list[str | dict | list]:
+        prop = {}
+        childs = []
         if not self.style == {}:
-            gen += f' style="{RenderCSS(self.style)}"'
+            prop['style'] = RenderCSS(self.style)
         for i in self.data:
             if i == 'selector':
-                gen += f' class="{self.data[i]}"'
+                prop['class'] = self.data[i]
             elif i in [
                 'selected',
                 'disabled',
                 'checked'
             ]:
                 if self.data[i]:
-                    gen += f' {i}'
+                    prop[i] = True
             else:
-                gen += f' {i}="{self.data[i]}"'
-        if self.element in no_content_elements:
-            gen += '/>'
-        else:
-            gen += '>'
+                prop[i] = self.data[i]
+        if self.element not in no_content_elements:
             for i in self.content:
-                if hasattr(i, 'render'):
-                    gen += i.render()
+                if hasattr(i, 'bf_widget'):
+                    childs += [i.bf_widget()]
                 else:
-                    gen += str(i)
-            gen += f'</{self.element}>'
-        return gen
+                    childs += [i]
+        return [self.element, prop, childs]

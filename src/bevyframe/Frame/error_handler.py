@@ -62,7 +62,7 @@ def error_handler(self, request: Context, status_code: int, exception: str) -> R
                             Widget(
                                 'div',
                                 selector='the_box',
-                                style={'margin-bottom': '10px', 'padding-top': '10px', 'font-family': 'monospace'},
+                                style={'margin-bottom': '10px', 'padding-top': '10px', 'font-family': 'monospace', 'overflow': 'hidden'},
                                 innertext=(
                                         'Path ' +
                                         e.split('"')[1].removeprefix('.').removesuffix('/__init__.py').removeprefix(
@@ -73,9 +73,10 @@ def error_handler(self, request: Context, status_code: int, exception: str) -> R
                         )
         else:
             print(exception)
+        # noinspection PyBroadException
         try:
             color = request.user.id.settings.theme_color
-        except AttributeError:
+        except:
             color = 'blank'
         if 'htm' in request.headers.get('Accept', '*/*'):
             return request.create_response(
