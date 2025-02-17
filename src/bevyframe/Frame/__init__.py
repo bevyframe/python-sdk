@@ -2,19 +2,16 @@ import importlib.metadata
 import sys
 import os
 from datetime import datetime
-
 from bevyframe.Features.Login import get_session
 from bevyframe.Objects.Context import Context
 from bevyframe.Objects.Response import Response
 import requests
 import json
-import time
 from bevyframe.Features.Style import compile_object as compile_style
 from bevyframe.Helpers.Identifiers import https_codes
 from bevyframe.Frame.error_handler import error_handler
 from bevyframe.Frame.route import route
 from bevyframe.Frame.Responser import responser
-from bevyframe.Frame.default_logging import default_logging
 from TheProtocols.theprotocols import TheProtocols
 from bevyframe.Frame.wsgi_runner import make_server
 
@@ -94,7 +91,11 @@ class Frame:
     def default_logging(self, func: callable) -> callable:
         if 'CustomLogging' in self.disabled:
             return lambda: func()
-        return default_logging(self, func)
+        self.default_logging_str = func
+        def wrapper(r: Context, req_time: str) -> callable:
+            return func(r, req_time)
+        wrapper.__name__ = func.__name__
+        return wrapper
 
     @property
     def reverse_routes(self) -> dict[str, str]:
@@ -136,7 +137,7 @@ class Frame:
                 recv['headers'].update({key: environ[header]})
         recv['credentials'] = get_session(
             self.secret,
-            recv['headers'].get('Cookie', 's=').removesuffix(';').split(';').pop().split('s=')[1]
+            recv['headers'].get('Cookie', 's=').split('s=')[1].split(';')[0]
         ) if 's=' in recv['headers'].get('Cookie', 's=') else None
         r = Context(recv, self)
         display_status_code = True

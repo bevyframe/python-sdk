@@ -6,7 +6,6 @@ from bevyframe.Objects.Context import Context
 from bevyframe.Widgets.Page import Page
 from bevyframe.Objects.Response import Response
 from bevyframe.Helpers.Identifiers import *
-from bevyframe.Widgets.Widget import Widget
 
 
 def error_handler(self, request: Context, status_code: int, exception: str) -> Response:
@@ -22,55 +21,43 @@ def error_handler(self, request: Context, status_code: int, exception: str) -> R
         resp.status_code = status_code
         return resp
     except:
+        pwd = os.getcwd()
         exception = exception.replace('<', '&lt;').replace('>', '&gt;')
         t = exception.replace('\n', '<br>').split('<br>  File')
         e_boxes = [
-            Widget(
-                'h1',
-                innertext=f'{https_codes[status_code]}'
-            )
+            f'<h1>{https_codes[status_code]}</h1>'
         ]
         if 'Debugger' not in self.disabled and self.debug:
             if status_code == 500:
                 for e in t:
                     if e.startswith('Traceback'):
-                        e_boxes.append(
-                            Widget(
-                                'div',
-                                style={'margin-bottom': '10px', 'padding-top': '10px', 'font-family': 'monospace'},
-                                innertext=e
-                            )
-                        )
+                        e_boxes.append(f'''
+                            <div style="margin-bottom: 10px; padding-top: 10px; font-family: monospace;">
+                                {e}
+                            </div>
+                        ''')
                     elif 'site-packages' in e:
-                        e_boxes.append(
-                            Widget(
-                                'div',
-                                selector='the_box',
-                                style={'margin-bottom': '10px', 'padding-top': '10px', 'font-family': 'monospace'},
-                                innertext=(
-                                        'Module ' +
-                                        e.split('site-packages/')[1].split('/')[0] + ', ' +
-                                        'file ' +
-                                        e.split('site-packages/' + e.split('site-packages/')[1].split('/')[0] + '/')[
-                                            1].split('"')[0] +
-                                        e.removeprefix(e.split(',')[0])
-                                )
-                            )
-                        )
-                    else:
-                        e_boxes.append(
-                            Widget(
-                                'div',
-                                selector='the_box',
-                                style={'margin-bottom': '10px', 'padding-top': '10px', 'font-family': 'monospace', 'overflow': 'hidden'},
-                                innertext=(
-                                        'Path ' +
-                                        e.split('"')[1].removeprefix('.').removesuffix('/__init__.py').removeprefix(
-                                            os.getcwd()) +
-                                        e.removeprefix(e.split('"')[0] + '"' + e.split('"')[1] + '"')
-                                )
-                            )
-                        )
+                        e_boxes.append(f'''
+                            <div
+                                class="the_box"
+                                style="margin-bottom: 10px; padding-top: 10px; font-family: monospace;" >
+                                    Module 
+                                    {e.split('site-packages/')[1].split('/')[0]},
+                                    file
+                                    {e.split('site-packages/' + e.split('site-packages/')[1].split('/')[0] + '/')[1].split('"')[0]}
+                                    {e.removeprefix(e.split(',')[0])}
+                            </div>
+                        ''')
+                    elif '/bevyframe/' not in e.split('"')[1].removeprefix(pwd).removeprefix('/pages/'):
+                        e_boxes.append(f'''
+                            <div
+                                class="the_box"
+                                style="margin-bottom: 15px; padding: 20px; font-family: monospace; overflow: hidden" >
+                                    {'Path' if e.split('"')[1].startswith(pwd + '/pages/') else 'Script'}
+                                    {e.split('"')[1].removeprefix(pwd).removeprefix('/pages/').removesuffix('__init__.py')}
+                                    {e.removeprefix(e.split('"')[0] + '"' + e.split('"')[1] + '",')}
+                            </div>
+                        ''')
         else:
             print(exception)
         # noinspection PyBroadException

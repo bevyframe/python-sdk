@@ -13,5 +13,4 @@ from bevyframe.Features.Database import Database, DataTypes, DeclarativeBase
 from bevyframe.Helpers.Exceptions import *
 from bevyframe.Features.Bridge import JavaScript, change_html
 from bevyframe.Objects.Activity import Activity
-
-safe = lambda x: x.replace('<', '&lt;').replace('>', '&gt;')
+from markupsafe import escape as safe

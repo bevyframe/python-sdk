@@ -1,32 +1,7 @@
+import importlib.resources
 import json
 import bevyframe.Features.Style as Style
 from bevyframe.Features.BridgeJS import client_side_bridge
-
-
-def render_in_js(body) -> str:
-    return """
-const renderWidget = (data, parent = document.body) => {
-    const [tag, attrs, children] = data;
-    const el = document.createElement(tag);
-    Object.entries(attrs || {}).forEach(([key, value]) => {
-        el.setAttribute(key, value);
-    });
-    children.forEach(child => {
-        if (Array.isArray(child)) {
-            renderWidget(child, el);
-        } else { 
-            el.appendChild(document.createTextNode(child));
-        }
-    });
-    parent.appendChild(el);
-}
-const renderAll = () => {
-    document.body.innerHTML = "";
-    for (let element of """ + json.dumps(body) + """) {
-        renderWidget(element);
-    }
-};
-    """
 
 
 class Page:
@@ -79,7 +54,7 @@ class Page:
         og = []
         for i in self.OpenGraph:
             og.append(f'<meta name="og:{i}" content="{self.OpenGraph[i]}">')
-        body = [i.bf_widget() for i in self.content]
+        body = [i.bf_widget() if hasattr(i, 'bf_widget') else str(i) for i in self.content]
         html = f"""
             <!DOCTYPE html>
             <html lang="{self.data['lang']}">
@@ -94,7 +69,7 @@ class Page:
                     {''.join(og)}
                     <script>
                         const bf_db = {json.dumps(self.db)};
-                        { render_in_js(body) }
+                        { importlib.resources.files('bevyframe').joinpath('Scripts/renderWidget.js').read_text().replace('`---body---`', json.dumps(body)) }
                         if (typeof navigator.serviceWorker !== 'undefined') navigator.serviceWorker.register('sw.js');
                         {client_side_bridge()}
                     </script>

@@ -31,9 +31,8 @@ Chat = "https://lemmy.today/c/bevyframe"
 bevyframe = "bevyframe:cmdline"
 bf_widget = "bevyframe.sh_widget:main"
 
-[project.optional-dependencies]
-ios = []
-android = []
+[tool.setuptools.package-data]
+"bevyframe" = ["Scripts/*.js"]
 
 [build-system]
 requires = ["setuptools","wheel"]
