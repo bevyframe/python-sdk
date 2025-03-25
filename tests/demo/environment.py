@@ -1,3 +1,0 @@
-environment = {
-    'text': 'Hello, World!'
-}
