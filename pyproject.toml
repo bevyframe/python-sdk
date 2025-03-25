@@ -1,10 +1,10 @@
 [project]
 name = "BevyFrame"
 version = "0.6.0"
-description = "Python Web Framework"
+description = "Official SDK for BevyFrame the Web Framework"
 readme = "README.md"
 license = {text = "LGPL-2.1"}
-maintainers = [{name = "Çağan Mert İŞLEK", email = "islekcaganmert@gmail.com"}]
+maintainers = [{name = "Çağan Mert İŞLEK", email = "hello@islekcaganmert.me"}]
 classifiers = [
     "Environment :: Web Environment",
     "Intended Audience :: Developers",
@@ -16,7 +16,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Application Frameworks",
 ]
 requires-python = ">=3.9"
-dependencies = ["requests==2.32.3", "Jinja2==3.1.4", "gunicorn==23.0.0", "hereus_ui_4_0==4.0.0", "pycparser==2.22", "certifi==2024.8.30", "cffi==1.17.1", "PyJWT==2.9.0", "charset-normalizer==3.4.0", "cryptography==44.0.0", "idna==3.10", "urllib3==2.2.3", "MarkupSafe==3.0.2", "SQLAlchemy==2.0.36", "TheProtocols==3.1.0.1", "psutil==6.1.1"]
+dependencies = ["TheProtocols==3.1.0.1"]
 
 [project.urls]
 Homepage = "https://bevyframe.islekcaganmert.me"
@@ -30,9 +30,12 @@ Chat = "https://lemmy.today/c/bevyframe"
 [project.scripts]
 bevyframe = "bevyframe:cmdline"
 bf_widget = "bevyframe.sh_widget:main"
+bevyframe_py = "bevyframe.run:run"
+bevyframe_html = "bevyframe.run_html:run"
+bevystyle_py = "bevystyle.std_style:main"
 
 [tool.setuptools.package-data]
-"bevyframe" = ["Scripts/*.js"]
+"bevyframe" = ["Scripts/*.js", "Scripts/*.html"]
 
 [build-system]
 requires = ["setuptools","wheel"]
