@@ -1,5 +1,4 @@
 from bevyframe.Widgets.Widget import RenderHTML
-from bevyframe.Widgets.Templates import *
 import sys
 
 

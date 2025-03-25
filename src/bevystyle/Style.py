@@ -1,5 +1,5 @@
 from types import *
-from bevyframe.Helpers.RenderCSS import RenderCSS
+from bevystyle.RenderCSS import RenderCSS
 from bevyframe.Widgets.Style import *
 
 m = {

@@ -1,10 +1,15 @@
+import markupsafe
+from TheProtocols import TheProtocols
 from TheProtocols.helpers.exceptions import CredentialsDidntWorked, NetworkException
+
+from bevyframe.Features.ContextManager import get_from_context_manager, set_to_context_manager
+from bevyframe.Features.ErrorHandler import Error401
 from TheProtocols.session import Session
-from bevyframe.Features.BridgeJS import client_side_bridge
 from bevyframe.Objects.Response import Response
 from bevyframe.Widgets.Page import Page
 import urllib.parse
 import jinja2
+from datetime import datetime, UTC
 import json
 import os
 
@@ -13,7 +18,8 @@ default_keys = [
     'env', 'tp', 'body', 'form', 'email', 'token', 'data',
     'preferences', 'app', 'cookies', 'not_locked', 'user',
     'db', 'get_asset', 'render_template', 'start_redirect',
-    'create_response', 'execute', 'json',
+    'create_response', 'execute', 'username', 'loginview',
+    'json'
 ]
 
 
@@ -71,9 +77,8 @@ class Run:
 
 
 class Context:
-    def __init__(self, data: dict, app) -> None:
+    def __init__(self, data: dict) -> None:
         self.not_locked = True
-        self.app = app
         self.method = data['method']
         self.path = data['path'].split('?')[0]
         self.headers = data['headers']
@@ -84,55 +89,42 @@ class Context:
                 self.ip = self.headers['X-Forwarded-For']
             elif 'X-Real-Ip' in self.headers:
                 self.ip = self.headers['X-Real-Ip']
-        self.query = {}
-        self.env = app.environment() if callable(app.environment) else app.environment
+        self.query = data['query']
+        self.env = {}
         if not isinstance(self.env, dict):
             self.env = {}
-        self.tp = app.tp
+        self.tp = TheProtocols(
+            data['package'],
+            data['permissions'],
+        )
+        self.loginview = data['loginview']
         try:
             data['body'] = data.get('body', b'').decode()
+            while data['body'].endswith('\r') or \
+                    data['body'].endswith('\n') or \
+                    data['body'].startswith('\r') or \
+                    data['body'].startswith('\n'):
+                data['body'] = data['body'].strip('\n')
+                data['body'] = data['body'].strip('\r')
         except UnicodeDecodeError:
             pass
-        if isinstance(data['body'], str):
-            while data['body'].endswith('\r\n'):
-                data['body'] = data['body'].removesuffix('\r\n')
-            while data['body'].startswith('\r\n'):
-                data['body'] = data['body'].removeprefix('\r\n')
         self.body = data['body']
         self._json = {}
         self._form = {}
-        if 'UserContext' in self.app.disabled:
-            self._user = None
-        if data['query']:
-            for i in data['query'].split('&'):
-                if '=' in i:
-                    self.query.update({
-                        urllib.parse.unquote(i.split('=')[0].replace('+', ' ')): urllib.parse.unquote(i.split('=')[1].replace('+', ' '))
-                    })
-                else:
-                    self.query.update({
-                        urllib.parse.unquote(i): True
-                    })
-        self.email = data['credentials'].get('email', f"Guest@{app.default_network}")
+        self._user = None
+        self.email = data['credentials'].get('email', f"Guest@localhost")
         self.token = data['credentials'].get('token', '')
-        if 'TheProtocols' not in self.app.disabled:
-            from bevyframe.Helpers.LazyInitDict import LazyInitDict
-            self.data = LazyInitDict(lazy_init_data(self))
-            self.preferences = LazyInitDict(lazy_init_pref(self))
-        else:
-            self.data = None
-            self.preferences = None
+        self.username = data['credentials'].get('username', '')
+        self.network = data['credentials'].get('network', '')
+        from bevyframe.Features.LazyInitDict import LazyInitDict
+        self.data = LazyInitDict(lazy_init_data(self))
+        self.preferences = LazyInitDict(lazy_init_pref(self))
         self.cookies = {}
         if 'Cookie' in self.headers:
             for cookie in self.headers['Cookie'].split('; '):
                 if '=' in cookie:
                     self.cookies.update({cookie.split('=')[0]: cookie.split('=')[1]})
         self.not_locked = False
-
-    # noinspection PyMissingTypeHints
-    @property
-    def db(self):
-        return self.app.db
 
     @property
     def execute(self) -> Run:
@@ -141,37 +133,28 @@ class Context:
     # noinspection PyAttributeOutsideInit
     @property
     def user(self) -> (Session, None):
-        if 'TheProtocols' in self.app.disabled:
-            return None
         if self._user is None:
             try:
-                if self.email.split('@')[0] == 'Guest':
-                    self._user = self.tp.create_session(f'Guest@{self.app.default_network}', '')
-                elif self.token:
-                    self._user = self.tp.restore_session(self.email, self.token)
-                else:
-                    self._user = self.tp.create_session(self.email, self.password)
+                self._user = self.tp.restore_session(self.email, self.token)
             except CredentialsDidntWorked:
-                self._user = self.tp.create_session(f'Guest@{self.app.default_network}', '')
+                raise Error401
             except NetworkException:
-                self._user = self.tp.create_session(f'Guest@{self.app.default_network}', '')
+                raise Error401
         return self._user
 
-    def render_template(self, template: str, **kwargs) -> (Response, str):
-        with open("./pages/" + template.removeprefix('/')) as f:
-            html = f.read()
-            if '<body' in html:
-                prop = html.split('<body')[1].split('>')[0].split(' ')
-                for i in prop:
-                    if i.split('=')[0] == 'login_required' and self.email.split('@')[0] == 'Guest':
-                        return self.start_redirect(f"/{self.app.loginview.removeprefix('/')}")
-            return jinja2.Template(html).render(
-                context=self,
-                style=f"<style>{self.app.style}</style>",
-                functions=f"<script>{client_side_bridge()}</script>" if 'JsBridge' not in self.app.disabled else "",
-                safe=lambda x: x.replace('<', '&lt;').replace('>', '&gt;'),
-                **kwargs
-            )
+    def render_template(self, template: str, login_req: bool = False, **kwargs) -> (Response, str):
+        if template.startswith('<!DOCTYPE html>'):
+            html = template
+        else:
+            with open(template) as f:
+                html = f.read()
+        if login_req and self.email.split('@')[0] == 'Guest':
+            return self.start_redirect(f"/{self.loginview.removeprefix('/')}")
+        return jinja2.Template(html).render(
+            context=self,
+            safe=markupsafe.escape,
+            **kwargs
+        )
 
     def create_response(
             self,
@@ -182,14 +165,12 @@ class Context:
     ) -> Response:
         if credentials is None:
             credentials = {'email': self.email, 'token': self.token}
-        if credentials['token'] is None:
-            credentials = {'email': self.email, 'password': self.password}
         return Response(
             body,
             headers=headers if headers is not None else {'Content-Type': 'text/html; charset=utf-8'},
             credentials=credentials,
             status_code=status_code,
-            app=self.app
+            context=self
         )
 
     def start_redirect(self, to_url) -> Response:
@@ -211,17 +192,24 @@ class Context:
 
     @property
     def form(self) -> any:
-        if not self._json:
+        if not self._form:
             self._form = {}
-            for b in self.body.split('\r\n'):
-                for i in b.split('&'):
-                    if '=' in i:
-                        self._form.update({
-                            urllib.parse.unquote(i.split('=')[0].replace('+', ' ')): urllib.parse.unquote(i.split('=')[1].replace('+', ' '))
-                        })
+            for i in self.body.split('&'):
+                if '=' in i:
+                    self._form.update({
+                        urllib.parse.unquote(
+                            i.split('=', 1)[0]
+                            .replace('+', ' ')
+                        ):
+                            urllib.parse.unquote(
+                                i.split('=', 1)[1]
+                                .replace('+', ' ')
+                            )
+                    })
         return self._form
 
-    def string(self, path: str, language: str = 'en') -> str:
+    @staticmethod
+    def string(path: str, language: str = 'en') -> str:
         language = language.split('/')[-1].split('-')[0]
         if f"{language}.json" not in os.listdir('./strings/'):
             language = 'en'
@@ -236,45 +224,30 @@ class Context:
                 return strings
         return str(strings)
 
-
     def __setattr__(self, name: str, value: any) -> None:
-        if name in ['_json', '_form']:
+        if name in ['_json', '_form', '_user']:
             object.__setattr__(self, name, value)
+            return
         elif name == 'path' and hasattr(self, 'path') and self.path == '/.well-known/bevyframe/proxy':
             object.__setattr__(self, name, value)
+            return
         elif name in default_keys and self.not_locked:
             object.__setattr__(self, name, value)
             return
-        elif 'UserContext' not in self.app.disabled:
-            if self.email not in self.app.vars:
-                self.app.vars[self.email] = {}
-            return self.app.vars[self.email].update({name: value})
-        return object.__setattr__(self, name, value)
+        set_to_context_manager(self.tp.package_name, self.email, name, value)
+        return
 
     def __getattr__(self, name: str) -> any:
         if name == 'app':
             try:
                 return object.__getattribute__(self, 'app')
             except AttributeError:
-                return type('Frame', (), {'disabled': ['UserContext']})()
-        if 'UserContext' not in self.app.disabled:
-            if name in default_keys:
-                if name == 'not_locked' and 'not_locked' not in self.__dict__:
-                    return True
-                return object.__getattribute__(self, name)
-            return self.app.vars.get(self.email, {}).get(name, None)
-        try:
-            return object.__getattribute__(self, name)
-        except AttributeError:
-            if name == 'not_locked':
+                return type('Frame', (), {})()
+        if name in default_keys:
+            if name == 'not_locked' and 'not_locked' not in self.__dict__:
                 return True
-
-    def __delattr__(self, name: str) -> None:
-        if 'UserContext' not in self.app.disabled:
-            if self.email not in self._app.vars and name in self.app.vars[self.email]:
-                del self.app.vars[name]
-        else:
-            object.__delattr__(self, name)
+            return object.__getattribute__(self, name)
+        return get_from_context_manager(self.tp.package_name, self.email, name)
 
     def __str__(self) -> str:
         return (f"""
@@ -286,5 +259,6 @@ Cred.Token: {self.token}
 Path: {self.path}
 IP: {self.ip}
 Method: {self.method}
+Header.Date: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S')}
 """ + '\n'.join([f"Header.{i}: {self.headers[i]}" for i in self.headers]) + """
         """).strip().strip('\n').strip()

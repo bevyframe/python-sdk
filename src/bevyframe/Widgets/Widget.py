@@ -1,7 +1,6 @@
-from bevyframe.Helpers.RenderCSS import RenderCSS
+from bevystyle.RenderCSS import RenderCSS
 from bevyframe.Widgets.Style import Margin, Padding, Position
-from bevyframe.Helpers.Exceptions import *
-from bevyframe.Features.Style import compile_style
+from bevystyle.Style import compile_style
 
 
 no_content_elements = [
@@ -83,7 +82,7 @@ class Widget:
         elif childs is not None:
             self.content = childs
         elif item not in no_content_elements:
-            raise WidgetContentEmptyError('Widget content is empty')
+            self.content = []
 
     def bf_widget(self) -> list[str | dict | list]:
         prop = {}
