@@ -125,52 +125,64 @@ class Size:
 
 
 class FourSided:
-    def __init__(self, top=None, right=None, bottom=None, left=None) -> None:
+    def __init__(self, _type, top=None, right=None, bottom=None, left=None) -> None:
         self.top = top
         self.right = right
         self.bottom = bottom
         self.left = left
+        self.__type = _type
+
+    def type(self):
+        return self.__type
 
 
 class Coordinate:
     def __init__(self, x=None, y=None) -> None:
         self.x = x
         self.y = y
+        self.__type = 'Coordinate'
+
+    def type(self):
+        return self.__type
 
 
 class Overflow(Coordinate):
-    pass
+    def __init__(self, x=None, y=None) -> None:
+        super().__init__(x, y)
+        self.item = 'overflow'
+        self.__type = 'overflow'
 
 
 class Margin(FourSided):
-    pass
+    def __init__(self, top=None, right=None, bottom=None, left=None) -> None:
+        super().__init__('margin', top, right, bottom, left)
 
 
 class Padding(FourSided):
-    pass
+    def __init__(self, top=None, right=None, bottom=None, left=None) -> None:
+        super().__init__('padding', top, right, bottom, left)
 
 
 class Position:
-
     class absolute(FourSided):
         def __init__(self, top=None, right=None, bottom=None, left=None) -> None:
+            super().__init__('position', top, right, bottom, left)
             self.item = 'absolute'
-            super().__init__(top, right, bottom, left)
 
     class relative(FourSided):
         def __init__(self, top=None, right=None, bottom=None, left=None) -> None:
+            super().__init__('position', top, right, bottom, left)
             self.item = 'relative'
-            super().__init__(top, right, bottom, left)
 
     class fixed(FourSided):
         def __init__(self, top=None, right=None, bottom=None, left=None) -> None:
+            super().__init__('position', top, right, bottom, left)
             self.item = 'fixed'
-            super().__init__(top, right, bottom, left)
 
     class sticky(FourSided):
         def __init__(self, top=None, right=None, bottom=None, left=None) -> None:
+            super().__init__('position', top, right, bottom, left)
             self.item = 'sticky'
-            super().__init__(top, right, bottom, left)
 
 
 def add_style(p1, p2) -> str:

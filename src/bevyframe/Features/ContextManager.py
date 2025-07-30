@@ -4,6 +4,7 @@ import socket
 
 def get_from_context_manager(package: str, email: str, name: str) -> any:
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock.settimeout(2)
     sock.connect(f"/opt/bevyframe/sockets/{package}")
     sock.sendall(f"get {email} {name}".encode())
     cmd = sock.recv(4096).decode().removesuffix('\n')
@@ -48,6 +49,7 @@ def set_to_context_manager(package: str, email: str, name: str, data: any) -> in
         data = pickle.dumps(data)
     ln = len(data)
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock.settimeout(2)
     sock.connect(f"/opt/bevyframe/sockets/{package}")
     sock.sendall(f"set {email} {tp} {name} {ln}".encode())
     sock.recv(4096)

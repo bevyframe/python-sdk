@@ -1,5 +1,6 @@
 import sys
 from bevyframe.Objects.Context import Context
+from bevyframe.Objects.Response import Response
 
 
 def run() -> int:
@@ -39,13 +40,16 @@ def run() -> int:
         'loginview': req_headers.get('LoginView'),
     })
 
-    login_req = sys.argv[2] == 'loginRequired' if len(sys.argv) > 2 else False
-    resp = r.render_template(sys.argv[1], login_req=login_req)
+    resp = r.render_template(sys.argv[1])
 
-    out = b"BevyFrame 200\n"
-    out += b"Content-Type: text/html\n\n"
-    out += str(resp).encode() + b'\n'
-    out += b'\n'
-    sys.stdout.buffer.write(out)
-    sys.stdout.buffer.flush()
+    if isinstance(resp, bool) and not resp:
+        print("BevyFrame 303")
+        print(f"Location: /{r.loginview.removeprefix('/')}")
+    else:
+        out = b"BevyFrame 200\n"
+        out += b"Content-Type: text/html\n\n"
+        out += str(resp).encode() + b'\n'
+        out += b'\n'
+        sys.stdout.buffer.write(out)
+        sys.stdout.buffer.flush()
     return 0

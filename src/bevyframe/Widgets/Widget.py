@@ -43,6 +43,7 @@ class Widget:
             self,
             item,
             innertext: str = None,
+            children: list = None,
             childs: list = None,
             style: dict = None,
             css: dict = None,
@@ -55,8 +56,10 @@ class Widget:
             min_width: str = None,
             max_width: str = None,
             text_align: str = None,
+            visibility: str = None,
             margin: (str, Margin) = None,
             padding: (str, Padding) = None,
+            opacity: float = None,
             position: (Position.fixed, Position.sticky, Position.absolute, Position.relative) = None,
             border_radius: str = None,
             font_size: str = None,
@@ -79,6 +82,8 @@ class Widget:
             self.style = compile_style(**locals())
         if innertext is not None:
             self.content = [innertext]
+        elif children is not None:
+            self.content = children
         elif childs is not None:
             self.content = childs
         elif item not in no_content_elements:
@@ -86,7 +91,7 @@ class Widget:
 
     def bf_widget(self) -> list[str | dict | list]:
         prop = {}
-        childs = []
+        children = []
         if not self.style == {}:
             prop['style'] = RenderCSS(self.style)
         for i in self.data:
@@ -104,7 +109,7 @@ class Widget:
         if self.element not in no_content_elements:
             for i in self.content:
                 if hasattr(i, 'bf_widget'):
-                    childs += [i.bf_widget()]
+                    children += [i.bf_widget()]
                 else:
-                    childs += [i]
-        return [self.element, prop, childs]
+                    children += [i]
+        return [self.element, prop, children]

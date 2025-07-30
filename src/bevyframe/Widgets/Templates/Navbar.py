@@ -3,13 +3,13 @@ from bevyframe.Widgets.Style import *
 
 
 class Navbar(Widget):
-    def __init__(self, childs) -> None:
-        super().__init__('nav', selector='Navbar', id='navbar', childs=childs)
+    def __init__(self, children) -> None:
+        super().__init__('nav', selector='Navbar', id='navbar', children=children)
 
 
 class NavIcon(Widget):
     def __init__(self, src) -> None:
-        super().__init__('a', selector='titleicon', childs=[
+        super().__init__('a', selector='titleicon', children=[
             Widget(
                 'img',
                 src=src,
@@ -21,8 +21,8 @@ class NavIcon(Widget):
 
 class NavItem(Widget):
     def __init__(self, icon, link, alt, active=False) -> None:
-        super().__init__('a', selector=('active' if active else 'inactive'), href=link, childs=[
-            Widget('button', childs=[
+        super().__init__('a', selector=('active' if active else 'inactive'), href=link, children=[
+            Widget('button', children=[
                 Widget(
                     'span',
                     selector='material-symbols-rounded',

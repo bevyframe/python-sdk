@@ -1,6 +1,10 @@
-# BevyFrame 0.6 ɑ
+# BevyFrame for Python
 
 Python SDK for [BevyFrame](https://bevyframe.islekcaganmert.me)
+
+[![PyPI](https://img.shields.io/pypi/v/bevyframe)](https://pypi.org/project/bevyframe/)
+[![PyPI - License](https://img.shields.io/pypi/l/bevyframe)](https://pypi.org/project/bevyframe/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/bevyframe)](https://pypi.org/project/bevyframe/)
 
 ## About BevyFrame
 

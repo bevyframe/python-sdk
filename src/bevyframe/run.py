@@ -1,6 +1,7 @@
 import io
 import json
 import os
+import subprocess
 import sys
 import importlib.util
 import traceback
@@ -56,8 +57,8 @@ def run() -> int:
         return resp_body.append
 
     permissions = req_headers.get('Permissions', '').split(',')
-    while '' in permissions:
-        permissions.remove('')
+    if not any(permissions):
+        permissions = []
     r = Context({
         'method': req_headers.get('Method', 'GET'),
         'path': req_headers.get('Path', '/'),
@@ -72,7 +73,7 @@ def run() -> int:
         },
         'query': http_query,
         'ip': req_headers.get('IP', '127.0.0.1'),
-        'permissions': req_headers.get('Permissions', '').split(','),
+        'permissions': permissions,
         'package': req_headers.get('Package'),
         'loginview': req_headers.get('LoginView'),
     })
@@ -147,16 +148,19 @@ def run() -> int:
             resp = r.create_response(resp, headers={'Content-Type': 'application/bevyframe'})
         if not isinstance(resp, Response):
             resp = r.create_response(resp)
+
+        if isinstance(resp.body, str) or isinstance(resp.body, int):
+            resp.body = str(resp.body).encode()
+        elif isinstance(resp.body, list) or isinstance(resp.body, dict):
+            resp.body = json.dumps(resp.body).encode()
+            if resp.headers['Content-Type'] == 'text/html; charset=utf-8':
+                resp.headers['Content-Type'] = 'application/json'
+        elif isinstance(resp.body, Page):
+            resp.body = resp.body.stdout().encode()
+
+        resp_body = [resp.body]
         status_code = str(resp.status_code)
         resp_headers = resp.headers.items()
-        if isinstance(resp.body, bytes):
-            resp_body = [resp.body]
-        elif isinstance(resp.body, str) or isinstance(resp.body, int):
-            resp_body = [str(resp.body).encode()]
-        elif isinstance(resp.body, list) or isinstance(resp.body, dict):
-            resp_body = [json.dumps(resp.body).encode()]
-        elif isinstance(resp.body, Page):
-            resp_body = [resp.body.stdout().encode()]
 
     out = f"BevyFrame {status_code}\n".encode()
     for header in resp_headers:
@@ -173,3 +177,34 @@ def run() -> int:
     sys.stdout.buffer.write(out)
     sys.stdout.buffer.flush()
     return 0
+
+
+def application(environ, start_response):
+    header_name_capitalize = lambda name: '-'.join(part.lower().capitalize() for part in name.removeprefix('HTTP_').split('_'))
+    simulatable = {
+        "method": environ.get('REQUEST_METHOD', 'GET'),
+        "path": environ.get('PATH_INFO', '/'),
+        "headers": {
+            header_name_capitalize(k): v
+            for k, v in environ.items() if k.startswith('HTTP_')
+        },
+        "body": environ['wsgi.input'].read().hex(),
+    }
+    simulatable_str = json.dumps(simulatable)
+    try:
+        result_raw = subprocess.check_output(
+            [f"{os.environ.get('BEVYFRAME_INSTALLATION', '/opt/bevyframe')}/bin/bevyframe", "simulate_request"],
+            input=simulatable_str.encode(),  # pass bytes
+        )
+    except subprocess.CalledProcessError as e:
+        result_raw = e.output
+    try:
+        result = json.loads(result_raw.decode())
+    except json.JSONDecodeError:
+        result = {
+            'status_code': 500,
+            'headers': {'Content-Type': 'text/plain'},
+            'body': f"Error decoding JSON response: {result_raw.decode()}"
+        }
+    start_response(str(result['status_code']), result['headers'].items())
+    return [result['body'].encode()]

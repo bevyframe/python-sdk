@@ -34,10 +34,6 @@ class Response:
     def login(self, email: str, password: str) -> bool:
         try:
             s = self.tp.create_session(email, password)
-            if not hasattr(s, 'token'):
-                return False
-            if s.token is None:
-                return False
             self.credentials = {
                 'email': email,
                 'token': s.token

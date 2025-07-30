@@ -1,6 +1,5 @@
 from types import *
 from bevystyle.RenderCSS import RenderCSS
-from bevyframe.Widgets.Style import *
 
 m = {
     'Label': 'p',
@@ -31,9 +30,9 @@ def compile_style(
         max_width: str = None,
         text_align: str = None,
         align_items: str = None,
-        margin: (str, Margin) = None,
-        padding: (str, Padding) = None,
-        position: (Position.fixed, Position.sticky, Position.absolute, Position.relative) = None,
+        margin = None,
+        padding = None,
+        position = None,
         border_radius: str = None,
         font_size: str = None,
         vertical_align: str = None,
@@ -44,11 +43,12 @@ def compile_style(
         font_weight: int = None,
         z_index: int = None,
         font_family: list = None,
-        overflow: Overflow = None,
+        overflow = None,
         scroll_behavior: str = None,
         accent_color: str = None,
         backdrop_filter: str = None,
         filter: str = None,
+        visibility: str = None,
         **kwargs
 ) -> dict:
     d = {}
@@ -58,28 +58,28 @@ def compile_style(
         d['background-attachment'] = 'fixed'
     if isinstance(margin, str):
         d.update({'margin': margin})
-    elif isinstance(margin, Margin):
+    elif hasattr(margin, 'type') and margin.type() == 'margin':
         for i in ['top', 'right', 'bottom', 'left']:
             if getattr(margin, i) is not None:
                 d.update({f'margin-{i}': getattr(margin, i)})
     if isinstance(padding, str):
         d.update({'padding': padding})
-    elif isinstance(padding, Padding):
+    elif hasattr(padding, 'type') and padding.type() == 'padding':
         for i in ['top', 'right', 'bottom', 'left']:
             if getattr(padding, i) is not None:
                 d.update({f'padding-{i}': getattr(padding, i)})
-    if isinstance(position, (Position.fixed, Position.sticky, Position.absolute, Position.relative)):
+    if hasattr(position, 'type') and position.type() == 'position':
         d.update({'position': position.item})
         for i in ['top', 'right', 'bottom', 'left']:
             if getattr(position, i) is not None:
                 d.update({i: getattr(position, i)})
-    if isinstance(overflow, Overflow):
+    if hasattr(overflow, 'type') and overflow.type() == 'overflow':
         for i in ['x', 'y']:
             if getattr(overflow, i) is not None:
                 d.update({f'overflow-{i}': getattr(overflow, i)})
     elif isinstance(overflow, str):
         d.update({'overflow': overflow})
-    if isinstance(border, FourSided):
+    if hasattr(overflow, 'type') and overflow.type() == 'FourSided':
         for i in ['top', 'right', 'bottom', 'left']:
             if getattr(border, i) is None:
                 d.update({f'border-{i}': 'none'})

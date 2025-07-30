@@ -16,7 +16,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Application Frameworks",
 ]
 requires-python = ">=3.9"
-dependencies = ["TheProtocols==3.1.0.1"]
+dependencies = ["TheProtocols==3.1.0.2", "markupsafe==3.0.2", "jinja2==3.1.6"]
 
 [project.urls]
 Homepage = "https://bevyframe.islekcaganmert.me"
@@ -28,7 +28,6 @@ Changes = "https://bevyframe.islekcaganmert.me/changes"
 Chat = "https://lemmy.today/c/bevyframe"
 
 [project.scripts]
-bevyframe = "bevyframe:cmdline"
 bf_widget = "bevyframe.sh_widget:main"
 bevyframe_py = "bevyframe.run:run"
 bevyframe_html = "bevyframe.run_html:run"

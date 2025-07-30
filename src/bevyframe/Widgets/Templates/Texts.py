@@ -4,9 +4,9 @@ from bevyframe.Widgets.Widget import Widget
 class Label(Widget):
     def __init__(self, innertext: str, no_newline: bool = False, **kwargs) -> None:
         if no_newline:
-            super().__init__('a', childs=[innertext], **kwargs)
+            super().__init__('a', children=[innertext], **kwargs)
         else:
-            super().__init__('p', childs=[innertext], **kwargs)
+            super().__init__('p', children=[innertext], **kwargs)
 
 
 class Bold(Widget):

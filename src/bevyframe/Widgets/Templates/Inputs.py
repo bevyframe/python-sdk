@@ -1,3 +1,4 @@
+from bevyframe.Widgets.Templates import Container
 from bevyframe.Widgets.Widget import Widget
 from bevyframe.Widgets.Style import *
 
@@ -8,17 +9,57 @@ class TextArea(Widget):
 
 
 class Textbox(Widget):
-    def __init__(self, name: str, selector='', **kwargs) -> None:
-        super().__init__('input', selector=f'textbox {selector}', id=name, name=name, **kwargs)
+    def __init__(self, name: str, selector='', label='', **kwargs) -> None:
+        super().__init__(
+            'label',
+            children=[
+                Widget(
+                    'p',
+                    innertext=label,
+                    margin=Margin(
+                        bottom=Size.pixel(0),
+                        left=Size.pixel(3),
+                    ),
+                    text_align=Align.left
+                ) if label else "",
+                Widget('input', selector=f'textbox {selector}', id = name, name = name, **kwargs)
+            ]
+        )
 
 
 class Selection(Widget):
-    def __init__(self, name: str, selected: str, options: list[str], selector='', **kwargs) -> None:
-        childs = [
+    def __init__(self, name: str, selected: str, options: list[str], label: str, selector='', **kwargs) -> None:
+        children = [
             Widget('option', innertext=i, selected=i == selected, value=i)
             for i in options
         ]
-        super().__init__('select', selector=f'textbox {selector}', id=name, name=name, childs=childs, **kwargs)
+        super().__init__(
+            'label',
+            children=[
+                Widget(
+                    'p',
+                    innertext=label,
+                    margin=Margin(
+                        bottom=Size.pixel(0),
+                        left=Size.pixel(3),
+                    ),
+                    text_align=Align.left
+                ) if label else "",
+                Container(
+                    selector=f"textbox {selector}",
+                    children=[
+                        Widget(
+                            'select',
+                            selector=f"textbox {selector}",
+                            id=name,
+                            name=name,
+                            children=children,
+                            background_color=Color.transparent
+                        ),
+                    ]
+                )
+            ]
+        )
 
 
 class Button(Widget):
@@ -27,8 +68,8 @@ class Button(Widget):
 
 
 class Form(Widget):
-    def __init__(self, method: str, childs: list) -> None:
-        super().__init__('form', method=method, childs=childs)
+    def __init__(self, method: str, children: list) -> None:
+        super().__init__('form', method=method, children=children)
 
 
 class FAB(Widget):

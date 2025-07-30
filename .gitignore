@@ -3,3 +3,5 @@ src/BevyFrame.egg-info
 build
 .venv
 .idea
+.DS_Store
+*/.DS_Store

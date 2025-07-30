@@ -19,7 +19,7 @@ default_keys = [
     'preferences', 'app', 'cookies', 'not_locked', 'user',
     'db', 'get_asset', 'render_template', 'start_redirect',
     'create_response', 'execute', 'username', 'loginview',
-    'json'
+    'json', 'network'
 ]
 
 
@@ -90,9 +90,6 @@ class Context:
             elif 'X-Real-Ip' in self.headers:
                 self.ip = self.headers['X-Real-Ip']
         self.query = data['query']
-        self.env = {}
-        if not isinstance(self.env, dict):
-            self.env = {}
         self.tp = TheProtocols(
             data['package'],
             data['permissions'],
@@ -142,14 +139,16 @@ class Context:
                 raise Error401
         return self._user
 
-    def render_template(self, template: str, login_req: bool = False, **kwargs) -> (Response, str):
+    def render_template(self, template: str, login_req: bool = False, **kwargs) -> (bool, str):
         if template.startswith('<!DOCTYPE html>'):
             html = template
         else:
             with open(template) as f:
                 html = f.read()
+        if "login-required" in html.split("<body ", 1)[-1].split('>', 1)[0].split(" "):
+            login_req = True
         if login_req and self.email.split('@')[0] == 'Guest':
-            return self.start_redirect(f"/{self.loginview.removeprefix('/')}")
+            return False
         return jinja2.Template(html).render(
             context=self,
             safe=markupsafe.escape,
@@ -222,9 +221,11 @@ class Context:
             strings = strings.get(parts.pop(0), {})
             if isinstance(strings, str):
                 return strings
+        if isinstance(strings, dict):
+            return f"@{language}/{path}"
         return str(strings)
 
-    def __setattr__(self, name: str, value: any) -> None:
+    """def __setattr__(self, name: str, value: any) -> None:
         if name in ['_json', '_form', '_user']:
             object.__setattr__(self, name, value)
             return
@@ -247,7 +248,7 @@ class Context:
             if name == 'not_locked' and 'not_locked' not in self.__dict__:
                 return True
             return object.__getattribute__(self, name)
-        return get_from_context_manager(self.tp.package_name, self.email, name)
+        return get_from_context_manager(self.tp.package_name, self.email, name)"""
 
     def __str__(self) -> str:
         return (f"""

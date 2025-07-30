@@ -30,8 +30,8 @@ class Page:
         self.db = {}
         self.style = {}
         for arg in kwargs:
-            if arg == 'childs':
-                self.content = kwargs['childs']
+            if arg == 'children':
+                self.content = kwargs['children']
             elif arg == 'style':
                 self.style = kwargs['style']
             elif arg == 'db':
