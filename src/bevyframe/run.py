@@ -206,5 +206,5 @@ def application(environ, start_response):
             'headers': {'Content-Type': 'text/plain'},
             'body': f"Error decoding JSON response: {result_raw.decode()}"
         }
-    start_response(str(result['status_code']), result['headers'].items())
+    start_response(str(result['status_code']), list(result['headers'].items()))
     return [result['body'].encode()]
