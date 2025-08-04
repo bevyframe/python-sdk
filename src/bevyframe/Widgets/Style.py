@@ -104,6 +104,12 @@ class Color:
     red = '#ff0000'
     hex = lambda x: f'#{x}'
     rgb = lambda r, g, b: f'rgb({r}, {g}, {b})'
+    green = "#00ff00"
+    blue = "#0000ff"
+    yellow = "#ffff00"
+    cyan = "#00ffff"
+    magenta = "#ff00ff"
+
 
 
 class Size:

@@ -22,6 +22,7 @@ def compile_style(
         color: str = None,
         background_color: str = None,
         background_image: str = None,
+        aspect_ratio: float = None,
         height: str = None,
         width: str = None,
         min_height: str = None,
@@ -54,8 +55,9 @@ def compile_style(
     d = {}
     if css is not None:
         d = css
-    if 'background-attachment' not in d and background_image is not None:
+    if background_image is not None:
         d['background-attachment'] = 'fixed'
+        d['background-image'] = f"url('{background_image}')" if '(' not in background_image else background_image
     if isinstance(margin, str):
         d.update({'margin': margin})
     elif hasattr(margin, 'type') and margin.type() == 'margin':
@@ -85,11 +87,14 @@ def compile_style(
                 d.update({f'border-{i}': 'none'})
             else:
                 d.update({f'border-{i}': getattr(border, i)})
-    elif isinstance(border, str):
+    if isinstance(border, str):
         d.update({'border': border})
     k = [i for i in locals().keys()]
     for i in k:
-        obj_blacklist = ['self', 'item', 'style', 'css', 'data', 'element', 'content', 'margin', 'padding', 'position', 'kwargs', 'd', 'backend', 'i', 'overflow', 'border']
+        obj_blacklist = [
+            'self', 'item', 'style', 'css', 'data', 'element', 'content', 'margin', 'padding', 'position', 'kwargs',
+            'd', 'backend', 'i', 'overflow', 'background_image', 'background_attachment'
+        ]
         if i not in obj_blacklist and locals()[i] is not None and not i.startswith('__'):
             if backend:
                 d.update({i.replace('_', '-'): 'none' if locals()[i] is None else locals()[i]})
@@ -200,4 +205,4 @@ def compile_object(obj) -> str:
                 .replace(' { ', '{')
                 .replace('; } ', ';}')
                 .replace('{} ', '{}'))
-    return imports + compiled
+    return imports + compiled + (listed['css'] if 'css' in listed else "")

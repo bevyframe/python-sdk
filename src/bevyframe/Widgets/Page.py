@@ -32,6 +32,8 @@ class Page:
         for arg in kwargs:
             if arg == 'children':
                 self.content = kwargs['children']
+            elif arg == 'child':
+                self.content = [kwargs['child']]
             elif arg == 'style':
                 self.style = kwargs['style']
             elif arg == 'db':

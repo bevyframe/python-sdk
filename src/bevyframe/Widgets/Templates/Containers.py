@@ -2,8 +2,8 @@ from bevyframe.Widgets.Widget import Widget
 
 
 class Container(Widget):
-    def __init__(self, children: list, **kwargs,) -> None:
-        super().__init__('div', children=children, **kwargs)
+    def __init__(self, children: list = None, child = None, **kwargs,) -> None:
+        super().__init__('div', children=children, child=child, **kwargs)
 
 
 class Root(Container):
@@ -17,10 +17,13 @@ class Root(Container):
 
 
 class Box(Container):
-    def __init__(self, children: list, onclick=None, **kwargs) -> None:
+    def __init__(self, children: list = None, child=None, innertext=None, onclick=None, **kwargs) -> None:
+
         super().__init__(
             selector='the_box',
-            children=children if isinstance(children, list) else [children],
+            children=children,
+            child=child,
+            innertext=innertext,
             onclick='' if onclick is None else onclick,
             **kwargs
         )
