@@ -8,5 +8,5 @@ from bevyframe.Widgets.Templates.Specialized.DualContainer import DualContainer
 
 
 class Icon(Widget):
-    def __init__(self, i: str, **k):
-        super().__init__('span', selector='material-symbols-rounded', innertext=i, **k)
+    def __init__(self, i: str, size: int = 24, **k):
+        super().__init__('span', selector='material-symbols-rounded', innertext=i, font_size=Size.pixel(size), **k)

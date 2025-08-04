@@ -181,7 +181,7 @@ class Context:
 
     @staticmethod
     def get_asset(path: str) -> str:
-        return "/assets/" + path
+        return ("/assets/" + path).replace("//", "/")
 
     @property
     def json(self) -> any:
@@ -207,8 +207,9 @@ class Context:
                     })
         return self._form
 
-    @staticmethod
-    def string(path: str, language: str = 'en') -> str:
+    def string(self, path: str, language: str = None) -> str:
+        if language is None:
+            language = self.browser.language
         language = language.split('/')[-1].split('-')[0]
         if f"{language}.json" not in os.listdir('./strings/'):
             language = 'en'
