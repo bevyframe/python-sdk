@@ -27,6 +27,21 @@ class Textbox(Widget):
         )
 
 
+class TextboxTypes:
+    text = 'text'
+    password = 'password'
+    email = 'email'
+    number = 'number'
+    tel = 'tel'
+    url = 'url'
+    search = 'search'
+    date = 'date'
+    datetime_local = 'datetime-local'
+    month = 'month'
+    time = 'time'
+    week = 'week'
+
+
 class Selection(Widget):
     def __init__(self, name: str, selected: str, options: list[str], label: str, selector='', **kwargs) -> None:
         children = [
@@ -70,6 +85,15 @@ class Button(Widget):
 class Form(Widget):
     def __init__(self, method: str, children: list) -> None:
         super().__init__('form', method=method, children=children)
+
+
+class Method:
+    post = 'POST'
+    get = 'GET'
+    put = 'PUT'
+    delete = 'DELETE'
+    patch = 'PATCH'
+
 
 
 class FAB(Widget):
