@@ -45,6 +45,7 @@ class Widget:
             innertext: str = None,
             children: list = None,
             childs: list = None,
+            child = None,
             style: dict = None,
             css: dict = None,
             color: str = None,
@@ -68,6 +69,7 @@ class Widget:
             text_decoration: str = None,
             onclick=None,
             onchange=None,
+            assigned: str = None,
             **kwargs
     ):
         self.data = kwargs
@@ -75,6 +77,8 @@ class Widget:
             self.data['onclick'] = str(onclick)
         if onchange is not None:
             self.data['onchange'] = str(onchange)
+        if assigned is not None:
+            self.data['for'] = str(assigned)
         self.element = item
         self.style = {} if style is None else style
         self.content = []
@@ -84,6 +88,8 @@ class Widget:
             self.content = [innertext]
         elif children is not None:
             self.content = children
+        elif child is not None:
+            self.content = [child]
         elif childs is not None:
             self.content = childs
         elif item not in no_content_elements:
