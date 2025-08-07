@@ -96,9 +96,17 @@ class Button(Widget):
         super().__init__('button', selector=f'button {selector}', **kwargs)
 
 
-class Form(Widget):
-    def __init__(self, method: str, children: list) -> None:
-        super().__init__('form', method=method, children=children)
+class Form:
+    def __init__(self, method: str, children: list, action: str = None) -> None:
+        self.method = method
+        self.children = children
+        self.action = action if action else ''
+
+    def bf_widget(self) -> list[str | dict | list]:
+        if self.action:
+            return Widget('form', method=self.method, children=self.children, action=self.action).bf_widget()
+        else:
+            return Widget('form', method=self.method, children=self.children).bf_widget()
 
 
 class Method:
