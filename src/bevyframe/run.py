@@ -13,73 +13,80 @@ from bevyframe.Widgets.Page import Page
 
 
 def run() -> int:
-    file_path = sys.argv[1]
-    sys.path += [os.getcwd()]
-    req_headers = {}
-    req_body = b''
+    try:
+        file_path = sys.argv[1]
+        sys.path += [os.getcwd()]
+        req_headers = {}
+        req_body = b''
 
-    in_headers = True
-    for line in sys.stdin.buffer.readlines():
-        if in_headers:
-            if line.strip() == b'':
-                in_headers = False
+        in_headers = True
+        for line in sys.stdin.buffer.readlines():
+            if in_headers:
+                if line.strip() == b'':
+                    in_headers = False
+                else:
+                    parts = line.decode().split(':', 1)
+                    req_headers.update({parts[0]: str(parts[1]).removesuffix('\n').removeprefix(' ')})
             else:
-                parts = line.decode().split(':', 1)
-                req_headers.update({parts[0]: str(parts[1]).removesuffix('\n').removeprefix(' ')})
-        else:
-            req_body += line
+                req_body += line
 
-    resp_body = []
-    status_code = ''
-    resp_headers = []
-    http_headers = {}
-    http_query = {}
-    environ = {
-        'REQUEST_METHOD': req_headers.get('Method', 'GET'),
-        'PATH_INFO': req_headers.get('Path', '/'),
-        'REMOTE_ADDR': req_headers.get('IP', '127.0.0.1'),
-        'QUERY_STRING': '',
-        'wsgi.input': io.BytesIO(req_body),
-        'wsgi.url_scheme': 'https'
-    }
+        resp_body = []
+        status_code = ''
+        resp_headers = []
+        http_headers = {}
+        http_query = {}
+        environ = {
+            'REQUEST_METHOD': req_headers.get('Method', 'GET'),
+            'PATH_INFO': req_headers.get('Path', '/'),
+            'REMOTE_ADDR': req_headers.get('IP', '127.0.0.1'),
+            'QUERY_STRING': '',
+            'wsgi.input': io.BytesIO(req_body),
+            'wsgi.url_scheme': 'https'
+        }
 
-    for i in req_headers:
-        if i.startswith('Header.'):
-            environ.update({"HTTP_" + i.removeprefix('Header.').upper(): req_headers[i]})
-            http_headers.update({i.removeprefix('Header.'): req_headers[i]})
-        elif i.startswith('Query.'):
-            http_query.update({i.removeprefix('Query.'): req_headers[i]})
+        for i in req_headers:
+            if i.startswith('Header.'):
+                environ.update({"HTTP_" + i.removeprefix('Header.').upper(): req_headers[i]})
+                http_headers.update({i.removeprefix('Header.'): req_headers[i]})
+            elif i.startswith('Query.'):
+                http_query.update({i.removeprefix('Query.'): req_headers[i]})
 
-    def start_response(status: str, _headers: list[tuple[str, str]]) -> callable:
-        nonlocal status_code, resp_headers
-        status_code = status.split(' ', 1)[0]
-        resp_headers = _headers
-        return resp_body.append
+        def start_response(status: str, _headers: list[tuple[str, str]]) -> callable:
+            nonlocal status_code, resp_headers
+            status_code = status.split(' ', 1)[0]
+            resp_headers = _headers
+            return resp_body.append
 
-    permissions = req_headers.get('Permissions', '').split(',')
-    if not any(permissions):
-        permissions = []
-    r = Context({
-        'method': req_headers.get('Method', 'GET'),
-        'path': req_headers.get('Path', '/'),
-        'protocol': 'bevyframe',
-        'headers': http_headers,
-        'body': req_body,
-        'credentials': {
-            'email': req_headers['Cred.Email'],
-            'token': req_headers['Cred.Token'],
-            'username': req_headers['Cred.Username'],
-            'network': req_headers['Cred.Network'],
-        },
-        'query': http_query,
-        'ip': req_headers.get('IP', '127.0.0.1'),
-        'permissions': permissions,
-        'package': req_headers.get('Package'),
-        'loginview': req_headers.get('LoginView'),
-    })
+        permissions = req_headers.get('Permissions', '').split(',')
+        if not any(permissions):
+            permissions = []
+        r = Context({
+            'method': req_headers.get('Method', 'GET'),
+            'path': req_headers.get('Path', '/'),
+            'protocol': 'bevyframe',
+            'headers': http_headers,
+            'body': req_body,
+            'credentials': {
+                'email': req_headers['Cred.Email'],
+                'token': req_headers['Cred.Token'],
+                'username': req_headers['Cred.Username'],
+                'network': req_headers['Cred.Network'],
+            },
+            'query': http_query,
+            'ip': req_headers.get('IP', '127.0.0.1'),
+            'permissions': permissions,
+            'package': req_headers.get('Package'),
+            'loginview': req_headers.get('LoginView'),
+        })
 
-    resp = None
+        resp = None
+    except Exception as e:
+        print("BevyFrame 500")
+        print(f"Content-Type: text/plain\n")
+        print(f"SDK Error: {e}")
+        return 0
 
+    # noinspection PyBroadException
     try:
         page_script_spec = importlib.util.spec_from_file_location(
             os.path.splitext(os.path.basename(file_path))[0],
@@ -143,24 +150,31 @@ def run() -> int:
     except:
         resp = error_handler(r, 500, traceback.format_exc())
 
-    if resp:
-        if isinstance(resp, Page):
-            resp = r.create_response(resp, headers={'Content-Type': 'application/bevyframe'})
-        if not isinstance(resp, Response):
-            resp = r.create_response(resp)
+    try:
+        if resp:
+            if isinstance(resp, Page):
+                resp = r.create_response(resp, headers={'Content-Type': 'application/bevyframe'})
+            if not isinstance(resp, Response):
+                resp = r.create_response(resp)
 
-        if isinstance(resp.body, str) or isinstance(resp.body, int):
-            resp.body = str(resp.body).encode()
-        elif isinstance(resp.body, list) or isinstance(resp.body, dict):
-            resp.body = json.dumps(resp.body).encode()
-            if resp.headers['Content-Type'] == 'text/html; charset=utf-8':
-                resp.headers['Content-Type'] = 'application/json'
-        elif isinstance(resp.body, Page):
-            resp.body = resp.body.stdout().encode()
+            if isinstance(resp.body, str) or isinstance(resp.body, int):
+                resp.body = str(resp.body).encode()
+            elif isinstance(resp.body, list) or isinstance(resp.body, dict):
+                resp.body = json.dumps(resp.body).encode()
+                if resp.headers['Content-Type'] == 'text/html; charset=utf-8':
+                    resp.headers['Content-Type'] = 'application/json'
+            elif isinstance(resp.body, Page):
+                resp.body = resp.body.stdout().encode()
 
-        resp_body = [resp.body]
-        status_code = str(resp.status_code)
-        resp_headers = resp.headers.items()
+            resp_body = [resp.body]
+            status_code = str(resp.status_code)
+            resp_headers = resp.headers.items()
+
+    except Exception as e:
+        print("BevyFrame 500")
+        print(f"Content-Type: text/plain\n")
+        print(f"SDK Error: {e}")
+        return 0
 
     out = f"BevyFrame {status_code}\n".encode()
     for header in resp_headers:
