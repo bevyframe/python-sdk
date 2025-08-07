@@ -1,5 +1,5 @@
 from bevystyle.RenderCSS import RenderCSS
-from bevyframe.Widgets.Style import Margin, Padding, Position
+from bevyframe.Widgets.Style import Margin, Padding, Position, BorderRadius, Overflow
 from bevystyle.Style import compile_style
 
 

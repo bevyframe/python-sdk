@@ -18,6 +18,14 @@ class Theme:
     pink = "pink"
 
 
+class TextDecoration:
+    none = 'none'
+    underline = 'underline'
+    overline = 'overline'
+    line_through = 'line-through'
+    blink = 'blink'
+
+
 class Effect:
     blur = lambda x: f'blur({x}px)'
     brightness = lambda x: f'brightness({x})'
@@ -121,7 +129,10 @@ class Size:
 
     class Relative:
         font = lambda i: f'{i}em'
+        parent = lambda i: f'{i}em'
+        root = lambda i: f'{i}rem'
         x = lambda i: f'{i}ex'
+        y = lambda i: f'{i}ch'
 
     class Viewport:
         height = lambda x: f'{x}vh'
@@ -131,11 +142,23 @@ class Size:
 
 
 class FourSided:
-    def __init__(self, _type, top=None, right=None, bottom=None, left=None) -> None:
+    def __init__(self, _type=None, top=None, right=None, bottom=None, left=None) -> None:
         self.top = top
         self.right = right
         self.bottom = bottom
         self.left = left
+        self.__type = _type if _type else 'FourSided'
+
+    def type(self):
+        return self.__type
+
+
+class FourCornered:
+    def __init__(self, _type, top_left=None, top_right=None, bottom_left=None, bottom_right=None) -> None:
+        self.top_left = top_left
+        self.top_right = top_right
+        self.bottom_left = bottom_left
+        self.bottom_right = bottom_right
         self.__type = _type
 
     def type(self):
@@ -152,11 +175,22 @@ class Coordinate:
         return self.__type
 
 
-class Overflow(Coordinate):
+class Overflow:
     def __init__(self, x=None, y=None) -> None:
-        super().__init__(x, y)
+        self.x = x
+        self.y = y
         self.item = 'overflow'
         self.__type = 'overflow'
+
+    def type(self):
+        return self.__type
+
+
+class OverflowBehavior:
+    auto = 'auto'
+    scroll = 'scroll'
+    hidden = 'hidden'
+    visible = 'visible'
 
 
 class Margin(FourSided):
@@ -189,6 +223,11 @@ class Position:
         def __init__(self, top=None, right=None, bottom=None, left=None) -> None:
             super().__init__('position', top, right, bottom, left)
             self.item = 'sticky'
+
+
+class BorderRadius(FourCornered):
+    def __init__(self, top_left=None, top_right=None, bottom_left=None, bottom_right=None) -> None:
+        super().__init__('border_radius', top_left, top_right, bottom_left, bottom_right)
 
 
 def add_style(p1, p2) -> str:
