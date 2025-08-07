@@ -75,25 +75,25 @@ def compile_style(
         for i in ['top', 'right', 'bottom', 'left']:
             if getattr(position, i) is not None:
                 d.update({i: getattr(position, i)})
-    if hasattr(overflow, 'type') and overflow.type() == 'overflow':
+    if isinstance(overflow, str):
+        d.update({'overflow': overflow})
+    elif hasattr(overflow, 'type') and overflow.type() == 'overflow':
         for i in ['x', 'y']:
             if getattr(overflow, i) is not None:
                 d.update({f'overflow-{i}': getattr(overflow, i)})
-    elif isinstance(overflow, str):
-        d.update({'overflow': overflow})
-    if hasattr(overflow, 'type') and overflow.type() == 'FourSided':
-        for i in ['top', 'right', 'bottom', 'left']:
-            if getattr(border, i) is None:
-                d.update({f'border-{i}': 'none'})
-            else:
-                d.update({f'border-{i}': getattr(border, i)})
+    if isinstance(border_radius, str):
+        d.update({'border-radius': border_radius})
+    elif border_radius and hasattr(border_radius, 'type') and border_radius.type() == 'border_radius':
+        for i in ['top_left', 'top_right', 'bottom_left', 'bottom_right']:
+            if getattr(border_radius, i) is not None:
+                d.update({f'border-{i}-radius'.replace('_', '-'): getattr(border_radius, i)})
     if isinstance(border, str):
         d.update({'border': border})
     k = [i for i in locals().keys()]
     for i in k:
         obj_blacklist = [
             'self', 'item', 'style', 'css', 'data', 'element', 'content', 'margin', 'padding', 'position', 'kwargs',
-            'd', 'backend', 'i', 'overflow', 'background_image', 'background_attachment'
+            'd', 'backend', 'i', 'overflow', 'background_image', 'background_attachment', 'border_radius',
         ]
         if i not in obj_blacklist and locals()[i] is not None and not i.startswith('__'):
             if backend:

@@ -60,11 +60,11 @@ class Widget:
             max_width: str = None,
             text_align: str = None,
             visibility: str = None,
-            margin: (str, Margin) = None,
-            padding: (str, Padding) = None,
+            margin: str | Margin = None,
+            padding: str | Padding = None,
             opacity: float = None,
-            position: (Position.fixed, Position.sticky, Position.absolute, Position.relative) = None,
-            border_radius: str = None,
+            position: Position.fixed | Position.sticky | Position.absolute | Position.relative = None,
+            border_radius: str | BorderRadius = None,
             border: str = None,
             font_size: str = None,
             vertical_align: str = None,
@@ -73,6 +73,8 @@ class Widget:
             onclick=None,
             onchange=None,
             assigned: str = None,
+            font_weight: int = None,
+            overflow: str | Overflow = None,
             **kwargs
     ):
         self.data = kwargs
