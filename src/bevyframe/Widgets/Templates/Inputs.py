@@ -8,23 +8,37 @@ class TextArea(Widget):
         super().__init__('textarea', selector='textarea', id=name, name=name, **kwargs)
 
 
-class Textbox(Widget):
-    def __init__(self, name: str, selector='', label='', **kwargs) -> None:
-        super().__init__(
+class Textbox:
+    def __init__(self, name: str, selector='', label=None, **kwargs) -> None:
+        self.name = name
+        self.selector = selector
+        self.label = label
+        self.kwargs = kwargs
+
+    def bf_widget(self) -> list[str | dict | list]:
+        if self.label is None:
+            return Widget(
+                'input',
+                selector=f'textbox {self.selector}',
+                id=self.name,
+                name=self.name,
+                **self.kwargs
+            ).bf_widget()
+        return Widget(
             'label',
             children=[
                 Widget(
                     'p',
-                    innertext=label,
+                    innertext=self.label,
                     margin=Margin(
                         bottom=Size.pixel(0),
                         left=Size.pixel(3),
                     ),
                     text_align=Align.left
-                ) if label else "",
-                Widget('input', selector=f'textbox {selector}', id = name, name = name, **kwargs)
+                ) if self.label else "",
+                Widget('input', selector=f'textbox {self.selector}', id = self.name, name = self.name, **self.kwargs)
             ]
-        )
+        ).bf_widget()
 
 
 class TextboxTypes:
