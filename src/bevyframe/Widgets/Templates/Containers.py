@@ -17,10 +17,10 @@ class Root(Container):
 
 
 class Box(Container):
-    def __init__(self, children: list = None, child=None, innertext=None, onclick=None, **kwargs) -> None:
+    def __init__(self, children: list = None, child=None, innertext=None, onclick=None, selector=None, **kwargs) -> None:
 
         super().__init__(
-            selector='the_box',
+            selector=f'the_box {selector}' if selector else 'the_box',
             children=children,
             child=child,
             innertext=innertext,
