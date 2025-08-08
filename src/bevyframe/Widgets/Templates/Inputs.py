@@ -97,9 +97,9 @@ class Button(Widget):
 
 
 class Form:
-    def __init__(self, method: str, children: list, action: str = None) -> None:
+    def __init__(self, method: str, children: list = None, child=None, action: str = None) -> None:
         self.method = method
-        self.children = children
+        self.children = [child] if child else children
         self.action = action if action else ''
 
     def bf_widget(self) -> list[str | dict | list]:
