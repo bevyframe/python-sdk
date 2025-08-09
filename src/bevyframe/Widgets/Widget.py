@@ -75,8 +75,11 @@ class Widget:
             assigned: str = None,
             font_weight: int = None,
             overflow: str | Overflow = None,
+            user_select: str = None,
             **kwargs
     ):
+        if 'oncontextmenu' not in kwargs:
+            kwargs['oncontextmenu'] = 'return false;'
         self.data = kwargs
         if onclick is not None:
             self.data['onclick'] = str(onclick)

@@ -50,6 +50,7 @@ def compile_style(
         backdrop_filter: str = None,
         filter: str = None,
         visibility: str = None,
+        user_select: str = None,
         **kwargs
 ) -> dict:
     d = {}
@@ -89,11 +90,18 @@ def compile_style(
                 d.update({f'border-{i}-radius'.replace('_', '-'): getattr(border_radius, i)})
     if isinstance(border, str):
         d.update({'border': border})
+    if user_select is None:
+        user_select = False
+    if user_select:
+        user_select = 'all'
+    elif not user_select:
+        user_select = 'none'
+    d.update({'user-select': user_select})
     k = [i for i in locals().keys()]
     for i in k:
         obj_blacklist = [
             'self', 'item', 'style', 'css', 'data', 'element', 'content', 'margin', 'padding', 'position', 'kwargs',
-            'd', 'backend', 'i', 'overflow', 'background_image', 'background_attachment', 'border_radius',
+            'd', 'backend', 'i', 'overflow', 'background_image', 'background_attachment', 'border_radius', 'user_select',
         ]
         if i not in obj_blacklist and locals()[i] is not None and not i.startswith('__'):
             if backend:
