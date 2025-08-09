@@ -221,4 +221,7 @@ def application(environ, start_response):
             'body': f"Error decoding JSON response: {result_raw.decode()}"
         }
     start_response(str(result['status_code']), list(result['headers'].items()))
-    return [result['body'].encode()]
+    try:
+        return [bytes.fromhex(result['body'].strip("\n").strip())]
+    except ValueError:
+        return [result['body'].encode()]
