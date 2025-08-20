@@ -76,11 +76,21 @@ class Widget:
             font_weight: int = None,
             overflow: str | Overflow = None,
             user_select: str = None,
+            enable_context_menu: bool = False,
+            font_family: list[str] | str = None,
+            auto_complete: bool = False,
             **kwargs
     ):
         if 'oncontextmenu' not in kwargs:
-            kwargs['oncontextmenu'] = 'return false;'
+            if enable_context_menu:
+                kwargs['oncontextmenu'] = 'event.stopImmediatePropagation();'
+            else:
+                kwargs['oncontextmenu'] = 'return false;'
         self.data = kwargs
+        if auto_complete:
+            self.data['autocomplete'] = 'on'
+        else:
+            self.data['autocomplete'] = 'off'
         if onclick is not None:
             self.data['onclick'] = str(onclick)
         if onchange is not None:

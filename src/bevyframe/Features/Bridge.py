@@ -1,5 +1,10 @@
 class JavaScript:
-    def __init__(self, script: (str, object, list)) -> None:
+    def __init__(self, script: str | object | list = None, src: str = None) -> None:
+        if src:
+            self.src = src
+            self.script = ""
+            return
+        self.src = None
         if isinstance(script, list):
             script = ''.join([
                 str(i)
@@ -8,7 +13,7 @@ class JavaScript:
         self.script: str = script
 
     def bf_widget(self) -> list[str | dict | list]:
-        return ['script', {}, [self.script]]
+        return ['script', {"src": self.src} if self.src else {}, [self.script]]
 
     def __repr__(self) -> str:
         return self.script

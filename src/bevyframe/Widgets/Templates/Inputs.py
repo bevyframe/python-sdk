@@ -5,14 +5,15 @@ from bevyframe.Widgets.Style import *
 
 class TextArea(Widget):
     def __init__(self, name: str, **kwargs) -> None:
-        super().__init__('textarea', selector='textarea', id=name, name=name, **kwargs)
+        super().__init__('textarea', selector='textbox textarea', id=name, name=name, **kwargs)
 
 
 class Textbox:
-    def __init__(self, name: str, selector='', label=None, **kwargs) -> None:
+    def __init__(self, name: str, selector='', label=None, autocomplete: bool = False, **kwargs) -> None:
         self.name = name
         self.selector = selector
         self.label = label
+        self.autocomplete = autocomplete
         self.kwargs = kwargs
 
     def bf_widget(self) -> list[str | dict | list]:
@@ -22,6 +23,7 @@ class Textbox:
                 selector=f'textbox {self.selector}',
                 id=self.name,
                 name=self.name,
+                autocomplete=self.autocomplete,
                 **self.kwargs
             ).bf_widget()
         return Widget(
@@ -97,16 +99,17 @@ class Button(Widget):
 
 
 class Form:
-    def __init__(self, method: str, children: list = None, child=None, action: str = None) -> None:
+    def __init__(self, method: str, children: list = None, child=None, action: str = None, **kwargs) -> None:
         self.method = method
         self.children = [child] if child else children
         self.action = action if action else ''
+        self.kwargs = kwargs
 
     def bf_widget(self) -> list[str | dict | list]:
         if self.action:
-            return Widget('form', method=self.method, children=self.children, action=self.action).bf_widget()
+            return Widget('form', method=self.method, children=self.children, action=self.action, **self.kwargs).bf_widget()
         else:
-            return Widget('form', method=self.method, children=self.children).bf_widget()
+            return Widget('form', method=self.method, children=self.children, **self.kwargs).bf_widget()
 
 
 class Method:

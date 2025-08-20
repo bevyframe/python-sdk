@@ -40,10 +40,10 @@ class Post(Container):
 
 
 class Line(Widget):
-    def __init__(self, children: list, onclick=None, **kwargs) -> None:
+    def __init__(self, children: list = None, child=None, onclick=None, **kwargs) -> None:
         super().__init__(
             'p',
-            children=children if isinstance(children, list) else [children],
+            children=[child] if child else children,
             onclick=onclick if onclick else '',
             **kwargs
         )

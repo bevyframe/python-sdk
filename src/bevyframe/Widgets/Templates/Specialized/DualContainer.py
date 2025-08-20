@@ -1,4 +1,4 @@
-from bevyframe.Widgets.Style import substract_style, Size, Position, Margin
+from bevyframe.Widgets.Style import substract_style, Size, Position, Margin, OverflowBehavior, Overflow, Padding
 from bevyframe.Widgets.Templates import Container, Box
 
 
@@ -21,6 +21,8 @@ class DualContainer:
                         children=self.left_children,
                         width=substract_style(Size.percent(100), Size.pixel(45)),
                         padding=Size.pixel(15),
+                        max_height=Size.percent(100),
+                        overflow=Overflow(y=OverflowBehavior.scroll),
                         position=Position.relative(
                             top=Size.pixel(5),
                             left=Size.pixel(5),
@@ -36,6 +38,10 @@ class DualContainer:
                         'transition': 'all 0.3s ease',
                         'height': '100%',
                     },
+                    padding=Padding(
+                        left=Size.pixel(10),
+                        right=Size.pixel(10),
+                    ),
                     children=self.right_children,
                 ),
             ]
