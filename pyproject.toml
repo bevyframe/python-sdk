@@ -5,18 +5,12 @@ description = "Official SDK for BevyFrame the Web Framework"
 readme = "README.md"
 license = {text = "LGPL-2.1"}
 maintainers = [{name = "Çağan Mert İŞLEK", email = "hello@islekcaganmert.me"}]
-classifiers = [
-    "Environment :: Web Environment",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: LGPL-2.1 License",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python",
-    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
-    "Topic :: Internet :: WWW/HTTP :: Application",
-    "Topic :: Software Development :: Libraries :: Application Frameworks",
+requires-python = ">=3.12"
+dependencies = [
+    "TheProtocols==4.0.0",
+    "markupsafe==3.0.2",
+    "jinja2==3.1.6"
 ]
-requires-python = ">=3.9"
-dependencies = ["TheProtocols==3.1.0.2", "markupsafe==3.0.2", "jinja2==3.1.6"]
 
 [project.urls]
 Homepage = "https://bevyframe.islekcaganmert.me"
